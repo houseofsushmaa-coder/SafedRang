@@ -1,0 +1,139 @@
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: var(--color-white);
+  border-bottom: 1px solid var(--color-ivory-deep);
+}
+
+.announcement-bar {
+  background-color: var(--color-dark-charcoal);
+  color: var(--color-white);
+  padding: 0.75rem 0;
+  font-size: 0.75rem;
+  font-family: var(--font-heading);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.announcement-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.logo {
+  flex: 1;
+  display: flex;
+}
+
+.logo-circle {
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.logo-circle .script-font {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: var(--color-dark-charcoal);
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.desktop-nav {
+  flex: 2;
+  display: flex;
+  justify-content: center;
+}
+
+.desktop-nav ul {
+  list-style: none;
+  display: flex;
+  gap: 3rem;
+}
+
+.desktop-nav a {
+  font-family: var(--font-heading);
+  font-size: 0.8125rem;
+  letter-spacing: 0.18em;
+  font-weight: 400;
+  color: var(--color-dark-charcoal);
+  text-transform: uppercase;
+  transition: opacity 0.3s ease;
+}
+
+.desktop-nav a:hover {
+  opacity: 0.6;
+}
+
+.header-actions {
+  flex: 1;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.header-actions button {
+  color: var(--color-dark-charcoal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: opacity 0.3s ease;
+}
+
+.header-actions button:hover {
+  opacity: 0.6;
+}
+
+.cart-btn .cart-count {
+  position: absolute;
+  top: -5px;
+  right: -8px;
+  background-color: var(--color-dark-charcoal);
+  color: var(--color-white);
+  font-size: 0.6rem;
+  font-weight: 400;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.mobile-menu-toggle {
+  display: none;
+  flex: 1;
+}
+
+@media (max-width: 900px) {
+  .desktop-nav {
+    display: none;
+  }
+  .mobile-menu-toggle {
+    display: block;
+  }
+  .logo {
+    justify-content: center;
+    flex: 2;
+  }
+  .logo-circle {
+    justify-content: center;
+  }
+  .hidden-mobile {
+    display: none;
+  }
+}

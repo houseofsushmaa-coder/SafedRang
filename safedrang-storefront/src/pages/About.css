@@ -1,0 +1,165 @@
+/* About Page Styling */
+
+.about-page {
+  padding-bottom: 4rem;
+}
+
+/* 1. Hero Section */
+.about-hero {
+  padding: 8rem 2rem 4rem 2rem;
+  background-color: var(--color-ivory-deep);
+  text-align: center;
+}
+
+.about-hero .section-title {
+  margin-bottom: 1rem;
+}
+
+.about-hero .hero-subtitle {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  color: var(--color-warm-taupe);
+  letter-spacing: 0.1em;
+  text-align: center;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* 2. Brand Story */
+.brand-story {
+  padding: 6rem 2rem;
+}
+
+.story-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.story-image img {
+  width: 100%;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+}
+
+.story-content {
+  padding: 2rem;
+}
+
+.story-content .overline {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  color: var(--color-antique-gold);
+  display: block;
+  margin-bottom: 1.5rem;
+}
+
+.story-content h2 {
+  font-size: 2.2rem;
+  line-height: 1.2;
+  margin-bottom: 2rem;
+}
+
+.story-content p {
+  font-size: 1rem;
+  color: var(--color-warm-taupe);
+  margin-bottom: 1.5rem;
+  line-height: 1.8;
+}
+
+/* 3. Why Choose Us (Reference) */
+.bg-light {
+  background-color: #F8F8F8; /* Light neutral matching reference */
+}
+
+.why-choose-us {
+  padding: 6rem 0;
+}
+
+.wcu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.wcu-content {
+  padding-right: 2rem;
+}
+
+.wcu-title {
+  font-family: 'Times New Roman', Times, serif; /* Using a classic serif to match reference */
+  font-size: 2.5rem;
+  color: #2C3E50; /* A soft dark blue/charcoal like reference */
+  text-transform: none;
+  letter-spacing: 0;
+  margin-bottom: 3rem;
+  font-weight: 500;
+}
+
+.wcu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.wcu-item h4 {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.wcu-item p {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.wcu-btn {
+  background-color: #A9627B; /* Muted rose/mauve to match reference */
+  border-color: #A9627B;
+  color: white;
+  padding: 0.8rem 2.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+}
+
+.wcu-btn:hover {
+  background-color: #8c4f64;
+  border-color: #8c4f64;
+  color: white;
+}
+
+.wcu-image img {
+  width: 100%;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .story-grid, .wcu-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  
+  .wcu-content {
+    padding-right: 0;
+    order: 2; /* Put text below image on mobile, or keep above */
+  }
+  
+  .wcu-image {
+    order: 1;
+  }
+}

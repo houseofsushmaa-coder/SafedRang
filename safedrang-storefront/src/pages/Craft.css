@@ -1,0 +1,166 @@
+/* Craft Page Styling */
+
+.craft-page {
+  background-color: var(--color-warm-ivory);
+}
+
+/* 1. Hero */
+.craft-hero {
+  padding: 8rem 2rem;
+  background-color: #6E1E2A; /* Deep maroon/wine to match reference */
+  text-align: center;
+  color: var(--color-white);
+}
+
+.craft-hero .section-title {
+  color: var(--color-white);
+  font-family: 'Times New Roman', Times, serif; /* To match user reference styling */
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+}
+
+.craft-hero .hero-subtitle {
+  font-family: var(--font-body);
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.15em;
+  text-align: center;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* 2. Intro */
+.craft-intro {
+  padding: 6rem 2rem;
+  text-align: center;
+}
+
+.intro-text {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.intro-text .overline {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  color: var(--color-antique-gold);
+  display: block;
+  margin-bottom: 1.5rem;
+}
+
+.intro-text h2 {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 2.4rem;
+  margin-bottom: 2rem;
+  color: #6E1E2A;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+.intro-text p {
+  font-size: 1.05rem;
+  color: #4A4A4A;
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 650px;
+}
+
+/* 3. The Process */
+.craft-process {
+  padding: 4rem 2rem 8rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8rem;
+}
+
+.process-step {
+  display: flex;
+  align-items: center;
+  gap: 5rem;
+}
+
+.step-image {
+  flex: 1;
+}
+
+.step-image img {
+  width: 100%;
+  aspect-ratio: 4/5;
+  object-fit: cover;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+}
+
+.step-content {
+  flex: 1;
+  position: relative;
+}
+
+.step-number {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 6rem;
+  color: rgba(174, 138, 84, 0.15); /* Faint antique gold */
+  position: absolute;
+  top: -4rem;
+  left: -2rem;
+  z-index: 0;
+  line-height: 1;
+}
+
+.step-content h3 {
+  position: relative;
+  z-index: 1;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: var(--color-dark-charcoal);
+}
+
+.step-content p {
+  position: relative;
+  z-index: 1;
+  font-size: 1rem;
+  color: var(--color-warm-taupe);
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+}
+
+/* 4. Conclusion */
+.craft-conclusion {
+  padding: 8rem 2rem;
+  background-color: var(--color-dark-charcoal);
+  color: var(--color-white);
+}
+
+.craft-conclusion h2 {
+  color: var(--color-antique-gold);
+  margin-bottom: 1rem;
+}
+
+.craft-conclusion p {
+  color: var(--color-white);
+  font-size: 1.1rem;
+  margin: 0 auto;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .craft-process {
+    gap: 5rem;
+  }
+  
+  .process-step {
+    flex-direction: column;
+    gap: 3rem;
+  }
+  
+  .process-step.left {
+    flex-direction: column-reverse;
+  }
+  
+  .step-number {
+    top: -3rem;
+    left: 0;
+    font-size: 5rem;
+  }
+}

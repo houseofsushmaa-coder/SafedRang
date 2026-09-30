@@ -1,0 +1,5 @@
+{
+  "json": true,
+  "exec": "ts-node",
+  "ext": "ts"
+}

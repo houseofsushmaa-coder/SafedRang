@@ -1,0 +1,322 @@
+/* Premium Edit Product Page Layout */
+.edit-product-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .edit-product-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.edit-product-main, .edit-product-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sticky-header {
+  position: sticky;
+  top: 70px; /* Offset for the AdminTopbar */
+  background: rgba(248, 250, 252, 0.9);
+  backdrop-filter: blur(8px);
+  padding: 16px 0 16px 0;
+  z-index: 40;
+  margin-bottom: 24px !important;
+  border-bottom: 1px solid var(--admin-border);
+  margin-top: -10px;
+}
+
+.admin-card {
+  background: var(--admin-surface);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--admin-border);
+}
+
+.card-heading {
+  margin: 0 0 20px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--admin-text-main);
+}
+
+.sub-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--admin-text-main);
+  margin-bottom: 12px;
+}
+.label-optional {
+  color: var(--admin-text-light);
+  font-weight: 400;
+  font-size: 0.8rem;
+  margin-left: 4px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--admin-text-main);
+  margin-bottom: 8px;
+}
+
+.admin-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: var(--admin-text-main);
+  background-color: var(--admin-surface);
+  outline: none;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.admin-input:focus {
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.admin-input::placeholder {
+  color: var(--admin-text-light);
+}
+
+textarea.admin-input {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.input-with-prefix {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-with-prefix .input-prefix {
+  position: absolute;
+  left: 14px;
+  color: var(--admin-text-muted);
+  font-weight: 500;
+}
+
+.input-with-prefix .admin-input {
+  padding-left: 32px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.half-width {
+  flex: 1;
+}
+
+.form-divider {
+  height: 1px;
+  background-color: var(--admin-border);
+  margin: 24px 0;
+}
+
+/* ── Image Upload Zone ── */
+.image-upload-zone {
+  border: 2px dashed var(--admin-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  overflow: hidden;
+  position: relative;
+  background-color: #f8fafc;
+}
+
+.image-upload-zone:hover,
+.image-upload-zone.dragging {
+  border-color: var(--admin-primary);
+  background-color: rgba(16, 185, 129, 0.05);
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.upload-icon-svg {
+  color: var(--admin-text-light);
+  margin-bottom: 12px;
+}
+
+.upload-placeholder p {
+  margin: 0 0 4px 0;
+  font-size: 0.95rem;
+  color: var(--admin-text-main);
+}
+
+.upload-placeholder strong {
+  color: var(--admin-primary);
+}
+
+.upload-hint {
+  font-size: 0.8rem !important;
+  color: var(--admin-text-muted) !important;
+}
+
+.upload-preview-main {
+  width: 100%;
+  position: relative;
+  aspect-ratio: 1;
+}
+
+.upload-preview-main img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.upload-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: white;
+  gap: 8px;
+}
+.upload-overlay span {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.image-upload-zone:hover .upload-overlay {
+  opacity: 1;
+}
+
+/* ── Gallery Grid ── */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.gallery-thumb {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 1;
+  background: #f1f5f9;
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.gallery-thumb-main {
+  border-color: var(--admin-primary);
+}
+
+.gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.gallery-main-badge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--admin-primary);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 4px;
+  text-align: center;
+}
+
+.gallery-thumb-actions {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.gallery-thumb:hover .gallery-thumb-actions {
+  opacity: 1;
+}
+
+.gallery-thumb-actions button {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background: rgba(15, 23, 42, 0.7);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.gallery-thumb-actions button:hover {
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.gallery-remove:hover {
+  background: var(--admin-danger) !important;
+}
+
+.gallery-add-btn {
+  border: 1px dashed var(--admin-border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  aspect-ratio: 1;
+  color: var(--admin-text-light);
+  transition: all 0.2s;
+  background: #f8fafc;
+  gap: 4px;
+}
+
+.gallery-add-btn:hover {
+  border-color: var(--admin-primary);
+  color: var(--admin-primary);
+  background-color: rgba(16, 185, 129, 0.05);
+}
+
+.gallery-add-btn span {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
