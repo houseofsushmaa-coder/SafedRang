@@ -19,6 +19,6 @@ export const connectDB = async (): Promise<void> => {
     logger.info('✅ Database connected successfully');
   } catch (error) {
     logger.error('❌ Database connection failed:', error);
-    process.exit(1);
+    // process.exit(1); // Removed so server doesn't crash on bad DB URL, allowing health checks
   }
 };
