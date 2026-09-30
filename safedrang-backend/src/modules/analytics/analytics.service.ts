@@ -101,7 +101,7 @@ export class AnalyticsService {
       orderNumber: o.orderNumber,
       totalAmount: Number(o.total),
       status: o.orderStatus,
-      customerName: o.customer?.firstName ? `${o.customer.firstName} ${o.customer.lastName || ''}` : 'Guest'
+      customerName: o.customer?.name || 'Guest'
     }));
 
     return {
