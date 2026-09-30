@@ -17,7 +17,7 @@ const Dashboard = () => {
     const fetchDashboardData = async () => {
       try {
         // Fetch real analytics data
-        const res = await axios.get('http://localhost:5000/api/v1/analytics/dashboard');
+        const res = await axios.get('https://violet-quetzal-133812.hostingersite.com/api/v1/analytics/dashboard');
         setData(res.data.data);
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);

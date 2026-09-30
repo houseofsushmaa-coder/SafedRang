@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/v1/auth/me');
+      const res = await axios.get('https://violet-quetzal-133812.hostingersite.com/api/v1/auth/me');
       setUser(res.data.data);
     } catch (error) {
       console.error("Auth check failed", error);
@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
-    const res = await axios.post('http://localhost:5000/api/v1/auth/login', { email, password });
+    const res = await axios.post('https://violet-quetzal-133812.hostingersite.com/api/v1/auth/login', { email, password });
     if (res.data.data.accessToken) {
       setToken(res.data.data.accessToken);
       setUser(res.data.data.user);

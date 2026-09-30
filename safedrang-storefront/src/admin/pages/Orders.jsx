@@ -17,7 +17,7 @@ const Orders = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:5000/api/v1/orders');
+      const res = await axios.get('https://violet-quetzal-133812.hostingersite.com/api/v1/orders');
       setOrders(res.data.data || []);
     } catch (error) {
       console.error("Failed to fetch orders:", error);
