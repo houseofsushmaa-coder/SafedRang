@@ -83,7 +83,7 @@ app.use(`${V1}/*`, notFoundHandler);
 app.use(errorHandler);
 
 // ── Serve React Frontend ─────────────────────────────
-const frontendPath = path.join(__dirname, '../../safedrang-storefront/dist');
+const frontendPath = path.join(__dirname, '../public');
 app.use(express.static(frontendPath));
 
 app.get('*', (req, res) => {
