@@ -1,4 +1,5 @@
 import express, { Application } from 'express';
+import path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -77,8 +78,17 @@ app.use(`${V1}/shipping`, shippingRoutes);
 app.use(`${V1}/settings`, settingsRoutes);
 
 // ── 404 & Error Handlers ─────────────────────────────
-app.use(notFoundHandler);
+// (Keep API 404 handler for API routes only)
+app.use(`${V1}/*`, notFoundHandler);
 app.use(errorHandler);
+
+// ── Serve React Frontend ─────────────────────────────
+const frontendPath = path.join(__dirname, '../../safedrang-storefront/dist');
+app.use(express.static(frontendPath));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
 // ── Start Server ──────────────────────────────────────
 const startServer = async () => {

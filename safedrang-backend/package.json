@@ -5,7 +5,7 @@
   "main": "dist/app.js",
   "scripts": {
     "dev": "nodemon --exec tsx src/app.ts",
-    "build": "npx prisma generate && tsc",
+    "build": "npx prisma generate && tsc && cd ../safedrang-storefront && npm install && npm run build",
     "start": "node dist/app.js",
     "prisma:generate": "node node_modules/prisma/dist/prisma.js generate || npx prisma generate",
     "prisma:migrate": "node node_modules/prisma/dist/prisma.js migrate dev",
