@@ -79,14 +79,14 @@ app.use(`${V1}/settings`, settingsRoutes);
 
 // ── 404 & Error Handlers ─────────────────────────────
 // (Keep API 404 handler for API routes only)
-app.use(`${V1}/*`, notFoundHandler);
+app.use(V1, notFoundHandler);
 app.use(errorHandler);
 
 // ── Serve React Frontend ─────────────────────────────
 const frontendPath = path.join(__dirname, '../public');
 app.use(express.static(frontendPath));
 
-app.get('*', (req, res) => {
+app.get(/.*/, (req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
