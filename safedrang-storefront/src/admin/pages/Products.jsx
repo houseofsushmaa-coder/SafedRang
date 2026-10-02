@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProducts } from '../../context/ProductContext';
-import { Edit, Trash2, Plus, Download, Upload, Filter, Search, MoreVertical } from 'lucide-react';
+import { Edit, Trash2, Plus, Download, Upload, Filter, Search, Package, Loader2 } from 'lucide-react';
+import Papa from 'papaparse';
+import { saveAs } from 'file-saver';
+import axios from 'axios';
 import './AdminPages.css';
 
 const Products = () => {
   const { products, deleteProduct, loading } = useProducts();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef(null);
 
   const getStatusClass = (status) => {
     switch(status?.toLowerCase()) {
@@ -26,6 +31,68 @@ const Products = () => {
     (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  const handleExport = () => {
+    const csvData = products.map(p => ({
+      Title: p.title,
+      SKU: p.sku || '',
+      Category: p.category,
+      Price: p.price,
+      SalePrice: p.salePrice || '',
+      Stock: p.stock || 0,
+      Status: p.stockStatus
+    }));
+    
+    const csv = Papa.unparse(csvData);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, `safedrang-products-${new Date().toISOString().split('T')[0]}.csv`);
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setImporting(true);
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        try {
+          const token = localStorage.getItem('adminToken');
+          
+          // Loop through each row and create a product
+          for (const row of results.data) {
+            if (!row.Title) continue;
+            
+            await axios.post('https://violet-quetzal-133812.hostingersite.com/api/v1/products', {
+              name: row.Title,
+              sku: row.SKU || undefined,
+              price: parseFloat(row.Price) || 0,
+              salePrice: row.SalePrice ? parseFloat(row.SalePrice) : undefined,
+              stock: parseInt(row.Stock, 10) || 0,
+              description: row.Description || ''
+            }, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+          }
+          
+          alert('Products imported successfully! Please refresh the page to see them.');
+          window.location.reload();
+        } catch (error) {
+          console.error("Import error:", error);
+          alert('There was an error importing some products. Check console for details.');
+        } finally {
+          setImporting(false);
+          // Reset file input
+          if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+      }
+    });
+  };
+
   return (
     <div className="admin-page">
       <div className="page-header">
@@ -34,10 +101,22 @@ const Products = () => {
           <p className="page-subtitle">Manage your store's inventory and product details.</p>
         </div>
         <div className="header-actions">
-          <button className="admin-btn admin-btn-outline icon-left">
-            <Upload size={16} /> Import
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileUpload} 
+            accept=".csv" 
+            style={{ display: 'none' }} 
+          />
+          <button 
+            className="admin-btn admin-btn-outline icon-left" 
+            onClick={handleImportClick}
+            disabled={importing}
+          >
+            {importing ? <Loader2 size={16} className="spin" /> : <Upload size={16} />} 
+            {importing ? 'Importing...' : 'Import'}
           </button>
-          <button className="admin-btn admin-btn-outline icon-left">
+          <button className="admin-btn admin-btn-outline icon-left" onClick={handleExport}>
             <Download size={16} /> Export
           </button>
           <button className="admin-btn icon-left" onClick={() => navigate('/admin/product/new')}>
