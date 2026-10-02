@@ -13,6 +13,7 @@ import Products from './admin/pages/Products';
 import EditProduct from './admin/pages/EditProduct';
 import Users from './admin/pages/Users';
 import AdminLogin from './admin/pages/AdminLogin';
+import Inventory from './admin/pages/Inventory';
 import { ProductProvider } from './context/ProductContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
@@ -53,6 +54,7 @@ function App() {
               <Route path="products" element={<Products />} />
               <Route path="product/:id" element={<EditProduct />} />
               <Route path="users" element={<Users />} />
+              <Route path="inventory" element={<Inventory />} />
               {/* Future routes to be implemented */}
               <Route path="*" element={<div style={{padding: '40px'}}><h2>Coming Soon</h2><p>This module is under construction.</p></div>} />
             </Route>
