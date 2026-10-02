@@ -1,39 +1,65 @@
-/* About Page Styling */
+/* ── About Page ── */
 
 .about-page {
-  padding-bottom: 4rem;
+  padding-bottom: 0;
 }
 
-/* 1. Hero Section */
+/* ════════════════════════════════════
+   1. HERO
+════════════════════════════════════ */
 .about-hero {
-  padding: 8rem 2rem 4rem 2rem;
+  padding: 9rem 2rem 5rem;
   background-color: var(--color-ivory-deep);
   text-align: center;
+  position: relative;
+  overflow: hidden;
 }
 
-.about-hero .section-title {
-  margin-bottom: 1rem;
+.about-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 60% 40%, rgba(174, 138, 84, 0.08) 0%, transparent 70%);
+  pointer-events: none;
 }
 
-.about-hero .hero-subtitle {
+.about-hero-overline {
+  display: block;
   font-family: var(--font-body);
-  font-size: 1.1rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  color: var(--color-antique-gold);
+  margin-bottom: 1.5rem;
+}
+
+.about-hero-title {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  letter-spacing: 0.22em;
+  margin-bottom: 1.5rem;
+  color: var(--color-dark-charcoal);
+}
+
+.about-hero-tagline {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
   color: var(--color-warm-taupe);
-  letter-spacing: 0.1em;
-  text-align: center;
-  width: 100%;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  max-width: 42ch;
   margin: 0 auto;
 }
 
-/* 2. Brand Story */
+/* ════════════════════════════════════
+   2. BRAND STORY
+════════════════════════════════════ */
 .brand-story {
-  padding: 6rem 2rem;
+  padding: 7rem 2rem;
 }
 
 .story-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4rem;
+  gap: 5rem;
   align-items: center;
 }
 
@@ -44,122 +70,311 @@
 }
 
 .story-content {
-  padding: 2rem;
+  padding: 1rem 0;
 }
 
-.story-content .overline {
+.story-content .overline,
+.overline {
   font-family: var(--font-body);
-  font-size: 0.8rem;
-  letter-spacing: 0.2em;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
   color: var(--color-antique-gold);
   display: block;
   margin-bottom: 1.5rem;
 }
 
 .story-content h2 {
-  font-size: 2.2rem;
-  line-height: 1.2;
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  line-height: 1.25;
   margin-bottom: 2rem;
 }
 
 .story-content p {
-  font-size: 1rem;
+  font-size: 0.98rem;
   color: var(--color-warm-taupe);
-  margin-bottom: 1.5rem;
-  line-height: 1.8;
+  margin-bottom: 1.4rem;
+  line-height: 1.85;
 }
 
-/* 3. Why Choose Us (Reference) */
-.bg-light {
-  background-color: #F8F8F8; /* Light neutral matching reference */
+.story-quote-inline {
+  font-size: 1.05rem !important;
+  color: var(--color-dark-charcoal) !important;
+  font-style: italic;
+  border-left: 2px solid var(--color-antique-gold);
+  padding-left: 1.2rem;
+  margin-top: 2rem !important;
 }
 
-.why-choose-us {
-  padding: 6rem 0;
-}
-
-.wcu-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
-  align-items: center;
-}
-
-.wcu-content {
-  padding-right: 2rem;
-}
-
-.wcu-title {
-  font-family: 'Times New Roman', Times, serif; /* Using a classic serif to match reference */
-  font-size: 2.5rem;
-  color: #2C3E50; /* A soft dark blue/charcoal like reference */
-  text-transform: none;
-  letter-spacing: 0;
-  margin-bottom: 3rem;
-  font-weight: 500;
-}
-
-.wcu-list {
+/* ════════════════════════════════════
+   3. PILLARS
+════════════════════════════════════ */
+.pillars-section {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  margin-bottom: 3rem;
 }
 
-.wcu-item h4 {
+.pillar-block {
+  padding: 6rem 0;
+  border-top: 1px solid var(--color-soft-blush);
+}
+
+.pillar-block--accent {
+  background-color: var(--color-ivory-deep);
+}
+
+.pillar-inner {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 5rem;
+  align-items: start;
+}
+
+.pillar-label-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding-top: 0.4rem;
+  position: sticky;
+  top: 6rem;
+}
+
+.pillar-number {
+  font-family: var(--font-heading);
+  font-size: 3.5rem;
+  font-weight: 400;
+  color: var(--color-soft-blush);
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+
+.pillar-tag {
   font-family: var(--font-body);
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 0.5rem;
-  text-transform: none;
-  letter-spacing: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.25em;
+  color: var(--color-antique-gold);
+  background: rgba(174, 138, 84, 0.08);
+  border: 1px solid rgba(174, 138, 84, 0.25);
+  padding: 4px 10px;
+  border-radius: 2px;
 }
 
-.wcu-item p {
+.pillar-content {
+  max-width: 62ch;
+}
+
+.pillar-heading {
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  letter-spacing: 0.14em;
+  margin-bottom: 0.6rem;
+  color: var(--color-dark-charcoal);
+}
+
+.pillar-subheading {
   font-family: var(--font-body);
   font-size: 0.95rem;
-  color: #555;
-  line-height: 1.6;
+  color: var(--color-antique-gold);
+  letter-spacing: 0.05em;
+  margin-bottom: 2rem !important;
+  max-width: none;
+}
+
+.pillar-para {
+  font-size: 0.97rem;
+  color: var(--color-warm-taupe);
+  line-height: 1.9;
+  margin-bottom: 1.25rem !important;
+  max-width: none;
+}
+
+.pillar-quote {
+  margin-top: 2.5rem;
+  padding: 1.5rem 2rem;
+  border-left: 3px solid var(--color-antique-gold);
+  background: rgba(174, 138, 84, 0.05);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--color-dark-charcoal);
+  font-style: italic;
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+}
+
+/* ════════════════════════════════════
+   4. PHILOSOPHY
+════════════════════════════════════ */
+.philosophy-section {
+  background-color: var(--color-dark-charcoal);
+  padding: 8rem 0;
+}
+
+.philosophy-inner {
+  text-align: center;
+  max-width: 800px;
+}
+
+.philosophy-inner .overline {
+  color: var(--color-antique-gold);
+  margin-bottom: 2rem;
+}
+
+.philosophy-title {
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  letter-spacing: 0.2em;
+  color: var(--color-warm-ivory);
+  line-height: 1.4;
+  margin-bottom: 4rem;
+}
+
+.philosophy-values {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 3.5rem;
+  text-align: left;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.philo-value {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.philo-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-antique-gold);
+  flex-shrink: 0;
+  position: relative;
+  top: -1px;
+}
+
+.philo-value p {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: rgba(250, 245, 236, 0.75);
+  line-height: 1.7;
   margin: 0;
+  max-width: none;
 }
 
-.wcu-btn {
-  background-color: #A9627B; /* Muted rose/mauve to match reference */
-  border-color: #A9627B;
-  color: white;
-  padding: 0.8rem 2.5rem;
-  border-radius: 4px;
+.philo-value strong {
+  color: var(--color-warm-ivory);
   font-weight: 500;
-  letter-spacing: 0.1em;
 }
 
-.wcu-btn:hover {
-  background-color: #8c4f64;
-  border-color: #8c4f64;
-  color: white;
+.philosophy-closing {
+  font-family: var(--font-body);
+  font-size: 0.97rem;
+  color: rgba(250, 245, 236, 0.65);
+  line-height: 1.85;
+  margin-bottom: 1.5rem !important;
+  max-width: 52ch;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.wcu-image img {
-  width: 100%;
-  aspect-ratio: 3/4;
-  object-fit: cover;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+.philosophy-bold {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--color-warm-ivory);
+  line-height: 1.75;
+  margin-bottom: 3.5rem !important;
+  max-width: none;
 }
 
-/* Responsive */
+.philosophy-sign {
+  margin-bottom: 3.5rem;
+  padding: 2rem 0;
+  border-top: 1px solid rgba(174, 138, 84, 0.25);
+  border-bottom: 1px solid rgba(174, 138, 84, 0.25);
+}
+
+.sign-brand {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  letter-spacing: 0.18em;
+  color: var(--color-antique-gold);
+  margin-bottom: 0.75rem !important;
+  max-width: none;
+}
+
+.sign-words {
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: rgba(250, 245, 236, 0.55);
+  line-height: 2;
+  font-style: italic;
+  letter-spacing: 0.06em;
+  max-width: none;
+}
+
+.philosophy-cta {
+  background-color: var(--color-antique-gold);
+  border-color: var(--color-antique-gold);
+  color: var(--color-dark-charcoal);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+}
+
+.philosophy-cta:hover {
+  background-color: var(--color-warm-ivory);
+  border-color: var(--color-warm-ivory);
+  color: var(--color-dark-charcoal);
+}
+
+/* ════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════ */
 @media (max-width: 900px) {
-  .story-grid, .wcu-grid {
+  .story-grid {
     grid-template-columns: 1fr;
-    gap: 3rem;
+    gap: 2.5rem;
   }
-  
-  .wcu-content {
-    padding-right: 0;
-    order: 2; /* Put text below image on mobile, or keep above */
+
+  .pillar-inner {
+    grid-template-columns: 1fr;
+    gap: 2rem;
   }
-  
-  .wcu-image {
-    order: 1;
+
+  .pillar-label-col {
+    flex-direction: row;
+    align-items: center;
+    position: static;
+  }
+
+  .pillar-number {
+    font-size: 2rem;
+  }
+
+  .philosophy-values {
+    text-align: center;
+  }
+
+  .philo-value {
+    justify-content: center;
   }
 }
+
+@media (max-width: 600px) {
+  .about-hero {
+    padding: 7rem 1.25rem 4rem;
+  }
+
+  .brand-story {
+    padding: 4rem 1.25rem;
+  }
+
+  .pillar-block {
+    padding: 4rem 0;
+  }
+
+  .philosophy-section {
+    padding: 5rem 0;
+  }
+}
+
