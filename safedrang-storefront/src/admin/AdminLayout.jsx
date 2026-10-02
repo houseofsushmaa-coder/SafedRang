@@ -1,17 +1,26 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, ShoppingBag, Tags, Package, ShoppingCart, Users,
   Ticket, CreditCard, Undo2, Truck, Megaphone, ShoppingBasket, Bell,
   BarChart3, LineChart, PieChart, TrendingUp, MonitorSmartphone, Layers,
-  FileText, Shield, Settings, FileClock, Menu, X, Search
+  FileText, Shield, Settings, FileClock, Menu, X, Search, LogOut
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import './AdminLayout.css';
 
 const AdminLayout = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/admin/login');
+  };
 
   const navigation = [
     {
@@ -111,13 +120,20 @@ const AdminLayout = () => {
         
         <div className="admin-sidebar-footer">
            {!isSidebarCollapsed && <Link to="/" className="view-store-link">View Store</Link>}
-           <div className="admin-user-profile">
-              <div className="admin-avatar">A</div>
+           <div className="admin-user-profile" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div className="admin-avatar">{user?.name ? user.name.charAt(0).toUpperCase() : 'A'}</div>
+                {!isSidebarCollapsed && (
+                  <div className="admin-user-info">
+                    <div className="admin-user-name" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100px' }}>{user?.name || 'Admin'}</div>
+                    <div className="admin-user-role" style={{ fontSize: '0.75rem' }}>{user?.role?.replace('_', ' ') || 'Super Admin'}</div>
+                  </div>
+                )}
+              </div>
               {!isSidebarCollapsed && (
-                <div className="admin-user-info">
-                  <div className="admin-user-name">Admin User</div>
-                  <div className="admin-user-role">Super Admin</div>
-                </div>
+                <button onClick={handleLogout} className="icon-btn" title="Log Out" style={{ opacity: 0.7, padding: '4px' }}>
+                  <LogOut size={18} />
+                </button>
               )}
            </div>
         </div>
