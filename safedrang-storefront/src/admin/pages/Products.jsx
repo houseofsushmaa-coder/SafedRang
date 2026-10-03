@@ -82,7 +82,12 @@ const Products = () => {
   };
 
   const handleImportClick = () => {
-    fileInputRef.current?.click();
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    } else {
+      console.error("File input ref is null");
+      alert("Error: Cannot open file picker");
+    }
   };
 
   const handleFileUpload = (e) => {
@@ -167,8 +172,9 @@ const Products = () => {
             type="file"
             ref={fileInputRef}
             onChange={handleFileUpload}
+            onClick={(e) => { e.target.value = null; }}
             accept=".csv"
-            style={{ display: "none" }}
+            style={{ position: "absolute", width: "1px", height: "1px", padding: 0, margin: "-1px", overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}
           />
           <button
             className="admin-btn admin-btn-outline icon-left"
