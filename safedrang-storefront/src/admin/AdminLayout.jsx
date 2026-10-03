@@ -42,32 +42,32 @@ const AdminLayout = () => {
     {
       group: "Sales",
       items: [
-        { path: '/admin/coupons', label: 'Coupons', icon: <Ticket size={20} /> },
+        { path: '/admin/coupons', label: 'Coupons', icon: <Ticket size={20} />, launchingSoon: true },
         { path: '/admin/payments', label: 'Payments', icon: <CreditCard size={20} /> },
-        { path: '/admin/refunds', label: 'Refunds', icon: <Undo2 size={20} /> },
-        { path: '/admin/shipping', label: 'Shipping', icon: <Truck size={20} /> },
+        { path: '/admin/refunds', label: 'Refunds', icon: <Undo2 size={20} />, launchingSoon: true },
+        { path: '/admin/shipping', label: 'Shipping', icon: <Truck size={20} />, launchingSoon: true },
       ]
     },
     {
       group: "Marketing",
       items: [
-        { path: '/admin/campaigns', label: 'Campaigns', icon: <Megaphone size={20} /> },
-        { path: '/admin/abandoned-carts', label: 'Abandoned Carts', icon: <ShoppingBasket size={20} /> },
-        { path: '/admin/notifications', label: 'Notifications', icon: <Bell size={20} /> },
+        { path: '/admin/campaigns', label: 'Campaigns', icon: <Megaphone size={20} />, launchingSoon: true },
+        { path: '/admin/abandoned-carts', label: 'Abandoned Carts', icon: <ShoppingBasket size={20} />, launchingSoon: true },
+        { path: '/admin/notifications', label: 'Notifications', icon: <Bell size={20} />, launchingSoon: true },
       ]
     },
     {
       group: "Analytics",
       items: [
         { path: '/admin/analytics', label: 'Overview', icon: <BarChart3 size={20} /> },
-        { path: '/admin/analytics/sales', label: 'Sales', icon: <LineChart size={20} /> },
+        { path: '/admin/analytics/sales', label: 'Sales', icon: <LineChart size={20} />, launchingSoon: true },
       ]
     },
     {
       group: "Website",
       items: [
-        { path: '/admin/website/homepage', label: 'Homepage', icon: <MonitorSmartphone size={20} /> },
-        { path: '/admin/website/banners', label: 'Banners', icon: <Layers size={20} /> },
+        { path: '/admin/website/homepage', label: 'Homepage', icon: <MonitorSmartphone size={20} />, launchingSoon: true },
+        { path: '/admin/website/banners', label: 'Banners', icon: <Layers size={20} />, launchingSoon: true },
       ]
     },
     {
@@ -75,7 +75,7 @@ const AdminLayout = () => {
       items: [
         { path: '/admin/users', label: 'Users', icon: <Shield size={20} /> },
         { path: '/admin/settings', label: 'Settings', icon: <Settings size={20} /> },
-        { path: '/admin/audit-logs', label: 'Audit Logs', icon: <FileClock size={20} /> },
+        { path: '/admin/audit-logs', label: 'Audit Logs', icon: <FileClock size={20} />, launchingSoon: true },
       ]
     }
   ];
@@ -106,12 +106,25 @@ const AdminLayout = () => {
               {group.items.map((item) => (
                 <Link
                   key={item.path}
-                  to={item.path}
+                  to={item.launchingSoon ? '#' : item.path}
+                  onClick={(e) => {
+                    if (item.launchingSoon) e.preventDefault();
+                  }}
                   title={isSidebarCollapsed ? item.label : undefined}
-                  className={`admin-nav-item ${location.pathname === item.path ? 'active' : ''}`}
+                  className={`admin-nav-item ${location.pathname === item.path ? 'active' : ''} ${item.launchingSoon ? 'launching-soon' : ''}`}
+                  style={item.launchingSoon ? { opacity: 0.65, cursor: 'default' } : {}}
                 >
                   <span className="admin-nav-icon">{item.icon}</span>
-                  {!isSidebarCollapsed && <span className="admin-nav-label">{item.label}</span>}
+                  {!isSidebarCollapsed && (
+                    <span className="admin-nav-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                      {item.label}
+                      {item.launchingSoon && (
+                        <span style={{ fontSize: '0.65rem', background: '#f59e0b', color: '#fff', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
+                          Soon
+                        </span>
+                      )}
+                    </span>
+                  )}
                 </Link>
               ))}
             </div>

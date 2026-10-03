@@ -32,19 +32,30 @@ const Products = () => {
   );
 
   const handleExport = () => {
-    const csvData = products.map(p => ({
-      Title: p.title,
-      SKU: p.sku || '',
-      Category: p.category,
-      Price: p.price,
-      SalePrice: p.salePrice || '',
-      Stock: p.stock || 0,
-      Status: p.stockStatus
-    }));
-    
-    const csv = Papa.unparse(csvData);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    saveAs(blob, `safedrang-products-${new Date().toISOString().split('T')[0]}.csv`);
+    try {
+      const csvData = products.map(p => ({
+        Title: p.title || '',
+        SKU: p.sku || '',
+        Category: p.category || '',
+        Price: p.price || 0,
+        SalePrice: p.salePrice || '',
+        Stock: p.stock || 0,
+        Status: p.stockStatus || ''
+      }));
+      
+      const csv = Papa.unparse(csvData);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `safedrang-products-${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error("Export error:", err);
+      alert("Failed to export products.");
+    }
   };
 
   const handleImportClick = () => {
@@ -62,33 +73,48 @@ const Products = () => {
       complete: async (results) => {
         try {
           const token = localStorage.getItem('adminToken');
+          let successCount = 0;
+          let errorCount = 0;
           
           // Loop through each row and create a product
           for (const row of results.data) {
-            if (!row.Title) continue;
+            const title = row.Title || row.title || row.Name || row.name;
+            if (!title) continue;
             
-            await axios.post('https://violet-quetzal-133812.hostingersite.com/api/v1/products', {
-              name: row.Title,
-              sku: row.SKU || undefined,
-              price: parseFloat(row.Price) || 0,
-              salePrice: row.SalePrice ? parseFloat(row.SalePrice) : undefined,
-              stock: parseInt(row.Stock, 10) || 0,
-              description: row.Description || ''
-            }, {
-              headers: { Authorization: `Bearer ${token}` }
-            });
+            try {
+              await axios.post('https://violet-quetzal-133812.hostingersite.com/api/v1/products', {
+                name: title,
+                sku: row.SKU || row.sku || undefined,
+                price: parseFloat(row.Price || row.price) || 0,
+                salePrice: (row.SalePrice || row.salePrice) ? parseFloat(row.SalePrice || row.salePrice) : undefined,
+                stock: parseInt(row.Stock || row.stock, 10) || 0,
+                description: row.Description || row.description || ''
+              }, {
+                headers: { Authorization: `Bearer ${token}` }
+              });
+              successCount++;
+            } catch (err) {
+              console.error("Failed to import row:", row, err);
+              errorCount++;
+            }
           }
           
-          alert('Products imported successfully! Please refresh the page to see them.');
+          alert(`Import complete! Successfully imported ${successCount} products. ${errorCount > 0 ? `Failed to import ${errorCount} products.` : ''}`);
           window.location.reload();
         } catch (error) {
           console.error("Import error:", error);
-          alert('There was an error importing some products. Check console for details.');
+          alert('There was a general error during import. Check console for details.');
         } finally {
           setImporting(false);
           // Reset file input
           if (fileInputRef.current) fileInputRef.current.value = '';
         }
+      },
+      error: (err) => {
+        console.error("CSV Parse Error:", err);
+        alert("Failed to parse CSV file.");
+        setImporting(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
       }
     });
   };
