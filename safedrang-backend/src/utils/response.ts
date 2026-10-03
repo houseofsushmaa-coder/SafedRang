@@ -1,12 +1,12 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from "express";
 
 // Standard API response structure
 export const sendSuccess = (
   res: Response,
   data: unknown,
-  message = 'Success',
+  message = "Success",
   statusCode = 200,
-  meta?: Record<string, unknown>
+  meta?: Record<string, unknown>,
 ) => {
   const response: Record<string, unknown> = {
     success: true,
@@ -17,7 +17,12 @@ export const sendSuccess = (
   return res.status(statusCode).json(response);
 };
 
-export const sendError = (res: Response, message: string, statusCode = 400, errors?: unknown) => {
+export const sendError = (
+  res: Response,
+  message: string,
+  statusCode = 400,
+  errors?: unknown,
+) => {
   return res.status(statusCode).json({
     success: false,
     message,
@@ -31,7 +36,7 @@ export const sendPaginated = (
   total: number,
   page: number,
   limit: number,
-  message = 'Success'
+  message = "Success",
 ) => {
   return res.status(200).json({
     success: true,
@@ -57,8 +62,8 @@ export const asyncHandler = (fn: Function) => {
 
 // Pagination helper
 export const getPagination = (query: { page?: string; limit?: string }) => {
-  const page = Math.max(1, parseInt(query.page || '1'));
-  const limit = Math.min(100, Math.max(1, parseInt(query.limit || '20')));
+  const page = Math.max(1, parseInt(query.page || "1"));
+  const limit = Math.min(100, Math.max(1, parseInt(query.limit || "20")));
   const skip = (page - 1) * limit;
   return { page, limit, skip };
 };
@@ -67,9 +72,9 @@ export const getPagination = (query: { page?: string; limit?: string }) => {
 export const generateSlug = (text: string): string => {
   return text
     .toLowerCase()
-    .replace(/[^a-z0-9 -]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
+    .replace(/[^a-z0-9 -]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
     .trim();
 };
 

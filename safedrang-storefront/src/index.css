@@ -1,17 +1,17 @@
 :root {
   /* Color Tokens */
-  --color-warm-ivory: #F9F6F0; /* Cream base background */
-  --color-ivory-deep: #EFE9DF; /* Deeper cream for secondary background */
-  --color-soft-blush: #E5DCD0;
-  --color-antique-gold: #AE8A54; /* Gold accent for hover/secondary text */
-  --color-deep-wine: #6E1E2A; /* Maroon */
-  --color-dark-charcoal: #6E1E2A; /* Map dark charcoal to Maroon for text and buttons */
-  --color-warm-taupe: #8B7863; /* Warm taupe for secondary text */
+  --color-warm-ivory: #f9f6f0; /* Cream base background */
+  --color-ivory-deep: #efe9df; /* Deeper cream for secondary background */
+  --color-soft-blush: #e5dcd0;
+  --color-antique-gold: #ae8a54; /* Gold accent for hover/secondary text */
+  --color-deep-wine: #6e1e2a; /* Maroon */
+  --color-dark-charcoal: #6e1e2a; /* Map dark charcoal to Maroon for text and buttons */
+  --color-warm-taupe: #8b7863; /* Warm taupe for secondary text */
   --color-white: #ffffff; /* Keep white for extreme contrast, or off-white */
 
   /* Typography */
-  --font-heading: 'Jost', sans-serif;
-  --font-body: 'Poppins', sans-serif;
+  --font-heading: "Jost", sans-serif;
+  --font-body: "Poppins", sans-serif;
 }
 
 * {
@@ -29,7 +29,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading);
   font-weight: 400;
   color: var(--color-dark-charcoal);
@@ -108,7 +113,9 @@ button {
   font-weight: 300;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
   border: 1px solid var(--color-dark-charcoal);
 }
 
@@ -143,4 +150,3 @@ button {
     padding: 0 1.25rem;
   }
 }
-

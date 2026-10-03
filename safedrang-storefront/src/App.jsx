@@ -1,21 +1,27 @@
-import { BrowserRouter as Router, Routes, Route, Outlet, Navigate } from 'react-router-dom';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import Home from './pages/Home';
-import Shop from './pages/Shop';
-import About from './pages/About';
-import Craft from './pages/Craft';
-import ProductDetail from './pages/ProductDetail';
-import AdminLayout from './admin/AdminLayout';
-import Dashboard from './admin/pages/Dashboard';
-import Orders from './admin/pages/Orders';
-import Products from './admin/pages/Products';
-import EditProduct from './admin/pages/EditProduct';
-import Users from './admin/pages/Users';
-import AdminLogin from './admin/pages/AdminLogin';
-import Inventory from './admin/pages/Inventory';
-import { ProductProvider } from './context/ProductContext';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Outlet,
+  Navigate,
+} from "react-router-dom";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import Home from "./pages/Home";
+import Shop from "./pages/Shop";
+import About from "./pages/About";
+import Craft from "./pages/Craft";
+import ProductDetail from "./pages/ProductDetail";
+import AdminLayout from "./admin/AdminLayout";
+import Dashboard from "./admin/pages/Dashboard";
+import Orders from "./admin/pages/Orders";
+import Products from "./admin/pages/Products";
+import EditProduct from "./admin/pages/EditProduct";
+import Users from "./admin/pages/Users";
+import AdminLogin from "./admin/pages/AdminLogin";
+import Inventory from "./admin/pages/Inventory";
+import { ProductProvider } from "./context/ProductContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
 const StorefrontLayout = () => (
   <div className="app-layout">
@@ -29,10 +35,10 @@ const StorefrontLayout = () => (
 
 const ProtectedAdminRoute = ({ children }) => {
   const { token, loading } = useAuth();
-  
+
   if (loading) return <div>Loading...</div>;
   if (!token) return <Navigate to="/admin/login" replace />;
-  
+
   return children;
 };
 
@@ -43,12 +49,15 @@ function App() {
         <Router>
           <Routes>
             <Route path="/admin/login" element={<AdminLogin />} />
-            
-            <Route path="/admin" element={
-              <ProtectedAdminRoute>
-                <AdminLayout />
-              </ProtectedAdminRoute>
-            }>
+
+            <Route
+              path="/admin"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminLayout />
+                </ProtectedAdminRoute>
+              }
+            >
               <Route index element={<Dashboard />} />
               <Route path="orders" element={<Orders />} />
               <Route path="products" element={<Products />} />
@@ -56,7 +65,15 @@ function App() {
               <Route path="users" element={<Users />} />
               <Route path="inventory" element={<Inventory />} />
               {/* Future routes to be implemented */}
-              <Route path="*" element={<div style={{padding: '40px'}}><h2>Coming Soon</h2><p>This module is under construction.</p></div>} />
+              <Route
+                path="*"
+                element={
+                  <div style={{ padding: "40px" }}>
+                    <h2>Coming Soon</h2>
+                    <p>This module is under construction.</p>
+                  </div>
+                }
+              />
             </Route>
 
             <Route path="/" element={<StorefrontLayout />}>

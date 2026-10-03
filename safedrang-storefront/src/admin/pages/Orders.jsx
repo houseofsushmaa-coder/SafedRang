@@ -1,13 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { Eye, Edit, Filter, Search, Download, Trash2, ShoppingCart } from 'lucide-react';
-import './AdminPages.css';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import {
+  Eye,
+  Edit,
+  Filter,
+  Search,
+  Download,
+  Trash2,
+  ShoppingCart,
+} from "lucide-react";
+import "./AdminPages.css";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,15 +25,33 @@ const Orders = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('https://violet-quetzal-133812.hostingersite.com/api/v1/orders');
+      const res = await axios.get(
+        "https://violet-quetzal-133812.hostingersite.com/api/v1/orders",
+      );
       setOrders(res.data.data || []);
     } catch (error) {
       console.error("Failed to fetch orders:", error);
       // Fallback for demo if API fails/empty
       if (orders.length === 0) {
         setOrders([
-          { id: '1', orderNumber: 'SR-0921', customer: { firstName: 'Sarah', lastName: 'Johnson' }, total: 12050, orderStatus: 'COMPLETED', createdAt: new Date().toISOString(), orderItems: [{}, {}, {}] },
-          { id: '2', orderNumber: 'SR-0922', customer: { firstName: 'Michael', lastName: 'Chen' }, total: 4500, orderStatus: 'PROCESSING', createdAt: new Date().toISOString(), orderItems: [{}] }
+          {
+            id: "1",
+            orderNumber: "SR-0921",
+            customer: { firstName: "Sarah", lastName: "Johnson" },
+            total: 12050,
+            orderStatus: "COMPLETED",
+            createdAt: new Date().toISOString(),
+            orderItems: [{}, {}, {}],
+          },
+          {
+            id: "2",
+            orderNumber: "SR-0922",
+            customer: { firstName: "Michael", lastName: "Chen" },
+            total: 4500,
+            orderStatus: "PROCESSING",
+            createdAt: new Date().toISOString(),
+            orderItems: [{}],
+          },
         ]);
       }
     } finally {
@@ -34,22 +60,36 @@ const Orders = () => {
   };
 
   const getStatusClass = (status) => {
-    switch(status?.toUpperCase()) {
-      case 'COMPLETED':
-      case 'DELIVERED': return 'status-completed';
-      case 'PENDING': return 'status-pending';
-      case 'PROCESSING': return 'status-processing';
-      case 'CANCELLED':
-      case 'REFUNDED': return 'status-cancelled';
-      default: return 'status-processing';
+    switch (status?.toUpperCase()) {
+      case "COMPLETED":
+      case "DELIVERED":
+        return "status-completed";
+      case "PENDING":
+        return "status-pending";
+      case "PROCESSING":
+        return "status-processing";
+      case "CANCELLED":
+      case "REFUNDED":
+        return "status-cancelled";
+      default:
+        return "status-processing";
     }
   };
 
-  const formatCurrency = (val) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
+  const formatCurrency = (val) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(val);
 
-  const filteredOrders = orders.filter(o => 
-    o.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (o.customer && `${o.customer.firstName} ${o.customer.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredOrders = orders.filter(
+    (o) =>
+      o.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (o.customer &&
+        `${o.customer.firstName} ${o.customer.lastName}`
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())),
   );
 
   return (
@@ -70,15 +110,15 @@ const Orders = () => {
         <div className="table-toolbar">
           <div className="toolbar-search">
             <Search size={18} className="search-icon" />
-            <input 
-              type="text" 
-              placeholder="Search by Order ID or Customer Name..." 
+            <input
+              type="text"
+              placeholder="Search by Order ID or Customer Name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <div className="toolbar-filters">
-            <select className="admin-select" style={{ marginRight: '10px' }}>
+            <select className="admin-select" style={{ marginRight: "10px" }}>
               <option value="">All Statuses</option>
               <option value="PENDING">Pending</option>
               <option value="PROCESSING">Processing</option>
@@ -112,26 +152,45 @@ const Orders = () => {
               </thead>
               <tbody>
                 {filteredOrders.map((order) => {
-                  const customerName = order.customer ? `${order.customer.firstName} ${order.customer.lastName || ''}`.trim() : 'Guest Customer';
-                  const date = new Date(order.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' });
-                  
+                  const customerName = order.customer
+                    ? `${order.customer.firstName} ${order.customer.lastName || ""}`.trim()
+                    : "Guest Customer";
+                  const date = new Date(order.createdAt).toLocaleDateString(
+                    "en-IN",
+                    { year: "numeric", month: "short", day: "numeric" },
+                  );
+
                   return (
                     <tr key={order.id}>
-                      <td><input type="checkbox" /></td>
-                      <td className="font-medium text-link">{order.orderNumber}</td>
+                      <td>
+                        <input type="checkbox" />
+                      </td>
+                      <td className="font-medium text-link">
+                        {order.orderNumber}
+                      </td>
                       <td>{date}</td>
                       <td>
                         <div className="product-info">
                           <span className="product-title">{customerName}</span>
-                          {order.customer?.email && <span className="product-sku">{order.customer.email}</span>}
+                          {order.customer?.email && (
+                            <span className="product-sku">
+                              {order.customer.email}
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td>
-                        <span className="category-badge">{order.paymentMethod || 'Prepaid'}</span>
+                        <span className="category-badge">
+                          {order.paymentMethod || "Prepaid"}
+                        </span>
                       </td>
-                      <td className="font-medium">{formatCurrency(order.total)}</td>
+                      <td className="font-medium">
+                        {formatCurrency(order.total)}
+                      </td>
                       <td>
-                        <span className={`status-badge ${getStatusClass(order.orderStatus)}`}>
+                        <span
+                          className={`status-badge ${getStatusClass(order.orderStatus)}`}
+                        >
                           {order.orderStatus}
                         </span>
                       </td>
@@ -152,7 +211,7 @@ const Orders = () => {
             </table>
           </div>
         )}
-        
+
         {!loading && filteredOrders.length === 0 && (
           <div className="empty-state">
             <ShoppingCart size={48} className="empty-icon" />

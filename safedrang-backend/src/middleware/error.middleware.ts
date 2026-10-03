@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import { logger } from '../utils/logger';
+import { Request, Response, NextFunction } from "express";
+import { logger } from "../utils/logger";
 
 export interface AppError extends Error {
   statusCode?: number;
@@ -10,20 +10,20 @@ export const errorHandler = (
   err: AppError,
   req: Request,
   res: Response,
-  _next: NextFunction
+  _next: NextFunction,
 ) => {
   const statusCode = err.statusCode || 500;
-  const message = err.isOperational ? err.message : 'Internal server error';
+  const message = err.isOperational ? err.message : "Internal server error";
 
   logger.error(`${req.method} ${req.path} - ${statusCode}: ${err.message}`);
-  if (process.env.NODE_ENV === 'development') {
-    logger.error(err.stack || '');
+  if (process.env.NODE_ENV === "development") {
+    logger.error(err.stack || "");
   }
 
   res.status(statusCode).json({
     success: false,
     message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
   });
 };
 

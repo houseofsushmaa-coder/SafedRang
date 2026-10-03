@@ -1,23 +1,25 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import React, { createContext, useState, useContext, useEffect } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('adminToken') || null);
+  const [token, setToken] = useState(
+    localStorage.getItem("adminToken") || null,
+  );
   const [loading, setLoading] = useState(true);
 
   // Setup Axios defaults
   useEffect(() => {
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      localStorage.setItem('adminToken', token);
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      localStorage.setItem("adminToken", token);
       checkAuth();
     } else {
-      delete axios.defaults.headers.common['Authorization'];
-      localStorage.removeItem('adminToken');
+      delete axios.defaults.headers.common["Authorization"];
+      localStorage.removeItem("adminToken");
       setUser(null);
       setLoading(false);
     }
@@ -25,7 +27,9 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const res = await axios.get('https://violet-quetzal-133812.hostingersite.com/api/v1/auth/me');
+      const res = await axios.get(
+        "https://violet-quetzal-133812.hostingersite.com/api/v1/auth/me",
+      );
       setUser(res.data.data);
     } catch (error) {
       console.error("Auth check failed", error);
@@ -36,7 +40,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
-    const res = await axios.post('https://violet-quetzal-133812.hostingersite.com/api/v1/auth/login', { email, password });
+    const res = await axios.post(
+      "https://violet-quetzal-133812.hostingersite.com/api/v1/auth/login",
+      { email, password },
+    );
     if (res.data.data.accessToken) {
       setToken(res.data.data.accessToken);
       setUser(res.data.data.user);

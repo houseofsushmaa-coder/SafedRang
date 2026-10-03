@@ -7,14 +7,15 @@
 /* 1. Hero */
 .craft-hero {
   padding: 8rem 2rem;
-  background-color: #6E1E2A; /* Deep maroon/wine to match reference */
+  background-color: #6e1e2a; /* Deep maroon/wine to match reference */
   text-align: center;
   color: var(--color-white);
 }
 
 .craft-hero .section-title {
   color: var(--color-white);
-  font-family: 'Times New Roman', Times, serif; /* To match user reference styling */
+  font-family:
+    "Times New Roman", Times, serif; /* To match user reference styling */
   letter-spacing: 0.1em;
   margin-bottom: 1rem;
 }
@@ -49,17 +50,17 @@
 }
 
 .intro-text h2 {
-  font-family: 'Times New Roman', Times, serif;
+  font-family: "Times New Roman", Times, serif;
   font-size: 2.4rem;
   margin-bottom: 2rem;
-  color: #6E1E2A;
+  color: #6e1e2a;
   font-weight: 500;
   letter-spacing: 0.05em;
 }
 
 .intro-text p {
   font-size: 1.05rem;
-  color: #4A4A4A;
+  color: #4a4a4a;
   line-height: 1.8;
   margin-bottom: 1.5rem;
   margin-left: auto;
@@ -89,7 +90,7 @@
   width: 100%;
   aspect-ratio: 4/5;
   object-fit: cover;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
 }
 
 .step-content {
@@ -98,7 +99,7 @@
 }
 
 .step-number {
-  font-family: 'Times New Roman', Times, serif;
+  font-family: "Times New Roman", Times, serif;
   font-size: 6rem;
   color: rgba(174, 138, 84, 0.15); /* Faint antique gold */
   position: absolute;
@@ -148,16 +149,16 @@
   .craft-process {
     gap: 5rem;
   }
-  
+
   .process-step {
     flex-direction: column;
     gap: 3rem;
   }
-  
+
   .process-step.left {
     flex-direction: column-reverse;
   }
-  
+
   .step-number {
     top: -3rem;
     left: 0;

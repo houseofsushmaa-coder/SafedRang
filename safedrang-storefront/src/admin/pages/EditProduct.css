@@ -12,7 +12,8 @@
   }
 }
 
-.edit-product-main, .edit-product-sidebar {
+.edit-product-main,
+.edit-product-sidebar {
   display: flex;
   flex-direction: column;
   gap: 24px;

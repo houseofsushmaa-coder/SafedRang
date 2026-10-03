@@ -75,7 +75,6 @@
   color: var(--color-white);
 }
 
-
 .trust-markers {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -112,7 +111,9 @@
 }
 
 .brand-col .script-font {
-  font-family: var(--font-heading) !important; /* Overriding script font for the logo text */
+  font-family: var(
+    --font-heading
+  ) !important; /* Overriding script font for the logo text */
   text-transform: uppercase;
   letter-spacing: 0.18em;
   font-size: 1.25rem !important;
@@ -185,7 +186,8 @@
   .footer-grid {
     grid-template-columns: repeat(3, 1fr);
   }
-  .quote-col, .brand-col {
+  .quote-col,
+  .brand-col {
     grid-column: 1 / -1;
   }
 }

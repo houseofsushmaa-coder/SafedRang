@@ -194,7 +194,9 @@
   letter-spacing: 0.1em;
   color: var(--color-warm-taupe);
   border-bottom: 1px solid transparent;
-  transition: color 0.2s ease, border-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
   padding: 0;
 }
 
@@ -269,8 +271,12 @@
 }
 
 @keyframes dotAppear {
-  from { transform: scale(0); }
-  to { transform: scale(1); }
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
 }
 
 /* ── Product Grid ── */
