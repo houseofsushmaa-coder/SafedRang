@@ -90,72 +90,41 @@ const Products = () => {
     }
   };
 
-  const handleFileUpload = (e) => {
+  const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     setImporting(true);
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: async (results) => {
-        try {
-          const token = localStorage.getItem("adminToken");
-          let successCount = 0;
-          let errorCount = 0;
+    const token = localStorage.getItem("adminToken");
+    
+    const formData = new FormData();
+    formData.append("file", file);
 
-          // Loop through each row and create a product
-          for (const row of results.data) {
-            const title = row.Title || row.title || row.Name || row.name;
-            if (!title) continue;
-
-            try {
-              await axios.post(
-                "https://violet-quetzal-133812.hostingersite.com/api/v1/products",
-                {
-                  name: title,
-                  sku: row.SKU || row.sku || undefined,
-                  price: parseFloat(row.Price || row.price) || 0,
-                  salePrice:
-                    row.SalePrice || row.salePrice
-                      ? parseFloat(row.SalePrice || row.salePrice)
-                      : undefined,
-                  stock: parseInt(row.Stock || row.stock, 10) || 0,
-                  description: row.Description || row.description || "",
-                },
-                {
-                  headers: { Authorization: `Bearer ${token}` },
-                },
-              );
-              successCount++;
-            } catch (err) {
-              console.error("Failed to import row:", row, err);
-              errorCount++;
-            }
-          }
-
-          alert(
-            `Import complete! Successfully imported ${successCount} products. ${errorCount > 0 ? `Failed to import ${errorCount} products.` : ""}`,
-          );
-          window.location.reload();
-        } catch (error) {
-          console.error("Import error:", error);
-          alert(
-            "There was a general error during import. Check console for details.",
-          );
-        } finally {
-          setImporting(false);
-          // Reset file input
-          if (fileInputRef.current) fileInputRef.current.value = "";
+    try {
+      const res = await axios.post(
+        "https://violet-quetzal-133812.hostingersite.com/api/v1/products/bulk/import",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
         }
-      },
-      error: (err) => {
-        console.error("CSV Parse Error:", err);
-        alert("Failed to parse CSV file.");
-        setImporting(false);
-        if (fileInputRef.current) fileInputRef.current.value = "";
-      },
-    });
+      );
+      
+      const { success, failed } = res.data.data;
+      alert(`Import complete! Successfully imported ${success} products. ${failed > 0 ? `Failed to import ${failed} products.` : ""}`);
+      window.location.reload();
+    } catch (err) {
+      console.error("Bulk import failed:", err);
+      alert(err.response?.data?.message || "Failed to import products. Check console for details.");
+    } finally {
+      setImporting(false);
+      // Reset input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
   };
 
   return (

@@ -20,6 +20,11 @@ import EditProduct from "./admin/pages/EditProduct";
 import Users from "./admin/pages/Users";
 import AdminLogin from "./admin/pages/AdminLogin";
 import Inventory from "./admin/pages/Inventory";
+import Analytics from "./admin/pages/Analytics";
+import Categories from "./admin/pages/Categories";
+import Payments from "./admin/pages/Payments";
+import Settings from "./admin/pages/Settings";
+import Coupons from "./admin/pages/Coupons";
 import { ProductProvider } from "./context/ProductContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
@@ -64,7 +69,13 @@ function App() {
               <Route path="product/:id" element={<EditProduct />} />
               <Route path="users" element={<Users />} />
               <Route path="inventory" element={<Inventory />} />
-              {/* Future routes to be implemented */}
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="analytics/sales" element={<Analytics />} />
+              <Route path="categories" element={<Categories />} />
+              <Route path="payments" element={<Payments />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="coupons" element={<Coupons />} />
+              {/* Placeholder for future routes */}
               <Route
                 path="*"
                 element={

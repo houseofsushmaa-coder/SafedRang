@@ -2,6 +2,8 @@ import { prisma } from "../../config/database";
 import { ProductStatus, Prisma } from "@prisma/client";
 import { createError } from "../../middleware/error.middleware";
 import { generateSlug } from "../../utils/response";
+import { Readable } from "stream";
+import csv from "csv-parser";
 
 export class ProductService {
   async create(data: {
@@ -275,5 +277,89 @@ export class ProductService {
       slug = `${generateSlug(name)}-${suffix}`;
     }
     return slug;
+  }
+
+  async importFromCsv(buffer: Buffer): Promise<{ total: number; success: number; failed: number }> {
+    return new Promise((resolve, reject) => {
+      const results: any[] = [];
+      Readable.from(buffer)
+        .pipe(csv())
+        .on("data", (data) => results.push(data))
+        .on("end", async () => {
+          let success = 0;
+          let failed = 0;
+          
+          for (const row of results) {
+            try {
+              // Only process simple or standard products for now
+              if (row["Type"] && row["Type"] !== "simple") {
+                failed++;
+                continue;
+              }
+
+              const name = row["Name"];
+              const sku = row["SKU"];
+              if (!name || !sku) {
+                failed++;
+                continue;
+              }
+
+              const existing = await prisma.product.findUnique({ where: { sku } });
+              if (existing) {
+                // If it already exists, you can choose to update or skip. Let's skip to be safe.
+                failed++;
+                continue;
+              }
+
+              const slug = await this.generateUniqueSlug(name);
+              
+              const price = parseFloat(row["Regular price"]) || 0;
+              const salePrice = parseFloat(row["Sale price"]) || null;
+              const stock = parseInt(row["Stock"], 10) || 0;
+              
+              const status: ProductStatus = row["Published"] === "1" ? "ACTIVE" : "DRAFT";
+              const featured = row["Is featured?"] === "1";
+              
+              const weight = row["Weight (kg)"] ? parseFloat(row["Weight (kg)"]) : null;
+
+              // Parse images
+              const imageUrls = row["Images"] ? row["Images"].split(",").map((url: string) => url.trim()) : [];
+              const imagesData = imageUrls.map((url: string, index: number) => ({
+                url,
+                sortOrder: index,
+              }));
+
+              await prisma.product.create({
+                data: {
+                  name,
+                  sku,
+                  slug,
+                  description: row["Description"] || null,
+                  shortDescription: row["Short description"] || null,
+                  price,
+                  salePrice,
+                  stock,
+                  status,
+                  featured,
+                  weight,
+                  fabric: row["Meta: fabric"] || null,
+                  craft: row["Meta: craft"] || null,
+                  care: row["Meta: care"] || null,
+                  hsnCode: row["Meta: hsnCode"] || null,
+                  images: imagesData.length > 0 ? { create: imagesData } : undefined,
+                },
+              });
+
+              success++;
+            } catch (err) {
+              console.error("Failed to import row", row["SKU"], err);
+              failed++;
+            }
+          }
+          
+          resolve({ total: results.length, success, failed });
+        })
+        .on("error", (error) => reject(error));
+    });
   }
 }

@@ -93,7 +93,6 @@ const AdminLayout = () => {
           path: "/admin/coupons",
           label: "Coupons",
           icon: <Ticket size={20} />,
-          launchingSoon: true,
         },
         {
           path: "/admin/payments",
@@ -149,7 +148,6 @@ const AdminLayout = () => {
           path: "/admin/analytics/sales",
           label: "Sales",
           icon: <LineChart size={20} />,
-          launchingSoon: true,
         },
       ],
     },

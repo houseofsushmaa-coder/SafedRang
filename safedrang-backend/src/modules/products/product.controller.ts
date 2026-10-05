@@ -80,6 +80,12 @@ export class ProductController {
     return sendSuccess(res, null, "Products updated");
   });
 
+  bulkImport = asyncHandler(async (req: Request, res: Response) => {
+    if (!req.file) return sendError(res, "No file uploaded", 400);
+    const result = await productService.importFromCsv(req.file.buffer);
+    return sendSuccess(res, result, "Products imported successfully");
+  });
+
   bulkDelete = asyncHandler(async (req: Request, res: Response) => {
     const { ids } = req.body;
     if (!ids?.length) return sendError(res, "IDs required", 422);
