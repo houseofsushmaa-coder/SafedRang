@@ -10,11 +10,13 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { useProducts } from "../context/ProductContext";
+import { useCurrency } from "../context/CurrencyContext";
 import "./ProductDetail.css";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const { products } = useProducts();
+  const { formatPrice } = useCurrency();
 
   // Find product by id, default to first product if not found (for testing)
   const product = products.find((p) => p.id === id) || products[0];
@@ -85,7 +87,7 @@ export default function ProductDetail() {
             {product.salePrice ? (
               <>
                 <span className="sale-price">
-                  ₹ {product.salePrice.toLocaleString()}
+                  {formatPrice(product.salePrice)}
                 </span>
                 <span
                   className="original-price"
@@ -96,11 +98,11 @@ export default function ProductDetail() {
                     fontSize: "1rem",
                   }}
                 >
-                  ₹ {product.price.toLocaleString()}
+                  {formatPrice(product.price)}
                 </span>
               </>
             ) : (
-              <span>₹ {product.price.toLocaleString()}</span>
+              <span>{formatPrice(product.price)}</span>
             )}
           </div>
 

@@ -27,6 +27,7 @@ import Settings from "./admin/pages/Settings";
 import Coupons from "./admin/pages/Coupons";
 import { ProductProvider } from "./context/ProductContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { CurrencyProvider } from "./context/CurrencyContext";
 
 const StorefrontLayout = () => (
   <div className="app-layout">
@@ -51,51 +52,53 @@ function App() {
   return (
     <AuthProvider>
       <ProductProvider>
-        <Router>
-          <Routes>
-            <Route path="/admin/login" element={<AdminLogin />} />
+        <CurrencyProvider>
+          <Router>
+            <Routes>
+              <Route path="/admin/login" element={<AdminLogin />} />
 
-            <Route
-              path="/admin"
-              element={
-                <ProtectedAdminRoute>
-                  <AdminLayout />
-                </ProtectedAdminRoute>
-              }
-            >
-              <Route index element={<Dashboard />} />
-              <Route path="orders" element={<Orders />} />
-              <Route path="products" element={<Products />} />
-              <Route path="product/:id" element={<EditProduct />} />
-              <Route path="users" element={<Users />} />
-              <Route path="inventory" element={<Inventory />} />
-              <Route path="analytics" element={<Analytics />} />
-              <Route path="analytics/sales" element={<Analytics />} />
-              <Route path="categories" element={<Categories />} />
-              <Route path="payments" element={<Payments />} />
-              <Route path="settings" element={<Settings />} />
-              <Route path="coupons" element={<Coupons />} />
-              {/* Placeholder for future routes */}
               <Route
-                path="*"
+                path="/admin"
                 element={
-                  <div style={{ padding: "40px" }}>
-                    <h2>Coming Soon</h2>
-                    <p>This module is under construction.</p>
-                  </div>
+                  <ProtectedAdminRoute>
+                    <AdminLayout />
+                  </ProtectedAdminRoute>
                 }
-              />
-            </Route>
+              >
+                <Route index element={<Dashboard />} />
+                <Route path="orders" element={<Orders />} />
+                <Route path="products" element={<Products />} />
+                <Route path="product/:id" element={<EditProduct />} />
+                <Route path="users" element={<Users />} />
+                <Route path="inventory" element={<Inventory />} />
+                <Route path="analytics" element={<Analytics />} />
+                <Route path="analytics/sales" element={<Analytics />} />
+                <Route path="categories" element={<Categories />} />
+                <Route path="payments" element={<Payments />} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="coupons" element={<Coupons />} />
+                {/* Placeholder for future routes */}
+                <Route
+                  path="*"
+                  element={
+                    <div style={{ padding: "40px" }}>
+                      <h2>Coming Soon</h2>
+                      <p>This module is under construction.</p>
+                    </div>
+                  }
+                />
+              </Route>
 
-            <Route path="/" element={<StorefrontLayout />}>
-              <Route index element={<Home />} />
-              <Route path="shop" element={<Shop />} />
-              <Route path="about" element={<About />} />
-              <Route path="craft" element={<Craft />} />
-              <Route path="product/:id" element={<ProductDetail />} />
-            </Route>
-          </Routes>
-        </Router>
+              <Route path="/" element={<StorefrontLayout />}>
+                <Route index element={<Home />} />
+                <Route path="shop" element={<Shop />} />
+                <Route path="about" element={<About />} />
+                <Route path="craft" element={<Craft />} />
+                <Route path="product/:id" element={<ProductDetail />} />
+              </Route>
+            </Routes>
+          </Router>
+        </CurrencyProvider>
       </ProductProvider>
     </AuthProvider>
   );

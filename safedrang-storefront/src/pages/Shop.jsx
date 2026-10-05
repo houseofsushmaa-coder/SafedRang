@@ -2,13 +2,14 @@ import { useState, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { useProducts } from "../context/ProductContext";
+import { useCurrency } from "../context/CurrencyContext";
 import "./Shop.css";
 
 const PRICE_RANGES = [
-  { label: "Under ₹5,000", min: 0, max: 4999 },
-  { label: "₹5,000 – ₹10,000", min: 5000, max: 10000 },
-  { label: "₹10,000 – ₹15,000", min: 10000, max: 15000 },
-  { label: "Above ₹15,000", min: 15001, max: Infinity },
+  { min: 0, max: 4999 },
+  { min: 5000, max: 10000 },
+  { min: 10000, max: 15000 },
+  { min: 15001, max: Infinity },
 ];
 
 const SORT_OPTIONS = [
@@ -20,6 +21,7 @@ const SORT_OPTIONS = [
 
 export default function Shop() {
   const { products, getAllCategories } = useProducts();
+  const { formatPrice } = useCurrency();
 
   /* ── filter state ── */
   const [activeCategory, setActiveCategory] = useState("All");
@@ -205,25 +207,31 @@ export default function Shop() {
           />
           All
         </label>
-        {PRICE_RANGES.map((range) => (
-          <label
-            key={range.label}
-            className={`filter-option ${activePriceRange?.label === range.label ? "active" : ""}`}
-          >
-            <span className="radio-dot">
-              {activePriceRange?.label === range.label && (
-                <span className="radio-dot-inner" />
-              )}
-            </span>
-            <input
-              type="radio"
-              name="price"
-              checked={activePriceRange?.label === range.label}
-              onChange={() => setActivePriceRange(range)}
-            />
-            {range.label}
-          </label>
-        ))}
+        {PRICE_RANGES.map((range, index) => {
+          const label = range.max === Infinity 
+            ? `Above ${formatPrice(range.min)}`
+            : `${formatPrice(range.min)} – ${formatPrice(range.max)}`;
+          
+          return (
+            <label
+              key={index}
+              className={`filter-option ${activePriceRange?.min === range.min ? "active" : ""}`}
+            >
+              <span className="radio-dot">
+                {activePriceRange?.min === range.min && (
+                  <span className="radio-dot-inner" />
+                )}
+              </span>
+              <input
+                type="radio"
+                name="price"
+                checked={activePriceRange?.min === range.min}
+                onChange={() => setActivePriceRange(range)}
+              />
+              {label}
+            </label>
+          );
+        })}
       </div>
     </>
   );

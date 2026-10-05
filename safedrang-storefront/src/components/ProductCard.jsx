@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
+import { useCurrency } from "../context/CurrencyContext";
 import "./ProductCard.css";
 
 export default function ProductCard({ product }) {
+  const { formatPrice } = useCurrency();
   const isSold = product.stockStatus === "Sold Out";
   const hasSale = product.salePrice && product.salePrice < product.price;
 
@@ -46,14 +48,14 @@ export default function ProductCard({ product }) {
             {hasSale ? (
               <>
                 <span className="price sale-price">
-                  ₹ {product.salePrice.toLocaleString()}
+                  {formatPrice(product.salePrice)}
                 </span>
                 <span className="price original-price">
-                  ₹ {product.price.toLocaleString()}
+                  {formatPrice(product.price)}
                 </span>
               </>
             ) : (
-              <span className="price">₹ {product.price.toLocaleString()}</span>
+              <span className="price">{formatPrice(product.price)}</span>
             )}
           </div>
         </div>

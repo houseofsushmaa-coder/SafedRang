@@ -1,8 +1,10 @@
 import { Search, ShoppingBag, Heart, User, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useCurrency } from "../context/CurrencyContext";
 import "./Header.css";
 
 export default function Header() {
+  const { currency, changeCurrency, supportedCurrencies, loadingRates } = useCurrency();
   return (
     <header className="site-header">
       <div className="announcement-bar">
@@ -50,6 +52,28 @@ export default function Header() {
         </nav>
 
         <div className="header-actions">
+          <div className="currency-selector hidden-mobile" style={{ marginRight: '15px' }}>
+            <select 
+              value={currency} 
+              onChange={(e) => changeCurrency(e.target.value)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                fontSize: '13px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                outline: 'none',
+                color: 'var(--text-main)'
+              }}
+              disabled={loadingRates}
+            >
+              {Object.keys(supportedCurrencies).map(code => (
+                <option key={code} value={code}>
+                  {code} ({supportedCurrencies[code].symbol})
+                </option>
+              ))}
+            </select>
+          </div>
           <button aria-label="Search">
             <Search size={20} />
           </button>
