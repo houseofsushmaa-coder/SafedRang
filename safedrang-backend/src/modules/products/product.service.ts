@@ -317,7 +317,7 @@ export class ProductService {
               const salePrice = parseFloat(row["Sale price"]) || null;
               const stock = parseInt(row["Stock"], 10) || 0;
               
-              const status: ProductStatus = row["Published"] === "1" ? ProductStatus.ACTIVE : ProductStatus.DRAFT;
+              const status: ProductStatus = row["Published"] === "1" ? ProductStatus.PUBLISHED : ProductStatus.DRAFT;
               const featured = row["Is featured?"] === "1";
               
               const weight = row["Weight (kg)"] ? parseFloat(row["Weight (kg)"]) : null;
