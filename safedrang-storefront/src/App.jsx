@@ -12,6 +12,7 @@ import Shop from "./pages/Shop";
 import About from "./pages/About";
 import Craft from "./pages/Craft";
 import ProductDetail from "./pages/ProductDetail";
+import Checkout from "./pages/Checkout";
 import AdminLayout from "./admin/AdminLayout";
 import Dashboard from "./admin/pages/Dashboard";
 import Orders from "./admin/pages/Orders";
@@ -28,6 +29,7 @@ import Coupons from "./admin/pages/Coupons";
 import { ProductProvider } from "./context/ProductContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CurrencyProvider } from "./context/CurrencyContext";
+import { CartProvider } from "./context/CartContext";
 
 const StorefrontLayout = () => (
   <div className="app-layout">
@@ -53,7 +55,8 @@ function App() {
     <AuthProvider>
       <ProductProvider>
         <CurrencyProvider>
-          <Router>
+          <CartProvider>
+            <Router>
             <Routes>
               <Route path="/admin/login" element={<AdminLogin />} />
 
@@ -95,9 +98,11 @@ function App() {
                 <Route path="about" element={<About />} />
                 <Route path="craft" element={<Craft />} />
                 <Route path="product/:id" element={<ProductDetail />} />
+                <Route path="checkout" element={<Checkout />} />
               </Route>
             </Routes>
           </Router>
+          </CartProvider>
         </CurrencyProvider>
       </ProductProvider>
     </AuthProvider>

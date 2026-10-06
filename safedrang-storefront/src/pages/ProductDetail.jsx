@@ -11,12 +11,16 @@ import {
 } from "lucide-react";
 import { useProducts } from "../context/ProductContext";
 import { useCurrency } from "../context/CurrencyContext";
+import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
 import "./ProductDetail.css";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const { products } = useProducts();
   const { formatPrice } = useCurrency();
+  const { addToCart, toggleWishlist, isInWishlist } = useCart();
+  const navigate = useNavigate();
 
   // Find product by id, default to first product if not found (for testing)
   const product = products.find((p) => p.id === id) || products[0];
@@ -24,8 +28,17 @@ export default function ProductDetail() {
   const [activeImage, setActiveImage] = useState(
     product?.images?.[0] || product?.image,
   );
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [activeTab, setActiveTab] = useState("details");
+
+  const handleAddToCart = () => {
+    addToCart(product);
+    alert("Added to cart!");
+  };
+
+  const handleBuyNow = () => {
+    addToCart(product);
+    navigate("/checkout");
+  };
 
   return (
     <div className="pdp-container">
@@ -73,11 +86,11 @@ export default function ProductDetail() {
             </h1>
             <button
               className="btn-wishlist"
-              onClick={() => setIsWishlisted(!isWishlisted)}
+              onClick={() => toggleWishlist(product)}
             >
               <Heart
                 size={20}
-                fill={isWishlisted ? "var(--color-dark-charcoal)" : "none"}
+                fill={isInWishlist(product.id) ? "var(--color-dark-charcoal)" : "none"}
                 color="var(--color-dark-charcoal)"
               />
             </button>
@@ -145,11 +158,12 @@ export default function ProductDetail() {
             <button
               className="btn-primary btn-add-to-cart"
               disabled={product.stockStatus === "Sold Out"}
+              onClick={handleAddToCart}
             >
               {product.stockStatus === "Sold Out" ? "SOLD OUT" : "ADD TO CART"}
             </button>
             {product.stockStatus !== "Sold Out" && (
-              <button className="btn-secondary btn-buy-now">BUY IT NOW</button>
+              <button className="btn-secondary btn-buy-now" onClick={handleBuyNow}>BUY IT NOW</button>
             )}
           </div>
 

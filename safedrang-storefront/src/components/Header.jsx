@@ -1,10 +1,12 @@
 import { Search, ShoppingBag, Heart, User, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCurrency } from "../context/CurrencyContext";
+import { useCart } from "../context/CartContext";
 import "./Header.css";
 
 export default function Header() {
   const { currency, changeCurrency, supportedCurrencies, loadingRates } = useCurrency();
+  const { cartCount, wishlistCount } = useCart();
   return (
     <header className="site-header">
       <div className="announcement-bar">
@@ -81,14 +83,15 @@ export default function Header() {
           </button>
           <button aria-label="Wishlist" className="hidden-mobile">
             <Heart size={20} />
+            {wishlistCount > 0 && <span className="cart-count wishlist-count">{wishlistCount}</span>}
           </button>
           <button aria-label="Account" className="hidden-mobile">
             <User size={20} />
           </button>
-          <button aria-label="Cart" className="cart-btn">
+          <Link to="/checkout" aria-label="Cart" className="cart-btn" style={{ textDecoration: 'none' }}>
             <ShoppingBag size={20} />
-            <span className="cart-count">0</span>
-          </button>
+            <span className="cart-count">{cartCount}</span>
+          </Link>
         </div>
       </div>
     </header>
