@@ -25,9 +25,11 @@ export default function Header() {
 
         <div className="logo">
           <Link to="/" style={{ textDecoration: "none" }}>
-            <div className="logo-circle">
-              <span className="script-font">safedrang</span>
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="Safedrang" 
+              style={{ height: "45px", width: "auto", objectFit: "contain" }} 
+            />
           </Link>
         </div>
 

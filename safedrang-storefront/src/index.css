@@ -1,17 +1,17 @@
 :root {
   /* Color Tokens */
-  --color-warm-ivory: #f9f6f0; /* Cream base background */
-  --color-ivory-deep: #efe9df; /* Deeper cream for secondary background */
-  --color-soft-blush: #e5dcd0;
-  --color-antique-gold: #ae8a54; /* Gold accent for hover/secondary text */
-  --color-deep-wine: #6e1e2a; /* Maroon */
-  --color-dark-charcoal: #6e1e2a; /* Map dark charcoal to Maroon for text and buttons */
-  --color-warm-taupe: #8b7863; /* Warm taupe for secondary text */
-  --color-white: #ffffff; /* Keep white for extreme contrast, or off-white */
+  --color-warm-ivory: #FAF5EC; /* Cream base background */
+  --color-ivory-deep: #F2EBDD; /* Deeper cream for secondary background */
+  --color-soft-blush: #E8DFD0;
+  --color-antique-gold: #AE8A54; /* Gold accent for hover/secondary text */
+  --color-deep-wine: #6E1E2A; /* Maroon */
+  --color-dark-charcoal: #2A211D; /* Map dark charcoal for text and buttons */
+  --color-warm-taupe: #8B7863; /* Warm taupe for secondary text */
+  --color-white: #FFFFFF; /* Keep white for extreme contrast, or off-white */
 
   /* Typography */
-  --font-heading: "Jost", sans-serif;
-  --font-body: "Poppins", sans-serif;
+  --font-heading: "Cormorant Garamond", serif;
+  --font-body: "Manrope", sans-serif;
 }
 
 * {
@@ -36,10 +36,10 @@ h4,
 h5,
 h6 {
   font-family: var(--font-heading);
-  font-weight: 400;
+  font-weight: 500;
   color: var(--color-dark-charcoal);
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
+  text-transform: none;
+  letter-spacing: normal;
 }
 
 h1 {
