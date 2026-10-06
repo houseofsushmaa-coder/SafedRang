@@ -15,12 +15,12 @@ export default function ProductCard({ product }) {
       >
         <div className="image-wrapper">
           <img
-            src={product.images[0]}
+            src={product.images?.[0] || product.image || "https://via.placeholder.com/450x572?text=No+Image"}
             alt={product.title}
             className="primary-img"
             loading="lazy"
           />
-          {product.images[1] && (
+          {product.images?.[1] && (
             <img
               src={product.images[1]}
               alt={`${product.title} alternate view`}

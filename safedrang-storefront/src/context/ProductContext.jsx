@@ -11,9 +11,7 @@ export const ProductProvider = ({ children }) => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(
-        "https://violet-quetzal-133812.hostingersite.com/api/v1/products?limit=200",
-      );
+      const res = await axios.get("/api/v1/products?limit=200");
 
       // Transform backend data to match the frontend shape
       const formattedProducts = res.data.data.map((p) => ({
@@ -46,9 +44,7 @@ export const ProductProvider = ({ children }) => {
 
   const addProduct = async (product) => {
     try {
-      await axios.post(
-        "https://violet-quetzal-133812.hostingersite.com/api/v1/products",
-        {
+      await axios.post("/api/v1/products", {
           name: product.title,
           price: product.price,
           stock: 10, // Default for now
@@ -63,9 +59,7 @@ export const ProductProvider = ({ children }) => {
 
   const deleteProduct = async (id) => {
     try {
-      await axios.delete(
-        `https://violet-quetzal-133812.hostingersite.com/api/v1/products/${id}`,
-      );
+      await axios.delete(`/api/v1/products/${id}`);
       setProducts(products.filter((p) => p.id !== id));
     } catch (error) {
       console.error("Failed to delete", error);
@@ -74,9 +68,7 @@ export const ProductProvider = ({ children }) => {
 
   const updateProduct = async (id, updatedData) => {
     try {
-      await axios.put(
-        `https://violet-quetzal-133812.hostingersite.com/api/v1/products/${id}`,
-        {
+      await axios.put(`/api/v1/products/${id}`, {
           name: updatedData.title,
           price: updatedData.price,
           salePrice: updatedData.salePrice,
