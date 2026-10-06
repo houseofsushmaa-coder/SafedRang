@@ -15,6 +15,7 @@ import {
 import Papa from "papaparse";
 import { saveAs } from "file-saver";
 import axios from "axios";
+import { API_BASE, getAuthHeaders, formatINR } from "../../config/api.js";
 import "./AdminPages.css";
 
 const Products = () => {
@@ -102,7 +103,7 @@ const Products = () => {
 
     try {
       const res = await axios.post(
-        "https://violet-quetzal-133812.hostingersite.com/api/v1/products/bulk/import",
+        `${API_BASE}/products/bulk/import`,
         formData,
         {
           headers: {

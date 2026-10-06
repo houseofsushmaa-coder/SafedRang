@@ -13,6 +13,7 @@ import About from "./pages/About";
 import Craft from "./pages/Craft";
 import ProductDetail from "./pages/ProductDetail";
 import Checkout from "./pages/Checkout";
+import PaymentVerify from "./pages/PaymentVerify";
 import AdminLayout from "./admin/AdminLayout";
 import Dashboard from "./admin/pages/Dashboard";
 import Orders from "./admin/pages/Orders";
@@ -99,6 +100,7 @@ function App() {
                 <Route path="craft" element={<Craft />} />
                 <Route path="product/:id" element={<ProductDetail />} />
                 <Route path="checkout" element={<Checkout />} />
+                <Route path="payment/verify" element={<PaymentVerify />} />
               </Route>
             </Routes>
           </Router>

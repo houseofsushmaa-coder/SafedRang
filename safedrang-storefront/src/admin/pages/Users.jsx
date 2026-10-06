@@ -13,7 +13,7 @@ import {
 import "./AdminPages.css";
 import "./Users.css";
 
-const API = "https://violet-quetzal-133812.hostingersite.com/api/v1";
+import { API_BASE, getAuthHeaders, formatINR } from "../../config/api.js";
 
 const ROLE_OPTIONS = ["CUSTOMER", "MANAGER", "ADMIN", "SUPER_ADMIN"];
 
@@ -84,7 +84,7 @@ const AddUserModal = ({ onClose, onSuccess }) => {
 
       // Register the user
       await axios.post(
-        `${API}/auth/register`,
+        `${API_BASE}/auth/register`,
         {
           name: form.name,
           email: form.email,
@@ -236,7 +236,7 @@ const Users = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("adminToken");
-      const res = await axios.get(`${API}/users`, {
+      const res = await axios.get(`${API_BASE}/users`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(res.data.data ?? []);

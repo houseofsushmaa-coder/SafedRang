@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import "./AdminPages.css";
 
-const API = "https://violet-quetzal-133812.hostingersite.com/api/v1";
+import { API_BASE, getAuthHeaders, formatINR } from "../../config/api.js";
 
 const Toast = ({ toast, onClose }) => {
   if (!toast) return null;
@@ -73,7 +73,7 @@ const AdjustStockModal = ({ item, onClose, onSuccess }) => {
         payload.variantId = item.variantId;
       }
 
-      await axios.put(`${API}/products/${item.productId}/stock`, payload, {
+      await axios.put(`${API_BASE}/products/${item.productId}/stock`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -227,7 +227,7 @@ const Inventory = () => {
   const fetchInventory = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API}/products?limit=100`);
+      const res = await axios.get(`${API_BASE}/products?limit=100`);
       setProducts(res.data.data?.products || []);
     } catch (error) {
       console.error("Failed to fetch inventory", error);

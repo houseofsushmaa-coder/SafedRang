@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { API_BASE } from "../config/api.js";
 
 const AuthContext = createContext();
 
@@ -27,9 +28,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const res = await axios.get(
-        "https://violet-quetzal-133812.hostingersite.com/api/v1/auth/me",
-      );
+      const res = await axios.get(`${API_BASE}/auth/me`);
       setUser(res.data.data);
     } catch (error) {
       console.error("Auth check failed", error);
@@ -40,10 +39,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
-    const res = await axios.post(
-      "https://violet-quetzal-133812.hostingersite.com/api/v1/auth/login",
-      { email, password },
-    );
+    const res = await axios.post(`${API_BASE}/auth/login`, {
+      email,
+      password,
+    });
     if (res.data.data.accessToken) {
       setToken(res.data.data.accessToken);
       setUser(res.data.data.user);

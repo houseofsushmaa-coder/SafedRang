@@ -22,8 +22,7 @@ export default function ProductDetail() {
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const navigate = useNavigate();
 
-  // Find product by id, default to first product if not found (for testing)
-  const product = products.find((p) => p.id === id) || products[0];
+  const product = products.find((p) => p.id === id);
 
   const [activeImage, setActiveImage] = useState(
     product?.images?.[0] || product?.image,
@@ -40,6 +39,20 @@ export default function ProductDetail() {
     navigate("/checkout");
   };
 
+  if (!product) {
+    return (
+      <div className="pdp-container container" style={{ padding: "80px 20px", textAlign: "center" }}>
+        <h2>Product Not Found</h2>
+        <p>The product you're looking for doesn't exist or has been removed.</p>
+        <Link to="/shop" className="btn-primary" style={{ display: "inline-block", marginTop: "20px", padding: "12px 24px" }}>
+          Return to Shop
+        </Link>
+      </div>
+    );
+  }
+
+  const imagesList = product.images?.length > 0 ? product.images : (product.image ? [product.image] : []);
+
   return (
     <div className="pdp-container">
       {/* Breadcrumb */}
@@ -55,7 +68,7 @@ export default function ProductDetail() {
         {/* Left: Image Gallery */}
         <div className="pdp-gallery">
           <div className="gallery-thumbnails">
-            {product.images.map((img, index) => (
+            {imagesList.map((img, index) => (
               <img
                 key={index}
                 src={img}
@@ -66,7 +79,7 @@ export default function ProductDetail() {
             ))}
           </div>
           <div className="gallery-main">
-            <img src={activeImage} alt={product.title} />
+            <img src={activeImage || imagesList[0]} alt={product.title} />
             <div className="badges">
               {product.category === "Sarees" && (
                 <span className="badge-luxury">ONE OF ONE</span>

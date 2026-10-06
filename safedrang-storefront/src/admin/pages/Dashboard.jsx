@@ -37,14 +37,8 @@ import {
 import "./AdminPages.css";
 import "./Dashboard.css";
 
-const API_BASE = "https://violet-quetzal-133812.hostingersite.com/api/v1";
+import { API_BASE, getAuthHeaders, formatINR } from "../../config/api.js";
 const REFRESH_INTERVAL = 30;
-
-// helper — reads token from localStorage (fallback if axios default not set yet)
-const getAuthHeaders = () => {
-  const t = localStorage.getItem("adminToken") || sessionStorage.getItem("adminToken");
-  return t ? { Authorization: `Bearer ${t}` } : {};
-};
 
 const PERIOD_OPTIONS = [
   { label: "Today", value: "today" },

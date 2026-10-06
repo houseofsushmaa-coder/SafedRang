@@ -8,9 +8,9 @@ import {
   Search,
   Download,
   Trash2,
-  ShoppingCart,
-} from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import "./AdminPages.css";
+import { API_BASE, getAuthHeaders, formatINR } from "../../config/api.js";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -25,35 +25,10 @@ const Orders = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(
-        "https://violet-quetzal-133812.hostingersite.com/api/v1/orders",
-      );
+      const res = await axios.get(`${API_BASE}/orders`, { headers: getAuthHeaders() });
       setOrders(res.data.data || []);
     } catch (error) {
       console.error("Failed to fetch orders:", error);
-      // Fallback for demo if API fails/empty
-      if (orders.length === 0) {
-        setOrders([
-          {
-            id: "1",
-            orderNumber: "SR-0921",
-            customer: { firstName: "Sarah", lastName: "Johnson" },
-            total: 12050,
-            orderStatus: "COMPLETED",
-            createdAt: new Date().toISOString(),
-            orderItems: [{}, {}, {}],
-          },
-          {
-            id: "2",
-            orderNumber: "SR-0922",
-            customer: { firstName: "Michael", lastName: "Chen" },
-            total: 4500,
-            orderStatus: "PROCESSING",
-            createdAt: new Date().toISOString(),
-            orderItems: [{}],
-          },
-        ]);
-      }
     } finally {
       setLoading(false);
     }
@@ -76,12 +51,7 @@ const Orders = () => {
     }
   };
 
-  const formatCurrency = (val) =>
-    new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0,
-    }).format(val);
+
 
   const filteredOrders = orders.filter(
     (o) =>
@@ -185,7 +155,7 @@ const Orders = () => {
                         </span>
                       </td>
                       <td className="font-medium">
-                        {formatCurrency(order.total)}
+                        {formatINR(order.total)}
                       </td>
                       <td>
                         <span

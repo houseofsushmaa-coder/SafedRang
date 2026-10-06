@@ -22,6 +22,7 @@ import analyticsRoutes from "./modules/analytics/analytics.routes";
 import uploadRoutes from "./modules/uploads/upload.routes";
 import shippingRoutes from "./modules/shipping/shipping.routes";
 import settingsRoutes from "./modules/settings/settings.routes";
+import paymentRoutes from "./modules/orders/payment.routes";
 
 const app: Application = express();
 
@@ -29,7 +30,10 @@ const app: Application = express();
 app.use(helmet());
 app.use(
   cors({
-    origin: config.frontendUrl,
+    origin: [
+      config.frontendUrl,
+      "https://violet-quetzal-133812.hostingersite.com",
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -56,7 +60,8 @@ const authLimiter = rateLimit({
 app.use(limiter);
 
 // ── Body Parsers ─────────────────────────────────────
-// Note: Razorpay webhook needs raw body — handled in order.routes.ts using express.raw()
+// Note: Cashfree webhook at /orders/cashfree-webhook uses express.raw() defined in order.routes.ts
+// It must be registered before the global json() middleware — this is handled at route level.
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -88,6 +93,7 @@ app.use(`${V1}/analytics`, analyticsRoutes);
 app.use(`${V1}/uploads`, uploadRoutes);
 app.use(`${V1}/shipping`, shippingRoutes);
 app.use(`${V1}/settings`, settingsRoutes);
+app.use(`${V1}/payments`, paymentRoutes);
 
 // ── 404 & Error Handlers ─────────────────────────────
 // (Keep API 404 handler for API routes only)

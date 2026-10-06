@@ -26,7 +26,7 @@ export const config = {
   cashfree: {
     appId: process.env.CASHFREE_APP_ID || "",
     secretKey: process.env.CASHFREE_SECRET_KEY || "",
-    environment: process.env.CASHFREE_ENVIRONMENT || "SANDBOX",
+    environment: (process.env.CASHFREE_ENV || "SANDBOX").toUpperCase() as "SANDBOX" | "PRODUCTION",
   },
 
   aws: {

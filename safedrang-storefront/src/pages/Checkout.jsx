@@ -1,19 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { load } from "@cashfreepayments/cashfree-js";
 import { useCart } from "../context/CartContext";
 import { useCurrency } from "../context/CurrencyContext";
-import { ChevronRight, ShieldCheck, CreditCard, Lock } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { ChevronRight, ShieldCheck, Lock, AlertCircle } from "lucide-react";
+import { API_BASE, getAuthHeaders } from "../config/api.js";
 import "./Checkout.css";
 
 export default function Checkout() {
   const { cart, cartCount, clearCart } = useCart();
   const { formatPrice } = useCurrency();
+  const { user, token, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    email: "",
-    firstName: "",
-    lastName: "",
+    email: user?.email || "",
+    firstName: user?.name?.split(" ")[0] || "",
+    lastName: user?.name?.split(" ")[1] || "",
     address: "",
     city: "",
     state: "",
@@ -22,6 +27,13 @@ export default function Checkout() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/login?redirect=/checkout");
+    }
+  }, [user, authLoading, navigate]);
 
   const subtotal = cart.reduce((acc, item) => acc + (item.salePrice || item.price) * item.quantity, 0);
   const shipping = subtotal > 0 ? 0 : 0; // Free shipping for simplicity
@@ -31,16 +43,67 @@ export default function Checkout() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!user) {
+      navigate("/login?redirect=/checkout");
+      return;
+    }
+
+    setError("");
     setLoading(true);
-    // Simulate payment processing
-    setTimeout(() => {
+
+    try {
+      // 1. Create order in backend
+      const orderData = {
+        items: cart.map(item => ({
+          productId: item.id,
+          variantId: item.variantId,
+          quantity: item.quantity
+        })),
+        shippingAddress: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          pincode: formData.pincode,
+          phone: formData.phone
+        },
+        paymentMethod: "CASHFREE"
+      };
+
+      const headers = { Authorization: `Bearer ${token}` };
+      const orderRes = await axios.post(`${API_BASE}/orders`, orderData, { headers });
+      const orderId = orderRes.data.data.id;
+
+      // 2. Init Cashfree Payment Session
+      const cfRes = await axios.post(`${API_BASE}/orders/cashfree-order`, {
+        orderId,
+        customerDetails: {
+          name: `${formData.firstName} ${formData.lastName}`.trim(),
+          email: formData.email,
+          phone: formData.phone
+        }
+      }, { headers });
+
+      const { paymentSessionId, cfEnvironment } = cfRes.data.data;
+
+      // 3. Load Cashfree SDK and redirect
+      const cashfree = await load({
+        mode: cfEnvironment === "production" ? "production" : "sandbox",
+      });
+
+      cashfree.checkout({
+        paymentSessionId,
+        redirectTarget: "_self"
+      });
+
+    } catch (err) {
+      console.error("Checkout failed:", err);
+      setError(err.response?.data?.message || "Failed to initiate payment. Please try again.");
       setLoading(false);
-      clearCart();
-      alert("Order placed successfully! This is a demo checkout.");
-      navigate("/");
-    }, 1500);
+    }
   };
 
   if (cartCount === 0) {
@@ -161,41 +224,18 @@ export default function Checkout() {
               </div>
             </section>
 
-            <section className="form-section payment-section">
-              <h2>Payment</h2>
-              <p className="payment-subtitle">All transactions are secure and encrypted.</p>
-              <div className="payment-box">
-                <div className="payment-option">
-                  <input type="radio" id="pay-cc" name="payment" defaultChecked />
-                  <label htmlFor="pay-cc" className="payment-label">
-                    <span>Credit Card / Debit Card</span>
-                    <CreditCard size={18} color="var(--color-warm-taupe)" />
-                  </label>
-                </div>
-                <div className="payment-details">
-                  <div className="form-group">
-                    <input type="text" placeholder="Card number" />
-                  </div>
-                  <div className="form-row">
-                    <div className="form-group">
-                      <input type="text" placeholder="Expiration date (MM/YY)" />
-                    </div>
-                    <div className="form-group">
-                      <input type="text" placeholder="Security code" />
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <input type="text" placeholder="Name on card" />
-                  </div>
-                </div>
+            {error && (
+              <div className="checkout-error" style={{ color: "var(--color-rust)", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <AlertCircle size={18} />
+                <span>{error}</span>
               </div>
-            </section>
+            )}
 
             <button type="submit" className="btn-primary checkout-btn" disabled={loading}>
-              {loading ? "Processing..." : `Pay ${formatPrice(total)}`}
+              {loading ? "Processing..." : `Proceed to Pay ${formatPrice(total)}`}
             </button>
             <div className="secure-badge">
-              <Lock size={14} /> Secure Checkout
+              <Lock size={14} /> Secure Cashfree Checkout
             </div>
           </form>
         </div>

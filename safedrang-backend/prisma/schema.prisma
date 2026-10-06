@@ -50,8 +50,11 @@ enum OrderStatus {
 
 enum PaymentStatus {
   PENDING
+  PAYMENT_INITIATED
   PAID
   FAILED
+  CANCELLED
+  EXPIRED
   PARTIALLY_REFUNDED
   REFUNDED
 }
@@ -63,7 +66,7 @@ enum FulfillmentStatus {
 }
 
 enum PaymentMethod {
-  RAZORPAY
+  CASHFREE
   COD
   BANK_TRANSFER
 }
@@ -305,7 +308,7 @@ model Order {
   paymentStatus     PaymentStatus     @default(PENDING)
   orderStatus       OrderStatus       @default(PENDING)
   fulfillmentStatus FulfillmentStatus @default(UNFULFILLED)
-  paymentMethod     PaymentMethod     @default(RAZORPAY)
+  paymentMethod     PaymentMethod     @default(CASHFREE)
   couponId          String?
   coupon            Coupon?           @relation(fields: [couponId], references: [id])
   billingAddress    Json?
@@ -365,22 +368,27 @@ model OrderItem {
 }
 
 model Payment {
-  id              String        @id @default(uuid())
-  orderId         String
-  order           Order         @relation(fields: [orderId], references: [id])
-  gateway         String
-  transactionId   String?       @unique
-  razorpayOrderId String?
-  amount          Decimal       @db.Decimal(12, 2)
-  currency        String        @default("INR")
-  status          PaymentStatus @default(PENDING)
-  gatewayResponse Json?
-  refunds         Refund[]
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id                    String        @id @default(uuid())
+  orderId               String
+  order                 Order         @relation(fields: [orderId], references: [id])
+  gateway               String
+  transactionId         String?       @unique
+  cfOrderId             String?       // Cashfree order_id
+  cfPaymentSessionId    String?       // Cashfree payment_session_id
+  cfPaymentId           String?       // Cashfree cf_payment_id after capture
+  idempotencyKey        String?       @unique // prevents duplicate payment creation
+  webhookEventId        String?       // Cashfree webhook event ID for idempotency
+  amount                Decimal       @db.Decimal(12, 2)
+  currency              String        @default("INR")
+  status                PaymentStatus @default(PENDING)
+  gatewayResponse       Json?
+  refunds               Refund[]
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
 
   @@index([orderId])
   @@index([transactionId])
+  @@index([cfOrderId])
   @@map("payments")
 }
 

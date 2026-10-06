@@ -7,15 +7,7 @@ import {
 import "./AdminPages.css";
 import "./Settings.css";
 
-const API_BASE = "https://violet-quetzal-133812.hostingersite.com/api/v1";
-
-const getAuthHeaders = () => {
-  const token = localStorage.getItem("adminToken") || sessionStorage.getItem("adminToken");
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
-
-const formatCurrency = (val) =>
-  new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(val ?? 0);
+import { API_BASE, getAuthHeaders, formatINR } from "../../config/api.js";
 
 const EMPTY_FORM = {
   code: "",
@@ -269,11 +261,11 @@ const Coupons = () => {
                     </td>
                     <td className="font-medium">
                       {c.type === "PERCENTAGE"
-                        ? `${c.value}%${c.maxDiscount ? ` (max ${formatCurrency(c.maxDiscount)})` : ""}`
-                        : formatCurrency(c.value)}
+                        ? `${c.value}%${c.maxDiscount ? ` (max ${formatINR(c.maxDiscount)})` : ""}`
+                        : formatINR(c.value)}
                     </td>
                     <td style={{ color: "var(--admin-text-muted)", fontSize: "0.85rem" }}>
-                      {c.minOrderAmount ? formatCurrency(c.minOrderAmount) : "—"}
+                      {c.minOrderAmount ? formatINR(c.minOrderAmount) : "—"}
                     </td>
                     <td style={{ fontSize: "0.85rem" }}>
                       <span style={{ fontWeight: 600 }}>{c.usageCount ?? 0}</span>

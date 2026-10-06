@@ -7,12 +7,7 @@ import {
 import "./AdminPages.css";
 import "./Settings.css";
 
-const API_BASE = "https://violet-quetzal-133812.hostingersite.com/api/v1";
-
-const getAuthHeaders = () => {
-  const token = localStorage.getItem("adminToken") || sessionStorage.getItem("adminToken");
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
+import { API_BASE, getAuthHeaders, formatINR } from "../../config/api.js";
 
 const EMPTY_FORM = { name: "", description: "", parentId: "", sortOrder: 0, status: "ACTIVE" };
 

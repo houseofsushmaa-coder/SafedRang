@@ -6,15 +6,7 @@ import {
 } from "lucide-react";
 import "./AdminPages.css";
 
-const API_BASE = "https://violet-quetzal-133812.hostingersite.com/api/v1";
-
-const getAuthHeaders = () => {
-  const token = localStorage.getItem("adminToken") || sessionStorage.getItem("adminToken");
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
-
-const formatCurrency = (val) =>
-  new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(val ?? 0);
+import { API_BASE, getAuthHeaders, formatINR } from "../../config/api.js";
 
 const STATUS_CONFIG = {
   PAID: { label: "Paid", cls: "status-delivered", icon: <CheckCircle2 size={13} /> },
@@ -59,7 +51,7 @@ const Payments = () => {
   const summaryCards = [
     {
       label: "Total Collected",
-      value: formatCurrency(payments.filter((p) => p.status === "PAID").reduce((s, p) => s + (p.amount ?? 0), 0)),
+      value: formatINR(payments.filter((p) => p.status === "PAID").reduce((s, p) => s + (p.amount ?? 0), 0)),
       icon: <IndianRupee size={20} />,
       cls: "revenue",
     },
@@ -198,7 +190,7 @@ const Payments = () => {
                         <td>
                           <span className="category-badge">{p.method ?? p.gateway ?? "—"}</span>
                         </td>
-                        <td className="font-medium">{formatCurrency(p.amount)}</td>
+                        <td className="font-medium">{formatINR(p.amount)}</td>
                         <td>
                           <span className={`status-badge ${sc.cls}`} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
                             {sc.icon} {sc.label}

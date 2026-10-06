@@ -11,7 +11,7 @@ import {
 import "./AdminPages.css";
 import "./Analytics.css";
 
-const API_BASE = "https://violet-quetzal-133812.hostingersite.com/api/v1";
+import { API_BASE, getAuthHeaders, formatINR } from "../../config/api.js";
 
 const PERIOD_OPTIONS = [
   { label: "Last 7 Days", value: "last7" },
@@ -22,8 +22,7 @@ const PERIOD_OPTIONS = [
 
 const PIE_COLORS = ["#10b981", "#6366f1", "#f59e0b", "#ef4444", "#0891b2", "#a855f7"];
 
-const formatCurrency = (val) =>
-  new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(val ?? 0);
+
 
 const formatChartDate = (dateStr) => {
   const d = new Date(dateStr);
@@ -37,7 +36,7 @@ const CustomTooltip = ({ active, payload, label }) => {
       <div className="chart-tooltip-label">{label}</div>
       {payload.map((p, i) => (
         <div key={i} className="chart-tooltip-value" style={{ color: p.color }}>
-          {p.name}: {p.name === "Revenue" ? formatCurrency(p.value) : p.value}
+          {p.name}: {p.name === "Revenue" ? formatINR(p.value) : p.value}
         </div>
       ))}
     </div>
@@ -55,10 +54,7 @@ const Analytics = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem("adminToken") || sessionStorage.getItem("adminToken");
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  };
+
 
   const fetchAll = useCallback(async (manual = false) => {
     if (manual) setRefreshing(true);
@@ -103,9 +99,9 @@ const Analytics = () => {
     : [];
 
   const kpis = [
-    { label: "Total Revenue", value: formatCurrency(d.revenue?.total), icon: <IndianRupee size={20} />, cls: "revenue", sub: `${(d.revenue?.change ?? 0) >= 0 ? "+" : ""}${d.revenue?.change ?? 0}% vs prev period` },
+    { label: "Total Revenue", value: formatINR(d.revenue?.total), icon: <IndianRupee size={20} />, cls: "revenue", sub: `${(d.revenue?.change ?? 0) >= 0 ? "+" : ""}${d.revenue?.change ?? 0}% vs prev period` },
     { label: "Total Orders", value: d.orders?.total ?? 0, icon: <ShoppingBag size={20} />, cls: "orders", sub: `${d.orders?.pending ?? 0} pending` },
-    { label: "Avg Order Value", value: formatCurrency(d.avgOrderValue), icon: <TrendingUp size={20} />, cls: "aov", sub: "Per transaction" },
+    { label: "Avg Order Value", value: formatINR(d.avgOrderValue), icon: <TrendingUp size={20} />, cls: "aov", sub: "Per transaction" },
     { label: "Total Customers", value: d.customers?.total ?? 0, icon: <Users size={20} />, cls: "customers", sub: `${d.customers?.new ?? 0} new this period` },
   ];
 
