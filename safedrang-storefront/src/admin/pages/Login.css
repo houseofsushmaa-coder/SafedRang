@@ -1,105 +1,126 @@
+/* ── Safedrang Admin Login ── */
 .admin-login-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f8fafc;
-  font-family: "Inter", system-ui, sans-serif;
+  background-color: #FAF5EC;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(174,138,84,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 90%, rgba(110,30,42,0.06) 0%, transparent 60%);
+  font-family: "Manrope", "Inter", system-ui, sans-serif;
   padding: 20px;
 }
 
 .admin-login-card {
-  background: white;
+  background: #fff;
   padding: 40px;
-  border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  border: 1px solid #E8DFD0;
+  box-shadow: 0 8px 32px rgba(42,33,29,0.08);
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
 }
 
-.admin-login-header {
-  text-align: center;
-  margin-bottom: 32px;
+.admin-login-header { text-align: center; margin-bottom: 28px; }
+.admin-login-logo {
+  width: 48px; height: 48px;
+  background: linear-gradient(135deg, #1D1510, #3D2B1F);
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
 }
-
+.admin-login-logo span {
+  color: #AE8A54;
+  font-weight: 800;
+  font-size: 1.3rem;
+  letter-spacing: 0.02em;
+}
 .admin-login-header h2 {
-  font-size: 1.75rem;
-  color: #0f172a;
-  margin: 0 0 8px 0;
+  font-size: 1.5rem;
+  color: #2A211D;
+  margin: 0 0 6px;
   font-weight: 700;
+  letter-spacing: -0.01em;
 }
-
-.admin-login-header p {
-  color: #64748b;
-  margin: 0;
-  font-size: 0.95rem;
-}
+.admin-login-header p { color: #8B7863; margin: 0; font-size: 0.875rem; }
 
 .admin-login-error {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background-color: #fef2f2;
-  color: #ef4444;
-  padding: 12px 16px;
+  gap: 9px;
+  background-color: #FEF2F2;
+  color: #C0392B;
+  padding: 11px 14px;
   border-radius: 8px;
-  margin-bottom: 24px;
-  font-size: 0.9rem;
-}
-
-.admin-login-form .form-group {
+  border: 1px solid #FECACA;
   margin-bottom: 20px;
+  font-size: 0.875rem;
 }
 
+.admin-login-form .form-group { margin-bottom: 18px; }
 .admin-login-form label {
   display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #334155;
-  margin-bottom: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #2A211D;
+  margin-bottom: 7px;
+  letter-spacing: 0.02em;
 }
 
-.input-with-icon {
-  position: relative;
-}
+.label-with-link { display: flex; justify-content: space-between; align-items: center; }
 
+.input-with-icon { position: relative; }
 .input-with-icon .input-icon {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #94a3b8;
+  position: absolute; left: 13px; top: 50%;
+  transform: translateY(-50%); color: #B8A898;
+  pointer-events: none;
 }
-
 .input-with-icon input {
   width: 100%;
   box-sizing: border-box;
-  padding: 12px 12px 12px 42px;
-  border: 1px solid #e2e8f0;
+  padding: 11px 12px 11px 40px;
+  border: 1px solid #E8DFD0;
   border-radius: 8px;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   outline: none;
-  transition: all 0.2s;
+  transition: all 0.18s;
+  color: #2A211D;
+  background: #FAFAF8;
+  font-family: inherit;
 }
-
+.input-with-icon input::placeholder { color: #B8A898; }
 .input-with-icon input:focus {
-  border-color: #10b981;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  border-color: #AE8A54;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(174,138,84,0.1);
 }
 
 .admin-login-form .admin-btn {
-  margin-top: 10px;
+  width: 100%;
+  margin-top: 8px;
   padding: 12px;
-  background-color: #10b981;
-  color: white;
+  background: #2A211D;
+  color: #fff;
   border: none;
   border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background 0.18s;
+  font-family: inherit;
+  letter-spacing: 0.02em;
 }
+.admin-login-form .admin-btn:hover { background: #AE8A54; }
+.admin-login-form .admin-btn.loading { opacity: 0.7; cursor: not-allowed; }
 
-.admin-login-form .admin-btn:hover {
-  background-color: #059669;
+.admin-login-footer {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 0.78rem;
+  color: #B8A898;
+  border-top: 1px solid #F0E8DC;
+  padding-top: 16px;
 }

@@ -37,8 +37,9 @@ const AdminLogin = () => {
     <div className="admin-login-container">
       <div className="admin-login-card">
         <div className="admin-login-header">
-          <h2>Safed Admin</h2>
-          <p>Sign in to manage your store</p>
+          <div className="admin-login-logo"><span>S</span></div>
+          <h2>Safed Rang</h2>
+          <p>Admin · Sign in to your store</p>
         </div>
 
         {error && (
@@ -87,6 +88,7 @@ const AdminLogin = () => {
             {isLoading ? "Signing in..." : "Sign In"}
           </button>
         </form>
+        <div className="admin-login-footer">safedrang.com · Store Admin</div>
       </div>
     </div>
   );

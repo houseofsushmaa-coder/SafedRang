@@ -202,12 +202,19 @@ const AdminLayout = () => {
         className={`admin-sidebar ${isSidebarCollapsed ? "collapsed" : ""} ${isMobileMenuOpen ? "mobile-open" : ""}`}
       >
         <div className="admin-logo">
-          <h2>{!isSidebarCollapsed ? "Safed Admin" : "S"}</h2>
+          {!isSidebarCollapsed ? (
+            <div>
+              <h2>Safed Rang</h2>
+              <span className="brand-tagline">Admin Panel</span>
+            </div>
+          ) : (
+            <h2 style={{ fontSize: "1.1rem", letterSpacing: "0.02em" }}>SR</h2>
+          )}
           <button
             className="sidebar-toggle-desktop"
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           >
-            <Menu size={20} />
+            <Menu size={18} />
           </button>
           <button
             className="sidebar-toggle-mobile"
@@ -338,9 +345,10 @@ const AdminLayout = () => {
               <Menu size={24} />
             </button>
             <div className="admin-breadcrumb">
-              Admin /{" "}
+              <span>Admin</span>
+              <span className="admin-breadcrumb-sep">/</span>
               <span className="breadcrumb-current">
-                {location.pathname.split("/").pop() || "Dashboard"}
+                {location.pathname.split("/").filter(Boolean).pop() || "Dashboard"}
               </span>
             </div>
           </div>
@@ -353,7 +361,6 @@ const AdminLayout = () => {
 
             <button className="icon-btn notification-btn">
               <Bell size={20} />
-              <span className="notification-badge">3</span>
             </button>
           </div>
         </header>

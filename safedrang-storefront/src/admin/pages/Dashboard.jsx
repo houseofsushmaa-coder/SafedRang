@@ -40,6 +40,12 @@ import "./Dashboard.css";
 const API_BASE = "https://violet-quetzal-133812.hostingersite.com/api/v1";
 const REFRESH_INTERVAL = 30;
 
+// helper — reads token from localStorage (fallback if axios default not set yet)
+const getAuthHeaders = () => {
+  const t = localStorage.getItem("adminToken") || sessionStorage.getItem("adminToken");
+  return t ? { Authorization: `Bearer ${t}` } : {};
+};
+
 const PERIOD_OPTIONS = [
   { label: "Today", value: "today" },
   { label: "Yesterday", value: "yesterday" },
@@ -101,12 +107,7 @@ const Dashboard = () => {
   const countdownRef = useRef(null);
   const refreshTimerRef = useRef(null);
 
-  const getAuthHeaders = () => {
-    const token =
-      localStorage.getItem("adminToken") ||
-      sessionStorage.getItem("adminToken");
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  };
+  // getAuthHeaders is now module-level above (avoids stale closure).
 
   const fetchDashboard = useCallback(
     async (isManual = false) => {
@@ -123,13 +124,15 @@ const Dashboard = () => {
       } catch (err) {
         console.error("Dashboard fetch failed:", err);
         setIsOnline(false);
-        if (!data) setError("Unable to load dashboard data.");
+        // Only show error if we have no previous data to show
+        setError((prevErr) => (data === null ? "Unable to load dashboard data." : prevErr));
       } finally {
         setLoading(false);
         setRefreshing(false);
       }
     },
-    [period],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [period], // intentionally omitting `data` to avoid fetch loop
   );
 
   const fetchChart = useCallback(async () => {
@@ -263,12 +266,12 @@ const Dashboard = () => {
   ];
 
   const quickActions = [
-    { label: "Products", to: "/admin/products", icon: <ShoppingBag size={15} />, color: "action-green" },
-    { label: "Orders", to: "/admin/orders", icon: <ShoppingCart size={15} />, color: "action-indigo" },
-    { label: "Inventory", to: "/admin/inventory", icon: <Package size={15} />, color: "action-amber" },
-    { label: "Customers", to: "/admin/customers", icon: <Users size={15} />, color: "action-purple" },
-    { label: "Analytics", to: "/admin/analytics", icon: <Activity size={15} />, color: "action-blue" },
-    { label: "Settings", to: "/admin/settings", icon: <Zap size={15} />, color: "action-rose" },
+    { label: "Products",  to: "/admin/products",  icon: <ShoppingBag size={14} />, color: "action-gold" },
+    { label: "Orders",    to: "/admin/orders",    icon: <ShoppingCart size={14} />, color: "action-wine" },
+    { label: "Inventory", to: "/admin/inventory", icon: <Package size={14} />,      color: "action-green" },
+    { label: "Customers", to: "/admin/customers", icon: <Users size={14} />,        color: "action-indigo" },
+    { label: "Analytics", to: "/admin/analytics", icon: <Activity size={14} />,     color: "action-blue" },
+    { label: "Settings",  to: "/admin/settings",  icon: <Zap size={14} />,          color: "action-amber" },
   ];
 
   return (
@@ -277,11 +280,11 @@ const Dashboard = () => {
       <div className="dashboard-welcome-banner">
         <div className="welcome-content">
           <div className="welcome-text">
-            <h2>Welcome back 👋</h2>
+            <h2>Safed Rang — Store Overview</h2>
             <p className="page-subtitle">
               {lastUpdated
-                ? `Last updated: ${lastUpdated.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`
-                : "Fetching latest data…"}
+                ? `Updated at ${lastUpdated.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })} · auto-refresh every ${REFRESH_INTERVAL}s`
+                : "Connecting to store…"}
             </p>
           </div>
           <div className="header-actions">
