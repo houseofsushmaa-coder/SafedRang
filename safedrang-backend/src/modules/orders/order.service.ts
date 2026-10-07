@@ -355,7 +355,11 @@ export class OrderService {
     // Cashfree Production requires HTTPS
     if (CF_SDK_ENV === "production") {
       returnUrl = returnUrl.replace("http://", "https://");
-      webhookUrl = "https://example.com/webhook"; // Webhook doesn't matter for localhost testing
+      if (baseUrl.includes("localhost") || baseUrl.includes("127.0.0.1")) {
+        webhookUrl = "https://example.com/webhook"; // Dummy webhook for localhost only
+      } else {
+        webhookUrl = `${baseUrl}/api/v1/orders/cashfree-webhook`; // Real webhook for live server
+      }
     }
 
     // Create Cashfree order server-side
