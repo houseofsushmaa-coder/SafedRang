@@ -5,8 +5,8 @@ import { useCart } from "../context/CartContext";
 import "./Header.css";
 
 export default function Header() {
-  const { currency, changeCurrency, supportedCurrencies, loadingRates } = useCurrency();
-  const { cartCount, wishlistCount } = useCart();
+  const { currency, changeCurrency, supportedCurrencies, loadingRates, formatPrice } = useCurrency();
+  const { cart, cartCount, wishlistCount } = useCart();
   return (
     <header className="site-header">
       <div className="announcement-bar">
@@ -88,10 +88,46 @@ export default function Header() {
           <button aria-label="Account" className="hidden-mobile">
             <User size={20} />
           </button>
-          <Link to="/checkout" aria-label="Cart" className="cart-btn" style={{ textDecoration: 'none' }}>
-            <ShoppingBag size={20} />
-            <span className="cart-count">{cartCount}</span>
-          </Link>
+          <div className="cart-wrapper">
+            <Link to="/checkout" aria-label="Cart" className="cart-btn" style={{ textDecoration: 'none' }}>
+              <ShoppingBag size={20} />
+              {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
+            </Link>
+
+            <div className="cart-dropdown">
+              <h4>Your Cart</h4>
+              {cart.length === 0 ? (
+                <p className="empty-cart">Your cart is currently empty.</p>
+              ) : (
+                <div className="cart-items">
+                  {cart.map((item) => (
+                    <div key={item.id} className="cart-item">
+                      <img src={item.images?.[0] || item.image} alt={item.title} />
+                      <div className="cart-item-info">
+                        <div className="cart-item-title">{item.title.replace(/"/g, "")}</div>
+                        <div className="cart-item-price">
+                          {formatPrice(item.salePrice || item.price)} × {item.quantity}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="cart-dropdown-footer">
+                    <div className="cart-subtotal">
+                      <span>Subtotal</span>
+                      <span>
+                        {formatPrice(
+                          cart.reduce((acc, item) => acc + (item.salePrice || item.price) * item.quantity, 0)
+                        )}
+                      </span>
+                    </div>
+                    <Link to="/checkout" className="btn-primary checkout-btn-dropdown">
+                      Proceed to Checkout
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </header>

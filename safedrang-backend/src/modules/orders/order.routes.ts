@@ -26,8 +26,11 @@ router.post(
 // Create an internal order (validates cart, calculates totals server-side)
 router.post("/", authenticate, ctrl.create);
 
-// Create a Cashfree payment session for an existing pending order
-router.post("/cashfree-order", authenticate, ctrl.createCashfreePaymentOrder);
+// Create an internal order as a Guest (no auth required)
+router.post("/guest", ctrl.guestCreate);
+
+// Create a Cashfree payment session for an existing pending order (auth removed for guest access)
+router.post("/cashfree-order", ctrl.createCashfreePaymentOrder);
 
 // Server-side payment verification after customer returns from Cashfree
 router.post("/verify-payment", ctrl.verifyPayment);

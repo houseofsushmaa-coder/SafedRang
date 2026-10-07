@@ -24,9 +24,55 @@ export class OrderController {
     return sendSuccess(res, order, "Order created", 201);
   });
 
-  // Customer: Create Cashfree payment session for an existing pending order
+  // Guest: Create new order without authentication
+  guestCreate = asyncHandler(async (req: Request, res: Response) => {
+    const { shippingAddress, guestEmail, guestPhone, guestName } = req.body;
+    const email = guestEmail || shippingAddress?.email;
+    const phone = guestPhone || shippingAddress?.phone || "";
+    const name = guestName || `${shippingAddress?.firstName || ""} ${shippingAddress?.lastName || ""}`.trim() || "Guest Customer";
+    
+    if (!email) {
+      return sendError(res, "Email is required for guest checkout", 422);
+    }
+
+    // 1. Find or create user
+    let user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      const crypto = require("crypto");
+      const randomPassword = crypto.randomBytes(16).toString("hex");
+      const bcrypt = require("bcryptjs");
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+      user = await prisma.user.create({
+        data: {
+          email,
+          passwordHash: hashedPassword,
+          name,
+          role: "CUSTOMER",
+        },
+      });
+    }
+
+    // 2. Find or create customer
+    let customer = await prisma.customer.findUnique({ where: { userId: user.id } });
+    if (!customer) {
+      customer = await prisma.customer.create({
+        data: {
+          userId: user.id,
+          name: user.name,
+          email: user.email,
+          phone,
+        },
+      });
+    }
+
+    // 3. Create order
+    const order = await orderService.createOrder(customer.id, req.body);
+    return sendSuccess(res, order, "Order created", 201);
+  });
+
+  // Customer/Guest: Create Cashfree payment session for an existing pending order
   createCashfreePaymentOrder = asyncHandler(
-    async (req: AuthRequest, res: Response) => {
+    async (req: Request, res: Response) => {
       const { orderId, customerDetails } = req.body;
       if (!orderId)
         return sendError(res, "orderId is required", 422);

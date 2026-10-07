@@ -1,6 +1,6 @@
 import "./Footer.css";
 import { Link } from "react-router-dom";
-import { Check } from "lucide-react";
+import { Award, ShieldCheck, Globe, Leaf } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -21,16 +21,16 @@ export default function Footer() {
           </div>
           <div className="trust-markers">
             <div className="trust-item">
-              <Check size={16} /> Authentic Craftsmanship
+              <Award size={20} strokeWidth={1.5} /> <span>Authentic Craftsmanship</span>
             </div>
             <div className="trust-item">
-              <Check size={16} /> Secure Payment
+              <ShieldCheck size={20} strokeWidth={1.5} /> <span>Secure Payment</span>
             </div>
             <div className="trust-item">
-              <Check size={16} /> Worldwide Shipping
+              <Globe size={20} strokeWidth={1.5} /> <span>Worldwide Shipping</span>
             </div>
             <div className="trust-item">
-              <Check size={16} /> A More Thoughtful Wardrobe
+              <Leaf size={20} strokeWidth={1.5} /> <span>A More Thoughtful Wardrobe</span>
             </div>
           </div>
         </div>
@@ -58,19 +58,14 @@ export default function Footer() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  overflow: "hidden"
                 }}
               >
-                <span
-                  className="script-font"
-                  style={{
-                    fontSize: "2.5rem",
-                    color: "var(--color-dark-charcoal)",
-                    lineHeight: "1",
-                    marginTop: "-5px",
-                  }}
-                >
-                  safedrang
-                </span>
+                <img 
+                  src="/circle-logo.png" 
+                  alt="Safedrang Circle Logo" 
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+                />
               </div>
             </Link>
           </div>

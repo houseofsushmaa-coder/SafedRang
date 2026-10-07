@@ -4,7 +4,6 @@ import axios from "axios";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { API_BASE, getAuthHeaders } from "../config/api.js";
 import { useCart } from "../context/CartContext";
-import "./PaymentVerify.css"; // We'll just style it inline or reuse checkout classes
 
 export default function PaymentVerify() {
   const [searchParams] = useSearchParams();
@@ -28,7 +27,8 @@ export default function PaymentVerify() {
         const token = localStorage.getItem("adminToken"); // Wait, we might need customer token here. Actually the backend does not require auth for verification webhook or verify endpoint, let's see. 
         // We can just call it with user token if available.
         const res = await axios.post(`${API_BASE}/orders/verify-payment`, {
-          orderId
+          orderId,
+          cfOrderId
         }, { headers: getAuthHeaders() });
 
         if (res.data.data.paymentStatus === "PAID") {

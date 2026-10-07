@@ -97,7 +97,7 @@ export class ProductService {
         skip: query.skip ?? 0,
         take: query.limit ?? 20,
         include: {
-          images: { orderBy: { sortOrder: "asc" }, take: 1 },
+          images: { orderBy: { sortOrder: "asc" } },
           category: true,
         },
       }),

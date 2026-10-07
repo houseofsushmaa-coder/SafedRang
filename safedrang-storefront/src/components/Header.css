@@ -138,3 +138,114 @@
     display: none;
   }
 }
+
+/* --- Hover Cart Dropdown --- */
+.cart-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.cart-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 350px;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-ivory-deep);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  padding: 1.5rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+
+.cart-wrapper:hover .cart-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.cart-dropdown h4 {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-ivory-deep);
+}
+
+.empty-cart {
+  color: var(--color-warm-taupe);
+  font-size: 0.85rem;
+}
+
+.cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.cart-item {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.cart-item img {
+  width: 60px;
+  height: 80px;
+  object-fit: cover;
+}
+
+.cart-item-info {
+  flex: 1;
+}
+
+.cart-item-title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-dark-charcoal);
+  margin-bottom: 0.25rem;
+}
+
+.cart-item-price {
+  font-size: 0.8rem;
+  color: var(--color-warm-taupe);
+}
+
+.cart-dropdown-footer {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-ivory-deep);
+}
+
+.cart-subtotal {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.checkout-btn-dropdown {
+  display: block;
+  text-align: center;
+  width: 100%;
+  padding: 0.8rem;
+  background-color: var(--color-dark-charcoal);
+  color: var(--color-white);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.checkout-btn-dropdown:hover {
+  background-color: var(--color-antique-gold);
+}

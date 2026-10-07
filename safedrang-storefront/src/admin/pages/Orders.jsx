@@ -8,7 +8,8 @@ import {
   Search,
   Download,
   Trash2,
-import { ShoppingCart } from "lucide-react";
+  ShoppingCart,
+} from "lucide-react";
 import "./AdminPages.css";
 import { API_BASE, getAuthHeaders, formatINR } from "../../config/api.js";
 

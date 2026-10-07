@@ -13,6 +13,7 @@ import { useProducts } from "../context/ProductContext";
 import { useCurrency } from "../context/CurrencyContext";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import "./ProductDetail.css";
 
 export default function ProductDetail() {
@@ -31,7 +32,7 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     addToCart(product);
-    alert("Added to cart!");
+    toast.success("Added to cart!");
   };
 
   const handleBuyNow = () => {
@@ -163,10 +164,6 @@ export default function ProductDetail() {
             <span>(Customer Reviews)</span>
           </div>
 
-          <div className="product-description">
-            <p>{product.description}</p>
-          </div>
-
           <div className="product-actions">
             <button
               className="btn-primary btn-add-to-cart"
@@ -182,12 +179,16 @@ export default function ProductDetail() {
 
           <div className="pincode-checker">
             <div className="pincode-header">
-              <Truck size={16} /> <span>Check Delivery Options</span>
+               <Truck size={16} /> <span>Check Delivery Options</span>
             </div>
             <div className="pincode-input-group">
-              <input type="text" placeholder="Enter Pincode" maxLength="6" />
-              <button className="btn-pincode">Check</button>
+               <input type="text" placeholder="Enter Pincode" maxLength="6" />
+               <button className="btn-pincode">Check</button>
             </div>
+          </div>
+
+          <div className="product-description">
+            <div dangerouslySetInnerHTML={{ __html: product.description?.replace(/\\n/g, ' ') || '' }} />
           </div>
 
           <div className="product-share">

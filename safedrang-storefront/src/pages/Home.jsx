@@ -38,13 +38,6 @@ export default function Home() {
             playsInline
             src="https://cdn.shopify.com/videos/c/o/v/066a03c998634cf393d5671dfefdf5d0.mp4"
           />
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            src="https://scontent.cdninstagram.com/o1/v/t16/f2/m84/AQOxaP2LIdj8hNsSpe-t5En3CMk-DQEHmM9Qg6jQA8xMGqKTiglUevLxPY23_8od7RT0PHUb3MBb6_VvTwq3e0rCTVEWJ1x92N3hF2U.mp4?_nc_cat=107&_nc_sid=5e9851&_nc_ht=scontent.cdninstagram.com&_nc_ohc=a-57wzPgl8MQ7kNvwEOHntH&efg=eyJ2ZW5jb2RlX3RhZyI6Inhwdl9wcm9ncmVzc2l2ZS5JTlNUQUdSQU0uQ0xJUFMuQzMuNzIwLmRhc2hfYmFzZWxpbmVfMV92MSIsInhwdl9hc3NldF9pZCI6MTQ2MTc4NjYzNTc3ODcxOCwiYXNzZXRfYWdlX2RheXMiOjAsInZpX3VzZWNhc2VfaWQiOjEwODI3LCJkdXJhdGlvbl9zIjozOSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&vs=b46c38a1ad29a6dc&_nc_vs=HBksFQIYTGlnX2JhY2tmaWxsX3RpbWVsaW5lX3ZvZC83MTQ1OEU0QTEyQjE3MzkzNDFGOTNCNjI5RjA1M0RCOV92aWRlb19kYXNoaW5pdC5tcDQVAALIARIAFQIYUWlnX3hwdl9wbGFjZW1lbnRfcGVybWFuZW50X3YyLzJFNDU2ODY5NUE5NEQyMjdDMEJGQkFFRTc1NjIzOTlDX2F1ZGlvX2Rhc2hpbml0Lm1wNBUCAsgBEgAoABgAGwKIB3VzZV9vaWwBMRJwcm9ncmVzc2l2ZV9yZWNpcGUBMRUAACa86s2Sl9-YBRUCKAJDMywXQEOEOVgQYk4YEmRhc2hfYmFzZWxpbmVfMV92MREAdf4HZZapAQA&_nc_gid=RRqtJKV2fjmJ_tk1Y9RKNw&edm=ANo9K5cEAAAA&_nc_zt=28&_nc_tpa=Q5bMBQJ7T8e93ErXvtUhNFwLqn42JP3opIGSsO6UerJ63O37HtFHJGMlT9Yzp4WTfILb22bKE4WuGelo&oh=00_AQInal4OqsL6GgztqOribAm8WqfoFXt46chCxPhqhXldbA&oe=6AB1C39D"
-          />
         </div>
         <div className="hero-overlay"></div>
         <div className="hero-content container">

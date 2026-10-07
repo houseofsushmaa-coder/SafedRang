@@ -18,8 +18,8 @@ export const ProductProvider = ({ children }) => {
         id: p.id,
         title: p.name,
         category: p.category?.name || "Uncategorized",
-        price: p.price,
-        salePrice: p.salePrice,
+        price: Number(p.price),
+        salePrice: p.salePrice ? Number(p.salePrice) : null,
         description: p.description,
         sku: p.sku,
         image:

@@ -29,12 +29,6 @@ export default function Checkout() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/login?redirect=/checkout");
-    }
-  }, [user, authLoading, navigate]);
-
   const subtotal = cart.reduce((acc, item) => acc + (item.salePrice || item.price) * item.quantity, 0);
   const shipping = subtotal > 0 ? 0 : 0; // Free shipping for simplicity
   const total = subtotal + shipping;
@@ -45,11 +39,7 @@ export default function Checkout() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!user) {
-      navigate("/login?redirect=/checkout");
-      return;
-    }
-
+    
     setError("");
     setLoading(true);
 
@@ -68,16 +58,22 @@ export default function Checkout() {
           city: formData.city,
           state: formData.state,
           pincode: formData.pincode,
-          phone: formData.phone
+          phone: formData.phone,
+          email: formData.email
         },
-        paymentMethod: "CASHFREE"
+        paymentMethod: "CASHFREE",
+        guestEmail: formData.email,
+        guestPhone: formData.phone,
+        guestName: `${formData.firstName} ${formData.lastName}`.trim()
       };
 
-      const headers = { Authorization: `Bearer ${token}` };
-      const orderRes = await axios.post(`${API_BASE}/orders`, orderData, { headers });
+      const headers = user ? { Authorization: `Bearer ${token}` } : {};
+      const endpoint = user ? `${API_BASE}/orders` : `${API_BASE}/orders/guest`;
+
+      const orderRes = await axios.post(endpoint, orderData, { headers });
       const orderId = orderRes.data.data.id;
 
-      // 2. Init Cashfree Payment Session
+      // 2. Init Cashfree Payment Session (no auth required for this step)
       const cfRes = await axios.post(`${API_BASE}/orders/cashfree-order`, {
         orderId,
         customerDetails: {
@@ -85,7 +81,7 @@ export default function Checkout() {
           email: formData.email,
           phone: formData.phone
         }
-      }, { headers });
+      });
 
       const { paymentSessionId, cfEnvironment } = cfRes.data.data;
 

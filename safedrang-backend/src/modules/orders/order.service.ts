@@ -282,6 +282,9 @@ export class OrderService {
       }
 
       return order;
+    }, {
+      maxWait: 10000,
+      timeout: 30000,
     });
   }
 
@@ -346,8 +349,14 @@ export class OrderService {
 
     // Build return URL from configured base URL
     const baseUrl = config.frontendUrl.replace(/\/$/, "");
-    const returnUrl = `${baseUrl}/payment/verify?order_id=${order.id}&cf_order_id=${cfOrderId}`;
-    const webhookUrl = `${baseUrl.replace(/(:\d+)$/, "").replace("localhost", "")}/api/v1/orders/cashfree-webhook`;
+    let returnUrl = `${baseUrl}/payment/verify?order_id=${order.id}&cf_order_id=${cfOrderId}`;
+    let webhookUrl = `${baseUrl.replace(/(:\d+)$/, "").replace("localhost", "127.0.0.1")}/api/v1/orders/cashfree-webhook`;
+
+    // Cashfree Production requires HTTPS
+    if (CF_SDK_ENV === "production") {
+      returnUrl = returnUrl.replace("http://", "https://");
+      webhookUrl = "https://example.com/webhook"; // Webhook doesn't matter for localhost testing
+    }
 
     // Create Cashfree order server-side
     let cfOrderData: Awaited<ReturnType<typeof createCashfreeOrder>>;
@@ -714,6 +723,9 @@ export class OrderService {
           data: { usedCount: { increment: 1 } },
         });
       }
+    }, {
+      maxWait: 10000,
+      timeout: 30000,
     });
   }
 

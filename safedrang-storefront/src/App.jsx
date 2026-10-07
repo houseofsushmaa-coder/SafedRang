@@ -32,6 +32,8 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CurrencyProvider } from "./context/CurrencyContext";
 import { CartProvider } from "./context/CartContext";
 
+import { Toaster } from "react-hot-toast";
+
 const StorefrontLayout = () => (
   <div className="app-layout">
     <Header />
@@ -58,6 +60,24 @@ function App() {
         <CurrencyProvider>
           <CartProvider>
             <Router>
+              <Toaster 
+                position="bottom-center"
+                toastOptions={{
+                  style: {
+                    background: 'var(--color-dark-charcoal)',
+                    color: 'var(--color-white)',
+                    fontFamily: 'var(--font-body)',
+                    letterSpacing: '0.05em',
+                    border: '1px solid var(--color-antique-gold)',
+                  },
+                  success: {
+                    iconTheme: {
+                      primary: 'var(--color-antique-gold)',
+                      secondary: 'var(--color-dark-charcoal)',
+                    },
+                  },
+                }}
+              />
             <Routes>
               <Route path="/admin/login" element={<AdminLogin />} />
 
