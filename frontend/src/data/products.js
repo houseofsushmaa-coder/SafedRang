@@ -7,10 +7,10 @@ export const products = [
     price: 7499,
     salePrice: null,
     image:
-      "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=500&q=80",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/09/surkh-lal-1-450x572.jpeg",
     images: [
-      "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=500&q=80",
-      "https://images.unsplash.com/photo-1583391733959-f156d8170c26?w=500&q=80",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/09/surkh-lal-1-450x572.jpeg",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/09/surkh-lal-2-450x572.jpeg",
     ],
     sku: "TFS110061",
     stockStatus: "In Stock",
@@ -29,9 +29,9 @@ export const products = [
     price: 7999,
     salePrice: null,
     image:
-      "https://images.unsplash.com/photo-1583391733959-f156d8170c26?w=500&q=80",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2026/03/WhatsApp-Image-2026-03-02-at-9.05.41-AM-1-450x572.jpeg",
     images: [
-      "https://images.unsplash.com/photo-1583391733959-f156d8170c26?w=500&q=80",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2026/03/WhatsApp-Image-2026-03-02-at-9.05.41-AM-1-450x572.jpeg",
     ],
     sku: "TFS110062",
     stockStatus: "In Stock",
@@ -50,9 +50,9 @@ export const products = [
     price: 10599,
     salePrice: null,
     image:
-      "https://images.unsplash.com/photo-1617260580979-d26b52a36b33?w=500&q=80",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/NEEL-KAMAL-1-450x572.jpeg",
     images: [
-      "https://images.unsplash.com/photo-1617260580979-d26b52a36b33?w=500&q=80",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/NEEL-KAMAL-1-450x572.jpeg",
     ],
     sku: "TFS110063",
     stockStatus: "In Stock",
@@ -71,9 +71,9 @@ export const products = [
     price: 14999,
     salePrice: null,
     image:
-      "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=500&q=80",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/10/aabha-4-450x572.jpg",
     images: [
-      "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=500&q=80",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/10/aabha-4-450x572.jpg",
     ],
     sku: "TFS110064",
     stockStatus: "Sold Out",
@@ -92,9 +92,9 @@ export const products = [
     price: 10999,
     salePrice: null,
     image:
-      "https://images.unsplash.com/photo-1583391733959-f156d8170c26?w=500&q=80",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/11/Amethyst-1-450x572.jpeg",
     images: [
-      "https://images.unsplash.com/photo-1583391733959-f156d8170c26?w=500&q=80",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/11/Amethyst-1-450x572.jpeg",
     ],
     sku: "TFS110065",
     stockStatus: "In Stock",
@@ -113,9 +113,9 @@ export const products = [
     price: 6999,
     salePrice: 4999,
     image:
-      "https://images.unsplash.com/photo-1617260580979-d26b52a36b33?w=500&q=80",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/Yellow-Kurta-1-450x572.jpeg",
     images: [
-      "https://images.unsplash.com/photo-1617260580979-d26b52a36b33?w=500&q=80",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/Yellow-Kurta-1-450x572.jpeg",
     ],
     sku: "TFS110066",
     stockStatus: "In Stock",
@@ -134,9 +134,9 @@ export const products = [
     price: 8499,
     salePrice: 6999,
     image:
-      "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=500&q=80",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/Pink-Kurta-1-450x572.jpeg",
     images: [
-      "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=500&q=80",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/Pink-Kurta-1-450x572.jpeg",
     ],
     sku: "TFS110067",
     stockStatus: "In Stock",
@@ -155,9 +155,9 @@ export const products = [
     price: 1899,
     salePrice: null,
     image:
-      "https://images.unsplash.com/photo-1583391733959-f156d8170c26?w=500&q=80",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/Brown-B-22-450x572.jpeg",
     images: [
-      "https://images.unsplash.com/photo-1583391733959-f156d8170c26?w=500&q=80",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/Brown-B-22-450x572.jpeg",
     ],
     sku: "TFS110068",
     stockStatus: "In Stock",
@@ -176,9 +176,9 @@ export const products = [
     price: 1599,
     salePrice: null,
     image:
-      "https://images.unsplash.com/photo-1617260580979-d26b52a36b33?w=500&q=80",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/purple-1-450x572.jpeg",
     images: [
-      "https://images.unsplash.com/photo-1617260580979-d26b52a36b33?w=500&q=80",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/purple-1-450x572.jpeg",
     ],
     sku: "TFS110069",
     stockStatus: "In Stock",
@@ -196,9 +196,9 @@ export const products = [
     price: 2000,
     salePrice: null,
     image:
-      "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=500&q=80",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/peach-blouse-11-450x572.jpeg",
     images: [
-      "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=500&q=80",
+      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/peach-blouse-11-450x572.jpeg",
     ],
     sku: "TFS110070",
     stockStatus: "In Stock",
