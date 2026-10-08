@@ -24,16 +24,13 @@ export default function Home() {
             playsInline
             src="/videos/video1.mp4"
           />
-          <div className="rotate-video-wrapper">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              src="/videos/video2.mp4"
-              className="rotated-video"
-            />
-          </div>
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            src="/videos/Video2.mp4"
+          />
           <video
             autoPlay
             loop
