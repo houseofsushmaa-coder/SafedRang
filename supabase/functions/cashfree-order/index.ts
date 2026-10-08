@@ -32,7 +32,8 @@ serve(async (req) => {
         customer_phone: customerDetails.phone || "9999999999"
       },
       order_meta: {
-        return_url: `${req.headers.get('origin')}/payment/verify?order_id=${orderId}`
+        return_url: `${req.headers.get('origin')}/payment/verify?order_id=${orderId}`,
+        notify_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/cashfree-webhook`
       }
     }
 
