@@ -72,7 +72,11 @@ serve(async (req) => {
       items: orderDetails.items
     })
 
-    if (dbError) throw dbError
+    if (dbError) {
+      console.error("Failed to save order to Supabase:", dbError)
+      // We don't throw here to allow the Cashfree payment to proceed, 
+      // matching the previous frontend behavior.
+    }
 
     return new Response(
       JSON.stringify({ 
