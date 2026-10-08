@@ -75,6 +75,20 @@
   object-fit: cover;
 }
 
+.hero-video-bg video:nth-child(1) {
+  object-position: center center;
+}
+.hero-video-bg video:nth-child(2) {
+  /* Frame the sitting girl correctly instead of the trees */
+  object-position: center bottom;
+}
+.hero-video-bg video:nth-child(3) {
+  object-position: center center;
+}
+.hero-video-bg video:nth-child(4) {
+  object-position: center center;
+}
+
 
 
 .hero-overlay {
