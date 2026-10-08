@@ -22,21 +22,31 @@ export default function Home() {
             loop
             muted
             playsInline
-            src="https://cdn.shopify.com/videos/c/o/v/da413e8c8a9c4a5b9fd67e236a7f6ecf.mp4"
+            src="/videos/video1.mp4"
+          />
+          <div className="rotate-video-wrapper">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              src="/videos/video2.mp4"
+              className="rotated-video"
+            />
+          </div>
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            src="/videos/video3.mp4"
           />
           <video
             autoPlay
             loop
             muted
             playsInline
-            src="https://cdn.shopify.com/videos/c/o/v/4f149286e67049d9bd51799094a7ecbb.mp4"
-          />
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            src="https://cdn.shopify.com/videos/c/o/v/066a03c998634cf393d5671dfefdf5d0.mp4"
+            src="/videos/video4.mp4"
           />
         </div>
         <div className="hero-overlay"></div>
