@@ -8,14 +8,7 @@ import { ChevronRight, ShieldCheck, Lock, AlertCircle } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import "./Checkout.css";
 
-const CF_APP_ID = import.meta.env.VITE_CASHFREE_APP_ID;
-const CF_SECRET = import.meta.env.VITE_CASHFREE_SECRET_KEY;
 const CF_ENV = import.meta.env.VITE_CASHFREE_ENV || "SANDBOX";
-
-// In local dev, calls go through Vite's proxy → bypasses CORS
-// In production, these calls happen inside the Supabase Edge Function
-const CF_PROXY =
-  CF_ENV === "PRODUCTION" ? "/cashfree-proxy-prod" : "/cashfree-proxy";
 
 export default function Checkout() {
   const { cart, cartCount, clearCart } = useCart();
@@ -57,80 +50,46 @@ export default function Checkout() {
       const customerName = `${formData.firstName} ${formData.lastName}`.trim();
 
       // ─────────────────────────────────────────────────────────────
-      // STEP 1: Create Cashfree order via Vite proxy (no CORS issue)
+      // STEP 1: Create Cashfree order securely via Supabase Edge Function
       // ─────────────────────────────────────────────────────────────
-      const cfRes = await fetch(`${CF_PROXY}/orders`, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          "x-api-version": "2022-09-01",
-          "x-client-id": CF_APP_ID,
-          "x-client-secret": CF_SECRET,
-        },
-        body: JSON.stringify({
-          order_id: orderId,
-          order_amount: total,
-          order_currency: "INR",
-          customer_details: {
-            customer_id: `cust_${Date.now()}`,
-            customer_name: customerName,
-            customer_email: formData.email,
-            customer_phone: formData.phone,
+      const { data: edgeData, error: edgeError } = await supabase.functions.invoke('cashfree-order', {
+        body: {
+          orderDetails: {
+            amount: total,
+            items: cart.map((item) => ({
+              productId: item.id,
+              title: item.title,
+              quantity: item.quantity,
+              price: item.salePrice || item.price,
+            }))
           },
-          order_meta: {
-            return_url: `${window.location.origin}/payment/verify?order_id={order_id}`,
-            notify_url: `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/cashfree-webhook`,
-          },
-        }),
+          customerDetails: {
+            name: customerName,
+            email: formData.email,
+            phone: formData.phone,
+            address: {
+              address: formData.address,
+              city: formData.city,
+              state: formData.state,
+              pincode: formData.pincode,
+            }
+          }
+        }
       });
 
-      const cfData = await cfRes.json();
-
-      if (!cfRes.ok) {
-        console.error("Cashfree error:", cfData);
-        throw new Error(
-          cfData.message || cfData.type || "Cashfree order creation failed."
-        );
+      if (edgeError || (edgeData && edgeData.error)) {
+        console.error("Edge function error:", edgeError || edgeData?.error);
+        throw new Error(edgeData?.error || edgeError?.message || "Payment initiation failed.");
       }
 
-      const { payment_session_id } = cfData;
+      const { payment_session_id } = edgeData;
 
       if (!payment_session_id) {
         throw new Error("No payment session ID received from Cashfree.");
       }
 
       // ─────────────────────────────────────────────────────────────
-      // STEP 2: Save pending order in Supabase (best-effort, don't block)
-      // ─────────────────────────────────────────────────────────────
-      supabase
-        .from("orders")
-        .insert({
-          id: orderId,
-          total_amount: total,
-          payment_status: "PENDING",
-          customer_email: formData.email,
-          customer_name: customerName,
-          customer_phone: formData.phone,
-          shipping_address: {
-            address: formData.address,
-            city: formData.city,
-            state: formData.state,
-            pincode: formData.pincode,
-          },
-          items: cart.map((item) => ({
-            productId: item.id,
-            title: item.title,
-            quantity: item.quantity,
-            price: item.salePrice || item.price,
-          })),
-        })
-        .then(({ error }) => {
-          if (error) console.warn("Order save warning:", error.message);
-        });
-
-      // ─────────────────────────────────────────────────────────────
-      // STEP 3: Load Cashfree JS SDK → redirect to payment page
+      // STEP 2: Load Cashfree JS SDK → redirect to payment page
       // ─────────────────────────────────────────────────────────────
       const cashfree = await load({
         mode: CF_ENV === "PRODUCTION" ? "production" : "sandbox",
