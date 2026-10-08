@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { supabase } from "../lib/supabase";
+import { products as staticProducts } from "../data/products";
 
 const ProductContext = createContext();
 
@@ -60,10 +61,17 @@ export const ProductProvider = ({ children }) => {
         data = fallback.data;
       }
 
-      setProducts((data || []).map(formatProduct));
+      if (!data || data.length === 0) {
+        console.log("No products found in database, falling back to static products");
+        setProducts(staticProducts);
+      } else {
+        setProducts((data || []).map(formatProduct));
+      }
     } catch (err) {
       console.error("Failed to fetch products:", err);
       setFetchError(err.message);
+      // Fallback on error too
+      setProducts(staticProducts);
     } finally {
       setLoading(false);
     }
