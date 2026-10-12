@@ -102,7 +102,8 @@ export default function ProductCard({ product }) {
 
         <div className="card-info">
           <p className="card-subtitle">
-            {(product.fabric || "PURE SILK").toUpperCase()} • {Math.floor(Math.random() * 500) + 200} CRAFT HOURS
+            {(product.fabric || product.category || "PURE SILK").toUpperCase()}
+            {product.craft ? ` · ${product.craft.toUpperCase()}` : ""}
           </p>
           <h3 className="card-title">
             {product.title.replace(/"/g, "")}

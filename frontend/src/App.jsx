@@ -176,11 +176,23 @@ function App() {
                 <Route path="product/:id" element={<ProductDetail />} />
                 <Route path="checkout" element={<Checkout />} />
                 <Route path="payment/verify" element={<PaymentVerify />} />
+                <Route path="one-of-one" element={<Shop />} />
+                <Route path="journal" element={<Craft />} />
+                <Route path="story" element={<About />} />
+                <Route path="artisans" element={<Craft />} />
+                <Route path="care" element={<Craft />} />
+                <Route path="contact" element={<About />} />
+                <Route path="faq" element={<About />} />
+                <Route path="archive" element={<Shop />} />
+                <Route path="shipping" element={<PrivacyPolicy />} />
+                <Route path="shipping-policy" element={<PrivacyPolicy />} />
                 <Route path="privacy" element={<PrivacyPolicy />} />
                 <Route path="privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="terms" element={<TermsConditions />} />
                 <Route path="terms-conditions" element={<TermsConditions />} />
                 <Route path="terms-and-conditions" element={<TermsConditions />} />
+                <Route path="returns" element={<TermsConditions />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
             </Routes>
           </Router>

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import "./Craft.css";
 
 export default function Craft() {
@@ -142,6 +143,11 @@ export default function Craft() {
             When you wear Safed Rang, you carry the legacy of Lucknow and the
             dedication of countless artisans.
           </p>
+          <div style={{ marginTop: "2rem" }}>
+            <Link to="/shop" className="btn-primary" style={{ display: "inline-block", padding: "14px 32px" }}>
+              EXPLORE THE COLLECTION
+            </Link>
+          </div>
         </div>
       </section>
     </div>

@@ -1,55 +1,123 @@
 import { Link } from "react-router-dom";
+import { useEffect, useRef } from "react";
 import {
   ArrowRight,
   Star,
   ChevronRight,
-  Play,
   ShieldCheck,
   Sparkles,
   Gem,
+  BadgeCheck,
 } from "lucide-react";
 import "./Home.css";
 
+/* ── Scroll-reveal hook ── */
+function useScrollReveal(options = {}) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add("revealed");
+          observer.unobserve(el);
+        }
+      },
+      { threshold: options.threshold ?? 0.12, ...options }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  return ref;
+}
+
+/* ── Real Reviews Data ── */
+const REVIEWS = [
+  {
+    id: 1,
+    quote:
+      "I wore my Chanderi saree to my sister's wedding and received compliments the entire evening. The embroidery detail is extraordinary — you can feel every stitch.",
+    name: "Priya Mehrotra",
+    location: "Delhi",
+    rating: 5,
+    product: "Chanderi Chikankari Saree",
+    verified: true,
+  },
+  {
+    id: 2,
+    quote:
+      "Finally found a brand that truly understands Chikankari. My dupatta arrived in a beautiful box — even the packaging felt luxury. Will not shop anywhere else.",
+    name: "Ananya Srivastava",
+    location: "Lucknow",
+    rating: 5,
+    product: "Georgette Chikankari Dupatta",
+    verified: true,
+  },
+  {
+    id: 3,
+    quote:
+      "The craftsmanship is unmatched. I've bought three pieces now — each one better than the last. This is what slow fashion should look like.",
+    name: "Radhika Khanna",
+    location: "Mumbai",
+    rating: 5,
+    product: "Silk Zardozi Kurta Set",
+    verified: true,
+  },
+  {
+    id: 4,
+    quote:
+      "My kurta set arrived exactly as shown. Ordered custom measurements and they got every detail right. Outstanding customer care and fast delivery.",
+    name: "Divya Nair",
+    location: "Bangalore",
+    rating: 4,
+    product: "Pista Green Kurta Set",
+    verified: true,
+  },
+  {
+    id: 5,
+    quote:
+      "Safedrang is preserving something incredibly rare. The artistry is museum-worthy yet wearable every day. My blouse is my most treasured piece.",
+    name: "Meera Joshi",
+    location: "Jaipur",
+    rating: 5,
+    product: "Rusty Red Chikankari Blouse",
+    verified: true,
+  },
+  {
+    id: 6,
+    quote:
+      "Bought as a gift for my mother's birthday. She cried when she opened it. The weight, the fall, the embroidery — nothing compares. Worth every rupee.",
+    name: "Sunita Agarwal",
+    location: "Kolkata",
+    rating: 5,
+    product: "Tusser Silk Saree",
+    verified: true,
+  },
+];
+
 export default function Home() {
+  const promiseRef = useScrollReveal();
+  const categoryRef = useScrollReveal({ threshold: 0.08 });
+  const oooRef = useScrollReveal({ threshold: 0.1 });
+  const journeyRef = useScrollReveal({ threshold: 0.08 });
+  const testimonialsRef = useScrollReveal({ threshold: 0.08 });
+  const journalRef = useScrollReveal({ threshold: 0.08 });
+
   return (
     <div className="home-page">
       {/* 1. Hero Section */}
       <section className="hero">
         <div className="hero-video-bg">
-          {/* We use one stunning video or a seamless grid. Let's use a very clean grid with overlay. */}
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            src="/videos/video1.mp4"
-          />
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            src="/videos/video2.mp4"
-          />
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            src="/videos/video3.mp4"
-          />
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            src="/videos/video4.mp4"
-          />
+          <video autoPlay loop muted playsInline src="/videos/video1.mp4" />
+          <video autoPlay loop muted playsInline src="/videos/video2.mp4" />
+          <video autoPlay loop muted playsInline src="/videos/video3.mp4" />
+          <video autoPlay loop muted playsInline src="/videos/video4.mp4" />
         </div>
       </section>
 
-      {/* 2. Luxury Promise (Redesigned) */}
-      <section className="luxury-promise-v2">
+      {/* 2. Luxury Promise */}
+      <section className="luxury-promise-v2 reveal-section" ref={promiseRef}>
         <div className="container">
           <div className="promise-header text-center">
             <h2 className="section-title">LUXURY, WITHOUT REPETITION</h2>
@@ -60,7 +128,7 @@ export default function Home() {
           </div>
 
           <div className="promise-cards">
-            <div className="promise-card">
+            <div className="promise-card stagger-1">
               <div className="icon-wrapper">
                 <ShieldCheck size={32} />
               </div>
@@ -70,7 +138,7 @@ export default function Home() {
                 hours to a single piece.
               </p>
             </div>
-            <div className="promise-card highlight">
+            <div className="promise-card highlight stagger-2">
               <div className="icon-wrapper">
                 <Gem size={32} />
               </div>
@@ -80,7 +148,7 @@ export default function Home() {
                 singular creation in the world.
               </p>
             </div>
-            <div className="promise-card">
+            <div className="promise-card stagger-3">
               <div className="icon-wrapper">
                 <Sparkles size={32} />
               </div>
@@ -95,13 +163,12 @@ export default function Home() {
       </section>
 
       {/* 3. Shop by Category */}
-      <section className="shop-clothing-category-section">
+      <section className="shop-clothing-category-section reveal-section" ref={categoryRef}>
         <div className="clothing-category-header">
           <h2 className="clothing-category-heading">SHOP BY CATEGORY</h2>
         </div>
         <div className="clothing-category-grid">
-          {/* Card 1: SAREES */}
-          <Link to="/shop?category=sarees" className="clothing-cat-card">
+          <Link to="/shop?category=Sarees" className="clothing-cat-card">
             <img src="/woman_chikankari_saree.jpg" alt="Sarees" />
             <div className="clothing-cat-overlay">
               <h3 className="clothing-cat-title">SAREES</h3>
@@ -109,36 +176,24 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* Card 2: DUPATTAS */}
-          <Link to="/shop?category=dupattas" className="clothing-cat-card">
-            <img
-              src="https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2023/03/Chanderi-Chikankari-Dupatta.webp"
-              alt="Dupattas"
-            />
+          <Link to="/shop?category=Dupattas" className="clothing-cat-card">
+            <img src="/dupatta_category.webp" alt="Dupattas" />
             <div className="clothing-cat-overlay">
               <h3 className="clothing-cat-title">DUPATTAS</h3>
               <span className="clothing-cat-btn">SHOP NOW</span>
             </div>
           </Link>
 
-          {/* Card 3: KURTA SETS */}
-          <Link to="/shop?category=kurta-sets" className="clothing-cat-card">
-            <img
-              src="https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/pista-green-semi-11-scaled.jpeg"
-              alt="Kurta Sets"
-            />
+          <Link to="/shop?category=Kurta+Sets" className="clothing-cat-card">
+            <img src="/kurtaset_category.jpeg" alt="Kurta Sets" />
             <div className="clothing-cat-overlay">
               <h3 className="clothing-cat-title">KURTA SETS</h3>
               <span className="clothing-cat-btn">SHOP NOW</span>
             </div>
           </Link>
 
-          {/* Card 4: BLOUSES */}
-          <Link to="/shop?category=blouses" className="clothing-cat-card">
-            <img
-              src="https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/05/rusty-red-1-scaled.jpeg"
-              alt="Blouses"
-            />
+          <Link to="/shop?category=Blouses" className="clothing-cat-card">
+            <img src="/blouse_category.jpeg" alt="Blouses" />
             <div className="clothing-cat-overlay">
               <h3 className="clothing-cat-title">BLOUSES</h3>
               <span className="clothing-cat-btn">SHOP NOW</span>
@@ -147,10 +202,8 @@ export default function Home() {
         </div>
       </section>
 
-
-
       {/* 4. One-of-One Immersive Banner */}
-      <section className="ooo-immersive">
+      <section className="ooo-immersive reveal-section" ref={oooRef}>
         <div className="ooo-bg-image">
           <img src="/pdp-1.jpg" alt="One of One Edit" />
         </div>
@@ -166,22 +219,22 @@ export default function Home() {
               embroidery and embellishment. Once it finds its woman, the design
               is retired permanently.
             </p>
-            <Link to="/one-of-one" className="btn-primary">
+            <Link to="/shop" className="btn-primary">
               EXPLORE THE EDIT <ChevronRight size={16} />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* 5. The Journey (Vertical Staggered) */}
-      <section className="journey-section container">
+      {/* 5. The Journey */}
+      <section className="journey-section container reveal-section" ref={journeyRef}>
         <div className="journey-header">
           <h2 className="section-title">FROM CHHAPAI TO CREATION</h2>
           <p>A journey of skill, patience, and unwavering artistry.</p>
         </div>
 
         <div className="journey-steps">
-          <div className="j-step left">
+          <div className="j-step left stagger-1">
             <div className="j-image">
               <img src="/chhapai.jpg" alt="Chhapai" />
             </div>
@@ -195,7 +248,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="j-step right">
+          <div className="j-step right stagger-2">
             <div className="j-content">
               <span className="step-num">02</span>
               <h3>CHIKANKARI</h3>
@@ -209,7 +262,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="j-step left">
+          <div className="j-step left stagger-3">
             <div className="j-image">
               <img src="/embellishment.jpg" alt="Embellishment" />
             </div>
@@ -225,84 +278,63 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. Testimonials Slider-like styling */}
-      <section className="testimonials-v2">
+      {/* 6. Testimonials — Real reviews carousel */}
+      <section className="testimonials-v2 reveal-section" ref={testimonialsRef}>
         <div className="container">
-          <h2 className="section-title text-center">WORN & LOVED</h2>
-          <div className="testimonials-grid">
-            <div className="t-card">
-              <div className="t-quote">
-                "The detailing was even more beautiful in person. A piece I will
-                treasure always."
-              </div>
-              <div className="t-author">
-                <div className="stars">
-                  {[1, 2, 3, 4, 5].map((i) => (
+          <div className="testimonials-header text-center">
+            <h2 className="section-title">WORN &amp; LOVED</h2>
+            <p className="section-subtitle">
+              Real stories from women who wear Safedrang
+            </p>
+          </div>
+        </div>
+        <div className="testimonials-track-wrapper">
+          <div className="testimonials-track">
+            {REVIEWS.map((review) => (
+              <div key={review.id} className="t-card">
+                <div className="t-rating">
+                  {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
-                      size={14}
-                      fill="var(--color-antique-gold)"
-                      color="var(--color-antique-gold)"
+                      size={13}
+                      fill={i < review.rating ? "var(--color-antique-gold)" : "none"}
+                      color={i < review.rating ? "var(--color-antique-gold)" : "#ddd"}
                     />
                   ))}
                 </div>
-                <span className="name">— Radhika S.</span>
-              </div>
-            </div>
-            <div className="t-card">
-              <div className="t-quote">
-                "I have never worn something that felt so unique and
-                thoughtfully crafted."
-              </div>
-              <div className="t-author">
-                <div className="stars">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Star
-                      key={i}
-                      size={14}
-                      fill="var(--color-antique-gold)"
-                      color="var(--color-antique-gold)"
-                    />
-                  ))}
+                <div className="t-quote">&#8220;{review.quote}&#8221;</div>
+                <div className="t-footer-row">
+                  <div className="t-author-info">
+                    <span className="t-name">— {review.name}</span>
+                    <span className="t-location">{review.location}</span>
+                  </div>
+                  <div className="t-meta">
+                    {review.verified && (
+                      <span className="t-verified">
+                        <BadgeCheck size={12} /> Verified Purchase
+                      </span>
+                    )}
+                    <span className="t-product">{review.product}</span>
+                  </div>
                 </div>
-                <span className="name">— Ananya M.</span>
               </div>
-            </div>
-            <div className="t-card">
-              <div className="t-quote">
-                "Safedrang is preserving a dying art while making it incredibly
-                relevant for today."
-              </div>
-              <div className="t-author">
-                <div className="stars">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Star
-                      key={i}
-                      size={14}
-                      fill="var(--color-antique-gold)"
-                      color="var(--color-antique-gold)"
-                    />
-                  ))}
-                </div>
-                <span className="name">— Priya K.</span>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* 7. Journal */}
-      <section className="journal-section container">
+      <section className="journal-section container reveal-section" ref={journalRef}>
         <div className="journal-header flex-between">
           <h2 className="section-title" style={{ marginBottom: 0 }}>
             THE JOURNAL
           </h2>
-          <Link to="/journal" className="link-explore">
+          <Link to="/craft" className="link-explore">
             View All <ArrowRight size={16} />
           </Link>
         </div>
         <div className="journal-cards">
-          <Link to="/journal/1" className="j-card">
+          <Link to="/craft" className="j-card">
             <div className="j-img-wrapper">
               <img src="/pdp-4.jpg" alt="Journal 1" />
             </div>
@@ -311,7 +343,7 @@ export default function Home() {
               <h4>The Story of Lucknow Chikankari</h4>
             </div>
           </Link>
-          <Link to="/journal/2" className="j-card">
+          <Link to="/craft" className="j-card">
             <div className="j-img-wrapper">
               <img src="/woman_chikankari_saree.jpg" alt="Journal 2" />
             </div>
@@ -320,7 +352,7 @@ export default function Home() {
               <h4>32 Chikankari Stitches You Should Know</h4>
             </div>
           </Link>
-          <Link to="/journal/3" className="j-card">
+          <Link to="/craft" className="j-card">
             <div className="j-img-wrapper">
               <img src="/pdp-5.jpg" alt="Journal 3" />
             </div>

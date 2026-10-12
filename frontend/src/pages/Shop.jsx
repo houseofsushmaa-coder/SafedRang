@@ -46,11 +46,19 @@ export default function Shop() {
   // Sync URL params to filter state
   useEffect(() => {
     if (urlCategory) {
+      const cleanUrlCat = urlCategory.toLowerCase().replace(/[\s-_+]+/g, "");
       const matched = categories.find(
-        (c) => c.toLowerCase() === urlCategory.toLowerCase() ||
-               c.toLowerCase().replace(/\s+/g, "-") === urlCategory.toLowerCase()
+        (c) =>
+          c.toLowerCase() === urlCategory.toLowerCase() ||
+          c.toLowerCase().replace(/[\s-_+]+/g, "") === cleanUrlCat ||
+          c.toLowerCase().includes(urlCategory.toLowerCase()) ||
+          urlCategory.toLowerCase().includes(c.toLowerCase())
       );
-      if (matched) setActiveCategory(matched);
+      if (matched) {
+        setActiveCategory(matched);
+      } else {
+        setActiveCategory(urlCategory);
+      }
     } else {
       setActiveCategory("All");
     }

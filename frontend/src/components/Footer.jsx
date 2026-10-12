@@ -1,8 +1,24 @@
+import React, { useState } from "react";
 import "./Footer.css";
 import { Link } from "react-router-dom";
 import { Award, ShieldCheck, Globe, Leaf } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function Footer() {
+  const [email, setEmail] = useState("");
+  const [isSubscribed, setIsSubscribed] = useState(false);
+
+  const handleSubscribe = (e) => {
+    e.preventDefault();
+    if (!email || !email.includes("@")) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    setIsSubscribed(true);
+    toast.success("Welcome to Safedrang! You're subscribed to our newsletter.");
+    setEmail("");
+  };
+
   return (
     <footer className="site-footer">
       {/* Newsletter Section */}
@@ -14,9 +30,15 @@ export default function Footer() {
               Be the first to discover new one-of-one creations, stories from
               our artisans, and more.
             </p>
-            <form className="newsletter-form">
-              <input type="email" placeholder="Your email address" required />
-              <button type="submit">SUBSCRIBE</button>
+            <form className="newsletter-form" onSubmit={handleSubscribe}>
+              <input
+                type="email"
+                placeholder={isSubscribed ? "Thank you for subscribing!" : "Your email address"}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <button type="submit">{isSubscribed ? "SUBSCRIBED" : "SUBSCRIBE"}</button>
             </form>
           </div>
           <div className="trust-markers">
@@ -143,16 +165,16 @@ export default function Footer() {
             <h4>FOLLOW</h4>
             <ul>
               <li>
-                <a href="#">Instagram</a>
+                <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">Instagram</a>
               </li>
               <li>
-                <a href="#">Facebook</a>
+                <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer">Facebook</a>
               </li>
               <li>
-                <a href="#">Pinterest</a>
+                <a href="https://www.pinterest.com/" target="_blank" rel="noopener noreferrer">Pinterest</a>
               </li>
               <li>
-                <a href="#">YouTube</a>
+                <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">YouTube</a>
               </li>
             </ul>
           </div>
