@@ -1,11 +1,53 @@
+import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { Heart } from "lucide-react";
 import { useCurrency } from "../context/CurrencyContext";
+import { useCart } from "../context/CartContext";
 import "./ProductCard.css";
 
 export default function ProductCard({ product }) {
   const { formatPrice } = useCurrency();
+  const { toggleWishlist, isInWishlist } = useCart();
+
   const isSold = product.stockStatus === "Sold Out";
   const hasSale = product.salePrice && product.salePrice < product.price;
+  const isWishlisted = isInWishlist ? isInWishlist(product.id) : false;
+
+  // Extract all available product images
+  const imagesList = useMemo(() => {
+    if (Array.isArray(product.images) && product.images.length > 0) {
+      return product.images.filter(Boolean);
+    }
+    if (product.image) {
+      return [product.image];
+    }
+    return ["https://via.placeholder.com/450x572?text=No+Image"];
+  }, [product.images, product.image]);
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Smooth 1-second looping carousel on hover
+  useEffect(() => {
+    if (!isHovered || imagesList.length <= 1) {
+      setCurrentImageIndex(0);
+      return;
+    }
+
+    const intervalId = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % imagesList.length);
+    }, 1000); // Cycles every 1 second smoothly
+
+    return () => clearInterval(intervalId);
+  }, [isHovered, imagesList.length]);
+
+  const handleWishlistClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (toggleWishlist) {
+      toggleWishlist(product);
+    }
+  };
 
   return (
     <div className={`product-card ${isSold ? "is-sold" : ""}`}>
@@ -13,31 +55,49 @@ export default function ProductCard({ product }) {
         to={`/product/${product.id}`}
         style={{ textDecoration: "none", color: "inherit" }}
       >
-        <div className="image-wrapper">
-          <img
-            src={product.images?.[0] || product.image || "https://via.placeholder.com/450x572?text=No+Image"}
-            alt={product.title}
-            className="primary-img"
-            loading="lazy"
-          />
-          {product.images?.[1] && (
+        <div
+          className="image-wrapper"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {/* Render all product photos as stacked crossfade layers */}
+          {imagesList.map((imgSrc, idx) => (
             <img
-              src={product.images[1]}
-              alt={`${product.title} alternate view`}
-              className="secondary-img"
-              loading="lazy"
+              key={`${imgSrc}-${idx}`}
+              src={imgSrc}
+              alt={`${product.title} - angle ${idx + 1}`}
+              className={`carousel-product-img ${idx === currentImageIndex ? "is-active" : ""}`}
+              loading={idx === 0 ? "eager" : "lazy"}
             />
+          ))}
+
+          {/* Interactive photo indicator dots when multiple images exist */}
+          {imagesList.length > 1 && (
+            <div className={`hover-carousel-indicators ${isHovered ? "is-visible" : ""}`}>
+              {imagesList.map((_, idx) => (
+                <span
+                  key={idx}
+                  className={`indicator-dot ${idx === currentImageIndex ? "is-active" : ""}`}
+                />
+              ))}
+            </div>
           )}
-          
+
           <div className="editorial-badge">
             <span className="badge-line-1">ATELIER EXCLUSIVE</span>
             <span className="badge-line-2">GI CERTIFIED</span>
           </div>
 
-          <button className="wishlist-icon" aria-label="Add to wishlist" onClick={(e) => { e.preventDefault(); }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-            </svg>
+          <button
+            className={`wishlist-icon ${isWishlisted ? "is-active" : ""}`}
+            aria-label="Add to wishlist"
+            onClick={handleWishlistClick}
+          >
+            <Heart
+              size={16}
+              fill={isWishlisted ? "#6E1E2A" : "none"}
+              color={isWishlisted ? "#6E1E2A" : "currentColor"}
+            />
           </button>
         </div>
 
