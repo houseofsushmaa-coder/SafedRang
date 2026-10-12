@@ -109,28 +109,31 @@ const Dashboard = () => {
       setError(null);
       try {
         const res = await adminService.getDashboard(period);
-        setData(res.data);
-        setLastUpdated(new Date());
-        setIsOnline(true);
+        if (res && res.data) {
+          setData(res.data);
+          setLastUpdated(new Date());
+          setIsOnline(true);
+        }
       } catch (err) {
         console.error("Dashboard fetch failed:", err);
         setIsOnline(false);
-        setError((prevErr) => (data === null ? "Unable to load dashboard data." : prevErr));
+        setError("Unable to load dashboard data.");
       } finally {
         setLoading(false);
         setRefreshing(false);
       }
     },
-    [period, data],
+    [period],
   );
 
   const fetchChart = useCallback(async () => {
-    setChartLoading(true);
     try {
       const raw = await adminService.getSalesChart(period);
-      setChartData(
-        raw.map((d) => ({ name: formatChartDate(d.date), revenue: d.revenue })),
-      );
+      if (Array.isArray(raw)) {
+        setChartData(
+          raw.map((d) => ({ name: formatChartDate(d.date), revenue: d.revenue })),
+        );
+      }
     } catch (err) {
       console.error("Chart fetch failed:", err);
       setChartData([]);
@@ -139,15 +142,25 @@ const Dashboard = () => {
     }
   }, [period]);
 
+  // Initial load and period changes
   useEffect(() => {
     setLoading(true);
-    fetchDashboard();
+    setChartLoading(true);
+    fetchDashboard(false);
     fetchChart();
+  }, [period, fetchDashboard, fetchChart]);
+
+  // Keep latest fetchers in refs so interval does not recreate or cause re-renders
+  const fetchDashboardRef = useRef(fetchDashboard);
+  const fetchChartRef = useRef(fetchChart);
+  useEffect(() => {
+    fetchDashboardRef.current = fetchDashboard;
+    fetchChartRef.current = fetchChart;
   }, [fetchDashboard, fetchChart]);
 
   const resetCountdown = useCallback(() => {
-    clearInterval(countdownRef.current);
-    clearInterval(refreshTimerRef.current);
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    if (refreshTimerRef.current) clearInterval(refreshTimerRef.current);
     setCountdown(REFRESH_INTERVAL);
 
     countdownRef.current = setInterval(() => {
@@ -155,17 +168,17 @@ const Dashboard = () => {
     }, 1000);
 
     refreshTimerRef.current = setInterval(() => {
-      fetchDashboard();
-      fetchChart();
+      if (fetchDashboardRef.current) fetchDashboardRef.current(false);
+      if (fetchChartRef.current) fetchChartRef.current();
       setCountdown(REFRESH_INTERVAL);
     }, REFRESH_INTERVAL * 1000);
-  }, [fetchDashboard, fetchChart]);
+  }, []);
 
   useEffect(() => {
     resetCountdown();
     return () => {
-      clearInterval(countdownRef.current);
-      clearInterval(refreshTimerRef.current);
+      if (countdownRef.current) clearInterval(countdownRef.current);
+      if (refreshTimerRef.current) clearInterval(refreshTimerRef.current);
     };
   }, [resetCountdown]);
 
@@ -175,7 +188,7 @@ const Dashboard = () => {
     resetCountdown();
   };
 
-  const stats = data ?? {
+  const defaultStats = {
     revenue: { total: 0, refunded: 0, change: 0 },
     orders: { total: 0, pending: 0, processing: 0, delivered: 0, cancelled: 0 },
     customers: { total: 0, new: 0 },
@@ -187,6 +200,19 @@ const Dashboard = () => {
     refunds: { count: 0, amount: 0 },
   };
 
+  const stats = {
+    ...defaultStats,
+    ...(data || {}),
+    revenue: { ...defaultStats.revenue, ...(data?.revenue || {}) },
+    orders: { ...defaultStats.orders, ...(data?.orders || {}) },
+    customers: { ...defaultStats.customers, ...(data?.customers || {}) },
+    products: { ...defaultStats.products, ...(data?.products || {}) },
+    refunds: { ...defaultStats.refunds, ...(data?.refunds || {}) },
+    bestSellers: Array.isArray(data?.bestSellers) ? data.bestSellers : [],
+    lowStockProducts: Array.isArray(data?.lowStockProducts) ? data.lowStockProducts : [],
+    recentOrders: Array.isArray(data?.recentOrders) ? data.recentOrders : [],
+  };
+
   const periodLabel =
     PERIOD_OPTIONS.find((o) => o.value === period)?.label ?? "Period";
 
@@ -194,58 +220,58 @@ const Dashboard = () => {
     {
       key: "revenue",
       label: `Revenue (${periodLabel})`,
-      value: formatCurrency(stats.revenue.total),
+      value: formatCurrency(stats?.revenue?.total ?? stats?.metrics?.revenue?.value ?? 0),
       icon: <IndianRupee size={20} />,
       iconClass: "revenue",
-      trend: stats.revenue.change,
-      trendLabel: `${Math.abs(stats.revenue.change)}%`,
-      meta: stats.revenue.refunded > 0 ? `\u21a9 ${formatCurrency(stats.revenue.refunded)} refunded` : null,
+      trend: stats?.revenue?.change ?? stats?.metrics?.revenue?.change ?? 0,
+      trendLabel: `${Math.abs(stats?.revenue?.change ?? stats?.metrics?.revenue?.change ?? 0)}%`,
+      meta: (stats?.revenue?.refunded ?? 0) > 0 ? `\u21a9 ${formatCurrency(stats.revenue.refunded)} refunded` : null,
     },
     {
       key: "aov",
       label: "Avg Order Value",
-      value: formatCurrency(stats.avgOrderValue),
+      value: formatCurrency(stats?.avgOrderValue ?? stats?.metrics?.averageOrderValue?.value ?? 0),
       icon: <TrendingUp size={20} />,
       iconClass: "aov",
     },
     {
       key: "orders",
       label: `Orders (${periodLabel})`,
-      value: stats.orders.total,
+      value: stats?.orders?.total ?? stats?.metrics?.orders?.value ?? 0,
       icon: <ShoppingBag size={20} />,
       iconClass: "orders",
       pills: [
-        { label: `${stats.orders.pending} pending`, cls: "pill--yellow" },
-        { label: `${stats.orders.delivered} delivered`, cls: "pill--green" },
-        { label: `${stats.orders.cancelled} cancelled`, cls: "pill--red" },
+        { label: `${stats?.orders?.pending ?? stats?.metrics?.pendingOrders?.value ?? 0} pending`, cls: "pill--yellow" },
+        { label: `${stats?.orders?.delivered ?? 0} delivered`, cls: "pill--green" },
+        { label: `${stats?.orders?.cancelled ?? 0} cancelled`, cls: "pill--red" },
       ],
     },
     {
       key: "customers",
       label: "Total Customers",
-      value: stats.customers.total,
+      value: stats?.customers?.total ?? stats?.metrics?.customers?.value ?? 1,
       icon: <Users size={20} />,
       iconClass: "customers",
-      trend: stats.customers.new > 0 ? 1 : null,
-      trendLabel: `${stats.customers.new} new`,
-      meta: `${stats.customers.new} joined this period`,
+      trend: (stats?.customers?.new ?? 0) > 0 ? 1 : null,
+      trendLabel: `${stats?.customers?.new ?? 0} new`,
+      meta: `${stats?.customers?.new ?? 0} joined this period`,
     },
     {
       key: "products",
       label: "Total Products",
-      value: stats.products.total,
+      value: stats?.products?.total ?? stats?.totalProducts ?? 0,
       icon: <Package size={20} />,
       iconClass: "products",
-      trend: stats.products.lowStock > 0 ? -1 : null,
-      trendLabel: `${stats.products.lowStock} low stock`,
+      trend: (stats?.products?.lowStock ?? stats?.metrics?.lowStock?.value ?? 0) > 0 ? -1 : null,
+      trendLabel: `${stats?.products?.lowStock ?? stats?.metrics?.lowStock?.value ?? 0} low stock`,
     },
     {
       key: "refunds",
       label: `Refunds (${periodLabel})`,
-      value: formatCurrency(stats.refunds?.amount ?? 0),
+      value: formatCurrency(stats?.refunds?.amount ?? 0),
       icon: <ArrowDownRight size={20} />,
       iconClass: "refunds",
-      meta: `${stats.refunds?.count ?? 0} refund${stats.refunds?.count !== 1 ? "s" : ""}`,
+      meta: `${stats?.refunds?.count ?? 0} refund${(stats?.refunds?.count ?? 0) !== 1 ? "s" : ""}`,
     },
   ];
 
@@ -312,7 +338,7 @@ const Dashboard = () => {
       </div>
 
       {/* ── Low-stock alert ── */}
-      {!loading && stats.lowStockProducts?.length > 0 && (
+      {!loading && (stats.lowStockProducts || []).length > 0 && (
         <div className="low-stock-strip">
           <AlertTriangle size={15} />
           <strong>
@@ -320,7 +346,7 @@ const Dashboard = () => {
             {stats.lowStockProducts.length !== 1 ? "s" : ""} low on stock:
           </strong>
           {stats.lowStockProducts.slice(0, 5).map((p, i) => (
-            <span key={p.id} className="low-stock-item">
+            <span key={p.id || i} className="low-stock-item">
               {p.name} <em>({p.stock})</em>
               {i < Math.min(stats.lowStockProducts.length, 5) - 1 ? ", " : ""}
             </span>
@@ -453,14 +479,14 @@ const Dashboard = () => {
               </div>
               <div className="order-breakdown-body">
                 {[
-                  { key: "pending", count: stats.orders.pending },
-                  { key: "processing", count: stats.orders.processing },
-                  { key: "delivered", count: stats.orders.delivered },
-                  { key: "cancelled", count: stats.orders.cancelled },
+                  { key: "pending", count: stats?.orders?.pending ?? 0 },
+                  { key: "processing", count: stats?.orders?.processing ?? 0 },
+                  { key: "delivered", count: stats?.orders?.delivered ?? 0 },
+                  { key: "cancelled", count: stats?.orders?.cancelled ?? 0 },
                 ].map(({ key, count }) => {
-                  const total = stats.orders.total || 1;
-                  const pct = Math.round((count / total) * 100);
-                  const cfg = statusConfig[key];
+                  const total = stats?.orders?.total || 1;
+                  const pct = Math.round(((count || 0) / total) * 100);
+                  const cfg = statusConfig[key] || { icon: <Clock size={13} />, label: key, cls: "pill--yellow" };
                   return (
                     <div key={key} className="breakdown-row">
                       <div className={`breakdown-label pill ${cfg.cls}`}>
@@ -478,7 +504,7 @@ const Dashboard = () => {
           )}
 
           {/* Best Sellers */}
-          {!loading && stats.bestSellers?.length > 0 && (
+          {!loading && (stats.bestSellers || []).length > 0 && (
             <div className="admin-chart-card best-sellers-card">
               <div className="card-header">
                 <h3>
@@ -488,15 +514,15 @@ const Dashboard = () => {
                 <span className="chart-period-tag">{periodLabel}</span>
               </div>
               <div style={{ padding: "12px 0" }}>
-                {stats.bestSellers.map((item, idx) => {
-                  const maxQty = stats.bestSellers[0]?._sum?.quantity ?? 1;
-                  const qty = item._sum?.quantity ?? 0;
+                {(stats.bestSellers || []).map((item, idx) => {
+                  const maxQty = stats.bestSellers?.[0]?._sum?.quantity ?? 1;
+                  const qty = item?._sum?.quantity ?? 0;
                   const pct = maxQty > 0 ? (qty / maxQty) * 100 : 0;
                   return (
-                    <div key={item.productId} className="best-seller-row">
+                    <div key={item?.productId || idx} className="best-seller-row">
                       <span className="bs-rank">#{idx + 1}</span>
                       <div className="bs-info">
-                        <div className="bs-name">{item.product?.name ?? "Unknown"}</div>
+                        <div className="bs-name">{item?.product?.name ?? "Unknown"}</div>
                         <div className="bs-bar-wrap">
                           <div className="bs-bar" style={{ width: `${pct}%` }} />
                         </div>
@@ -534,7 +560,7 @@ const Dashboard = () => {
                 </div>
               ))}
             </div>
-          ) : stats.recentOrders.length === 0 ? (
+          ) : (stats.recentOrders || []).length === 0 ? (
             <div className="empty-state">
               <ShoppingCart size={40} className="empty-icon" />
               <h3>No recent orders</h3>
@@ -552,14 +578,14 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {stats.recentOrders.map((order) => (
-                  <tr key={order.id}>
-                    <td className="font-medium order-num">{order.orderNumber}</td>
-                    <td>{order.customerName}</td>
-                    <td className="font-medium">{formatCurrency(order.totalAmount)}</td>
+                {(stats.recentOrders || []).map((order) => (
+                  <tr key={order.id || Math.random()}>
+                    <td className="font-medium order-num">{order.orderNumber || order.id || "—"}</td>
+                    <td>{order.customerName || "Customer"}</td>
+                    <td className="font-medium">{formatCurrency(order.totalAmount || order.total || 0)}</td>
                     <td>
-                      <span className={`status-badge status-${order.status?.toLowerCase()}`}>
-                        {order.status}
+                      <span className={`status-badge status-${(order.status || "pending").toLowerCase()}`}>
+                        {order.status || "PENDING"}
                       </span>
                     </td>
                     <td style={{ color: "var(--admin-text-muted)", fontSize: "0.85rem" }}>

@@ -30,6 +30,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import AdminErrorBoundary from "./components/AdminErrorBoundary";
 import "./AdminLayout.css";
 
 const AdminLayout = () => {
@@ -314,7 +315,7 @@ const AdminLayout = () => {
                     className="admin-user-role"
                     style={{ fontSize: "0.75rem" }}
                   >
-                    {user?.role?.replace("_", " ") || "Super Admin"}
+                    {typeof user?.role === "string" ? user.role.replace("_", " ") : "Super Admin"}
                   </div>
                 </div>
               )}
@@ -367,7 +368,9 @@ const AdminLayout = () => {
 
         {/* Page Content */}
         <div className="admin-content custom-scrollbar">
-          <Outlet />
+          <AdminErrorBoundary isSubRoute={true}>
+            <Outlet />
+          </AdminErrorBoundary>
         </div>
       </main>
     </div>

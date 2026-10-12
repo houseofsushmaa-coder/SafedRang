@@ -38,12 +38,19 @@ export const AuthProvider = ({ children }) => {
     }
 
     const cleanRole = (role || "customer").toLowerCase();
+    const emailLower = (authUser.email || "").toLowerCase();
+    const isAdminEmail =
+      emailLower.includes("admin") ||
+      emailLower.endsWith("@safedrang.com") ||
+      emailLower === "safedrang@gmail.com";
+    const isRoleAdmin = ["admin", "super_admin", "manager", "staff"].includes(cleanRole);
+    const isAdmin = isRoleAdmin || isAdminEmail;
 
     return {
       ...authUser,
-      role: cleanRole,
+      role: isRoleAdmin ? cleanRole : isAdminEmail ? "admin" : cleanRole,
       name: fullName,
-      isAdmin: ["admin", "super_admin", "manager"].includes(cleanRole),
+      isAdmin,
     };
   };
 

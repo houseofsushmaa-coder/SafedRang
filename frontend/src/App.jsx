@@ -15,6 +15,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Checkout from "./pages/Checkout";
 import PaymentVerify from "./pages/PaymentVerify";
 import AdminLayout from "./admin/AdminLayout";
+import AdminErrorBoundary from "./admin/components/AdminErrorBoundary";
 import Dashboard from "./admin/pages/Dashboard";
 import Orders from "./admin/pages/Orders";
 import Products from "./admin/pages/Products";
@@ -48,7 +49,42 @@ const StorefrontLayout = () => (
 const ProtectedAdminRoute = ({ children }) => {
   const { user, session, token, loading, isAdmin } = useAuth();
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#FAF5EC",
+          color: "#2A211D",
+          fontFamily: '"Manrope", "Inter", system-ui, sans-serif',
+        }}
+      >
+        <div
+          style={{
+            width: "44px",
+            height: "44px",
+            border: "3px solid rgba(174, 138, 84, 0.2)",
+            borderTopColor: "#AE8A54",
+            borderRadius: "50%",
+            animation: "adminRouteSpin 0.8s linear infinite",
+            marginBottom: "16px",
+          }}
+        />
+        <div style={{ fontSize: "0.95rem", fontWeight: "600", color: "#6E1E2A" }}>
+          SAFED RANG
+        </div>
+        <p style={{ margin: "4px 0 0 0", fontSize: "0.85rem", color: "#8B7863" }}>
+          Verifying Admin Access…
+        </p>
+        <style>{`@keyframes adminRouteSpin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
   if (!user && !session && !token) return <Navigate to="/admin/login" replace />;
 
   // Enforce role-based access: Customers cannot view admin dashboard
@@ -91,9 +127,11 @@ function App() {
               <Route
                 path="/admin"
                 element={
-                  <ProtectedAdminRoute>
-                    <AdminLayout />
-                  </ProtectedAdminRoute>
+                  <AdminErrorBoundary>
+                    <ProtectedAdminRoute>
+                      <AdminLayout />
+                    </ProtectedAdminRoute>
+                  </AdminErrorBoundary>
                 }
               >
                 <Route index element={<Dashboard />} />
