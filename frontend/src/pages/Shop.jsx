@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { useProducts } from "../context/ProductContext";
@@ -22,6 +22,10 @@ const SORT_OPTIONS = [
 export default function Shop() {
   const { products, getAllCategories } = useProducts();
   const { formatPrice } = useCurrency();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, []);
 
   /* ── filter state ── */
   const [activeCategory, setActiveCategory] = useState("All");

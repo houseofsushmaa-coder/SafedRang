@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { load } from "@cashfreepayments/cashfree-js";
 import { useCart } from "../context/CartContext";
@@ -15,6 +15,10 @@ export default function Checkout() {
   const { formatPrice } = useCurrency();
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, []);
 
   const [formData, setFormData] = useState({
     email: user?.email || "",

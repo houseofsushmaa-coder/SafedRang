@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./About.css";
 
@@ -57,6 +58,10 @@ const pillars = [
 ];
 
 export default function About() {
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, []);
+
   return (
     <div className="about-page">
       {/* ── 1. Hero ── */}

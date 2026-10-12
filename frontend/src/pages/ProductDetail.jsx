@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   ChevronRight,
@@ -29,6 +29,14 @@ export default function ProductDetail() {
     product?.images?.[0] || product?.image,
   );
   const [activeTab, setActiveTab] = useState("details");
+
+  // Always reset scroll to top on product change
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    if (product) {
+      setActiveImage(product.images?.[0] || product.image);
+    }
+  }, [id, product]);
 
   const handleAddToCart = () => {
     addToCart(product);

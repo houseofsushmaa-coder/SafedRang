@@ -1,6 +1,10 @@
+import { useEffect } from "react";
 import "./Craft.css";
 
 export default function Craft() {
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, []);
   return (
     <div className="craft-page">
       {/* 1. Hero Section */}
