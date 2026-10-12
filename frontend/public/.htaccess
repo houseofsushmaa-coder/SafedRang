@@ -1,5 +1,37 @@
 Options -MultiViews
 RewriteEngine On
+
+# Ensure proper MIME types for CSS, JS, and SVG
+<IfModule mod_mime.c>
+  AddType text/css .css
+  AddType application/javascript .js .mjs
+  AddType image/svg+xml .svg
+</IfModule>
+
+# CORS & Cache headers for static assets
+<IfModule mod_headers.c>
+  <FilesMatch "\.(css|js|mjs|svg|png|jpg|jpeg|webp|woff|woff2|ttf|eot|ico)$">
+    Header set Access-Control-Allow-Origin "*"
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  # Never cache HTML so browsers always load latest CSS/JS hashes
+  <FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires 0
+  </FilesMatch>
+</IfModule>
+
+# Video rewrite rule
 RewriteRule ^videos/[vV]ideo2\.mp4$ /videos/video2.mp4 [NC,L]
+
+# Prevent returning index.html for missing assets (return 404 instead of HTML)
+RewriteCond %{REQUEST_URI} ^/assets/
 RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ - [R=404,L]
+
+# SPA Fallback for client-side routing
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.html [QSA,L]
+

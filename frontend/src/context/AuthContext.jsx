@@ -99,8 +99,32 @@ export const AuthProvider = ({ children }) => {
     };
   };
 
+  const loginWithGoogle = async (redirectToPath = "/admin") => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://safedrang.com";
+    const redirectTo = `${origin}${redirectToPath}`;
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo,
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent",
+        },
+      },
+    });
+
+    if (error) {
+      console.error("Google login failed:", error.message);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  };
+
   const logout = async () => {
     await supabase.auth.signOut();
+    localStorage.removeItem("adminToken");
     setUser(null);
     setSession(null);
   };
@@ -110,7 +134,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, token, loading, login, logout, isAdmin }}
+      value={{ user, session, token, loading, login, loginWithGoogle, logout, isAdmin }}
     >
       {children}
     </AuthContext.Provider>
