@@ -45,10 +45,15 @@ const StorefrontLayout = () => (
 );
 
 const ProtectedAdminRoute = ({ children }) => {
-  const { user, session, token, loading } = useAuth();
+  const { user, session, token, loading, isAdmin } = useAuth();
 
   if (loading) return <div>Loading...</div>;
   if (!user && !session && !token) return <Navigate to="/admin/login" replace />;
+
+  // Enforce role-based access: Customers cannot view admin dashboard
+  if (!isAdmin) {
+    return <Navigate to="/admin/login?error=unauthorized" replace />;
+  }
 
   return children;
 };
@@ -94,6 +99,7 @@ function App() {
                 <Route path="products" element={<Products />} />
                 <Route path="product/:id" element={<EditProduct />} />
                 <Route path="users" element={<Users />} />
+                <Route path="customers" element={<Users />} />
                 <Route path="inventory" element={<Inventory />} />
                 <Route path="analytics" element={<Analytics />} />
                 <Route path="analytics/sales" element={<Analytics />} />

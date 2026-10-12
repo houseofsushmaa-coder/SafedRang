@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useCallback } from "react";
-import axios from "axios";
 import {
   CreditCard, Search, IndianRupee, Eye, CheckCircle2, XCircle,
   Clock, Loader2, Filter, Download,
 } from "lucide-react";
 import "./AdminPages.css";
 
-import { API_BASE, getAuthHeaders, formatINR } from "../../config/api.js";
+import { formatINR } from "../../config/api.js";
+import { adminService } from "../adminService";
 
 const STATUS_CONFIG = {
   PAID: { label: "Paid", cls: "status-delivered", icon: <CheckCircle2 size={13} /> },
@@ -31,15 +31,24 @@ const Payments = () => {
   const fetchPayments = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_BASE}/payments`, {
-        headers: getAuthHeaders(),
-        params: { page, limit: PER_PAGE, status: statusFilter !== "ALL" ? statusFilter : undefined, search: search || undefined },
-      });
-      setPayments(res.data.data?.payments ?? res.data.data ?? []);
-      setTotal(res.data.meta?.total ?? res.data.total ?? 0);
+      const data = await adminService.getPayments();
+      let filtered = data || [];
+      if (statusFilter !== "ALL") {
+        filtered = filtered.filter((p) => p.status === statusFilter);
+      }
+      if (search) {
+        const q = search.toLowerCase();
+        filtered = filtered.filter(
+          (p) =>
+            p.transactionId?.toLowerCase().includes(q) ||
+            p.customerName?.toLowerCase().includes(q) ||
+            p.customerEmail?.toLowerCase().includes(q),
+        );
+      }
+      setPayments(filtered);
+      setTotal(filtered.length);
     } catch (err) {
       console.error("Payments fetch failed:", err);
-      // Fallback: try fetching via orders
       setPayments([]);
     } finally {
       setLoading(false);

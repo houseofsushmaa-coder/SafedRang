@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from "react";
-import axios from "axios";
 import {
   UserPlus,
   Search,
@@ -12,8 +11,7 @@ import {
 } from "lucide-react";
 import "./AdminPages.css";
 import "./Users.css";
-
-import { API_BASE, getAuthHeaders, formatINR } from "../../config/api.js";
+import { supabase } from "../../lib/supabase";
 
 const ROLE_OPTIONS = ["CUSTOMER", "MANAGER", "ADMIN", "SUPER_ADMIN"];
 
@@ -80,27 +78,36 @@ const AddUserModal = ({ onClose, onSuccess }) => {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("adminToken");
-
-      // Register the user
-      await axios.post(
-        `${API_BASE}/auth/register`,
-        {
-          name: form.name,
-          email: form.email,
-          phone: form.phone || undefined,
-          password: form.password,
+      // 1. Sign up user via Supabase
+      const { data: authData, error: authErr } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: {
+          data: {
+            full_name: form.name,
+            role: form.role.toLowerCase(),
+          },
         },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      });
 
-      onSuccess(`User "${form.name}" created successfully!`);
+      if (authErr) throw authErr;
+
+      // 2. Insert into profiles table
+      if (authData?.user?.id) {
+        await supabase.from("profiles").upsert([
+          {
+            id: authData.user.id,
+            email: form.email,
+            role: form.role.toLowerCase(),
+            full_name: form.name,
+          },
+        ]);
+      }
+
+      onSuccess(`User "${form.name}" created with role ${form.role}!`);
       onClose();
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Failed to create user. Please try again.",
-      );
+      setError(err.message || "Failed to create user. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -235,18 +242,54 @@ const Users = () => {
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("adminToken");
-      const res = await axios.get(`${API_BASE}/users`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUsers(res.data.data ?? []);
-    } catch {
-      // Fallback to empty list — endpoint may not exist yet
+      // 1. Fetch from Supabase profiles
+      const { data: profiles, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (!error && profiles && profiles.length > 0) {
+        setUsers(
+          profiles.map((p) => ({
+            id: p.id,
+            name: p.full_name || p.email?.split("@")[0],
+            email: p.email,
+            role: (p.role || "customer").toUpperCase(),
+            status: "Active",
+            createdAt: p.created_at,
+          })),
+        );
+        return;
+      }
+
+      // 2. If profiles is empty, fallback to empty array
+      setUsers([]);
+    } catch (err) {
+      console.warn("fetchUsers error:", err);
       setUsers([]);
     } finally {
       setLoading(false);
     }
   }, []);
+
+  const handleRoleChange = async (userId, userEmail, newRole) => {
+    try {
+      const cleanRole = newRole.toLowerCase();
+      const { error } = await supabase
+        .from("profiles")
+        .update({ role: cleanRole, updated_at: new Date().toISOString() })
+        .eq("id", userId);
+
+      if (error) {
+        showToast("Error updating role: " + error.message, "error");
+      } else {
+        showToast(`Updated ${userEmail} role to ${newRole}!`, "success");
+        fetchUsers();
+      }
+    } catch (err) {
+      showToast("Failed to update role", "error");
+    }
+  };
 
   useEffect(() => {
     fetchUsers();
@@ -342,9 +385,30 @@ const Users = () => {
                     </div>
                   </td>
                   <td>
-                    <span className={getRoleClass(user.role)}>
-                      {user.role?.replace("_", " ")}
-                    </span>
+                    <select
+                      className={`role-select ${getRoleClass(user.role)}`}
+                      value={user.role}
+                      onChange={(e) =>
+                        handleRoleChange(user.id, user.email, e.target.value)
+                      }
+                      style={{
+                        padding: "5px 10px",
+                        borderRadius: "20px",
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        border: "1px solid rgba(0,0,0,0.12)",
+                        background: "var(--admin-card-bg, #fff)",
+                        color: "inherit",
+                        outline: "none",
+                      }}
+                    >
+                      {ROLE_OPTIONS.map((r) => (
+                        <option key={r} value={r}>
+                          {r.replace("_", " ")}
+                        </option>
+                      ))}
+                    </select>
                   </td>
                   <td>
                     <span

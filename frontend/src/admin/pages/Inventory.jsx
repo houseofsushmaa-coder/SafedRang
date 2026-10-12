@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from "react";
-import axios from "axios";
 import {
   Search,
   Loader2,
@@ -13,7 +12,9 @@ import {
 } from "lucide-react";
 import "./AdminPages.css";
 
-import { API_BASE, getAuthHeaders, formatINR } from "../../config/api.js";
+import { formatINR } from "../../config/api.js";
+import { adminService } from "../adminService";
+import { useProducts } from "../../context/ProductContext";
 
 const Toast = ({ toast, onClose }) => {
   if (!toast) return null;
@@ -64,22 +65,11 @@ const AdjustStockModal = ({ item, onClose, onSuccess }) => {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("adminToken");
-      const payload = {
-        quantity: payloadQuantity,
-        reason: reason || (operation === "add" ? "Restock" : "Damage/Loss"),
-      };
-      if (isVariant) {
-        payload.variantId = item.variantId;
-      }
-
-      await axios.put(`${API_BASE}/products/${item.productId}/stock`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      onSuccess(`Stock updated successfully for ${item.name}`);
+      const newTotal = Math.max(0, item.currentStock + payloadQuantity);
+      await adminService.updateStock(item.productId, newTotal);
+      onSuccess(`Stock updated successfully for ${item.name} (${newTotal} units)`);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to update stock");
+      setError(err.message || "Failed to update stock");
     } finally {
       setLoading(false);
     }
@@ -211,6 +201,7 @@ const AdjustStockModal = ({ item, onClose, onSuccess }) => {
 };
 
 const Inventory = () => {
+  const { products: contextProducts } = useProducts();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -227,15 +218,30 @@ const Inventory = () => {
   const fetchInventory = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_BASE}/products?limit=100`);
-      setProducts(res.data.data?.products || []);
+      if (contextProducts && contextProducts.length > 0) {
+        setProducts(
+          contextProducts.map((p) => ({
+            id: p.id,
+            title: p.title,
+            sku: p.sku || `SR-${p.id}`,
+            category: p.category,
+            stock: p.stock ?? 10,
+            price: p.price,
+            image: p.image,
+            hasVariants: false,
+            variants: [],
+          }))
+        );
+      } else {
+        setProducts([]);
+      }
     } catch (error) {
       console.error("Failed to fetch inventory", error);
       showToast("Failed to load inventory", "error");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [contextProducts]);
 
   useEffect(() => {
     fetchInventory();

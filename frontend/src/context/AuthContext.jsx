@@ -8,18 +8,69 @@ export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Helper to resolve role and profile details
+  const resolveUserProfile = async (authUser) => {
+    if (!authUser) return null;
+
+    let role =
+      authUser.app_metadata?.role ||
+      authUser.user_metadata?.role ||
+      null;
+    let fullName =
+      authUser.user_metadata?.full_name ||
+      authUser.user_metadata?.name ||
+      authUser.email?.split("@")[0] ||
+      "";
+
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role, full_name")
+        .eq("id", authUser.id)
+        .maybeSingle();
+
+      if (profile) {
+        if (profile.role) role = profile.role;
+        if (profile.full_name) fullName = profile.full_name;
+      }
+    } catch (err) {
+      console.warn("Could not fetch profile:", err);
+    }
+
+    const cleanRole = (role || "customer").toLowerCase();
+
+    return {
+      ...authUser,
+      role: cleanRole,
+      name: fullName,
+      isAdmin: ["admin", "super_admin", "manager"].includes(cleanRole),
+    };
+  };
+
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
-      setUser(session?.user || null);
+      if (session?.user) {
+        const enrichedUser = await resolveUserProfile(session.user);
+        setUser(enrichedUser);
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
-      setUser(session?.user || null);
+      if (session?.user) {
+        const enrichedUser = await resolveUserProfile(session.user);
+        setUser(enrichedUser);
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
 
@@ -31,22 +82,36 @@ export const AuthProvider = ({ children }) => {
       email,
       password,
     });
-    
+
     if (error) {
       console.error("Login failed:", error.message);
-      return false;
+      return { success: false, error: error.message };
     }
-    return true;
+
+    const enrichedUser = await resolveUserProfile(data.user);
+    setUser(enrichedUser);
+
+    return {
+      success: true,
+      user: enrichedUser,
+      isAdmin: enrichedUser?.isAdmin ?? false,
+      role: enrichedUser?.role ?? "customer",
+    };
   };
 
   const logout = async () => {
     await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
   };
 
   const token = session?.access_token || (user ? "authenticated" : null);
+  const isAdmin = user?.isAdmin ?? false;
 
   return (
-    <AuthContext.Provider value={{ user, session, token, loading, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, session, token, loading, login, logout, isAdmin }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { Lock, Mail, AlertCircle } from "lucide-react";
 import "./Login.css";
@@ -9,8 +9,16 @@ const AdminLogin = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("error") === "unauthorized") {
+      setError("Access denied: You do not have Admin privileges.");
+    }
+  }, [location]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,11 +26,18 @@ const AdminLogin = () => {
     setIsLoading(true);
 
     try {
-      const success = await login(email, password);
-      if (success) {
-        navigate("/admin");
+      const result = await login(email, password);
+      if (result.success) {
+        if (!result.isAdmin) {
+          setError(
+            `Access denied: Your account role is "${result.role}". Only Admins can access this portal.`,
+          );
+          await logout();
+        } else {
+          navigate("/admin");
+        }
       } else {
-        setError("Invalid credentials");
+        setError(result.error || "Invalid credentials");
       }
     } catch (err) {
       setError(

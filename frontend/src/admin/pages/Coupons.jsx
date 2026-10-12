@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useCallback } from "react";
-import axios from "axios";
 import {
   Plus, Search, Edit2, Trash2, Ticket, Loader2,
   Copy, CheckCircle2, Calendar, Percent, IndianRupee, AlertCircle,
@@ -7,7 +6,8 @@ import {
 import "./AdminPages.css";
 import "./Settings.css";
 
-import { API_BASE, getAuthHeaders, formatINR } from "../../config/api.js";
+import { formatINR } from "../../config/api.js";
+import { adminService } from "../adminService";
 
 const EMPTY_FORM = {
   code: "",
@@ -52,8 +52,8 @@ const Coupons = () => {
   const fetchCoupons = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_BASE}/coupons`, { headers: getAuthHeaders() });
-      setCoupons(res.data.data ?? []);
+      const data = await adminService.getCoupons();
+      setCoupons(data ?? []);
     } catch (err) {
       console.error("Coupons fetch failed:", err);
       setCoupons([]);
@@ -75,13 +75,13 @@ const Coupons = () => {
     setEditItem(coupon);
     setForm({
       code: coupon.code,
-      type: coupon.type ?? "PERCENTAGE",
-      value: coupon.value ?? "",
+      type: coupon.type || coupon.discountType || "PERCENTAGE",
+      value: coupon.value || coupon.discountValue || "",
       minOrderAmount: coupon.minOrderAmount ?? "",
       maxDiscount: coupon.maxDiscount ?? "",
       usageLimit: coupon.usageLimit ?? "",
       expiresAt: coupon.expiresAt ? coupon.expiresAt.slice(0, 10) : "",
-      isActive: coupon.isActive ?? true,
+      isActive: coupon.isActive ?? (coupon.status === "ACTIVE"),
     });
     setError("");
     setShowModal(true);
@@ -99,26 +99,25 @@ const Coupons = () => {
     setSaving(true);
     try {
       const payload = {
+        id: editItem?.id,
         code: form.code.toUpperCase().trim(),
         type: form.type,
         value: Number(form.value),
+        discountType: form.type,
+        discountValue: Number(form.value),
         minOrderAmount: form.minOrderAmount ? Number(form.minOrderAmount) : null,
         maxDiscount: form.maxDiscount ? Number(form.maxDiscount) : null,
         usageLimit: form.usageLimit ? Number(form.usageLimit) : null,
         expiresAt: form.expiresAt || null,
         isActive: form.isActive,
+        status: form.isActive ? "ACTIVE" : "INACTIVE",
       };
-      if (editItem) {
-        await axios.put(`${API_BASE}/coupons/${editItem.id}`, payload, { headers: getAuthHeaders() });
-        showToast("Coupon updated successfully.");
-      } else {
-        await axios.post(`${API_BASE}/coupons`, payload, { headers: getAuthHeaders() });
-        showToast("Coupon created successfully.");
-      }
+      await adminService.saveCoupon(payload);
+      showToast(editItem ? "Coupon updated successfully." : "Coupon created successfully.");
       setShowModal(false);
       fetchCoupons();
     } catch (err) {
-      setError(err.response?.data?.message ?? "Failed to save coupon.");
+      setError(err.message ?? "Failed to save coupon.");
     } finally {
       setSaving(false);
     }
@@ -128,11 +127,11 @@ const Coupons = () => {
     if (!window.confirm("Delete this coupon?")) return;
     setDeleting(id);
     try {
-      await axios.delete(`${API_BASE}/coupons/${id}`, { headers: getAuthHeaders() });
+      await adminService.deleteCoupon(id);
       showToast("Coupon deleted.");
       fetchCoupons();
     } catch (err) {
-      alert(err.response?.data?.message ?? "Failed to delete coupon.");
+      alert(err.message ?? "Failed to delete coupon.");
     } finally {
       setDeleting(null);
     }

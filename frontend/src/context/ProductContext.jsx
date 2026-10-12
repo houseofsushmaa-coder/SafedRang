@@ -82,48 +82,70 @@ export const ProductProvider = ({ children }) => {
   }, []);
 
   const addProduct = async (product) => {
+    const formatted = {
+      id: product.id || `prod_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      title: product.title || product.name || "",
+      category: product.category || "Uncategorized",
+      price: Number(product.price || 0),
+      salePrice: product.salePrice ? Number(product.salePrice) : null,
+      description: product.description || "",
+      sku: product.sku || `SR-${Date.now()}`,
+      fabric: product.fabric || "",
+      image: product.image || product.images?.[0] || "",
+      images: product.images || (product.image ? [product.image] : []),
+      stockStatus: (product.stock > 0 || product.stockStatus === "In Stock") ? "In Stock" : "Out of Stock",
+      stock: product.stock !== undefined ? Number(product.stock) : 10,
+    };
+
+    setProducts((prev) => [formatted, ...prev]);
+
     try {
-      const { error } = await supabase.from("products").insert([
+      await supabase.from("products").insert([
         {
-          name: product.title,
-          price: product.price,
-          stock: 10,
-          description: product.description || "",
+          name: formatted.title,
+          price: formatted.price,
+          sale_price: formatted.salePrice,
+          stock: formatted.stock,
+          description: formatted.description,
+          category_name: formatted.category,
+          sku: formatted.sku,
+          image_url: formatted.image,
         },
       ]);
-      if (error) throw error;
-      fetchProducts();
     } catch (err) {
-      console.error("Failed to add product:", err);
+      console.warn("Could not insert product into Supabase:", err);
     }
   };
 
   const deleteProduct = async (id) => {
+    setProducts((prev) => prev.filter((p) => p.id !== id));
     try {
-      const { error } = await supabase.from("products").delete().eq("id", id);
-      if (error) throw error;
-      setProducts((prev) => prev.filter((p) => p.id !== id));
+      await supabase.from("products").delete().eq("id", id);
     } catch (err) {
-      console.error("Failed to delete product:", err);
+      console.warn("Failed to delete product from Supabase:", err);
     }
   };
 
   const updateProduct = async (id, updatedData) => {
+    setProducts((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, ...updatedData } : p))
+    );
+
     try {
-      const { error } = await supabase
+      await supabase
         .from("products")
         .update({
           name: updatedData.title,
           price: updatedData.price,
           sale_price: updatedData.salePrice,
           description: updatedData.description,
-          stock: updatedData.stockStatus === "In Stock" ? 10 : 0,
+          stock: updatedData.stockStatus === "In Stock" ? (updatedData.stock || 10) : 0,
+          sku: updatedData.sku,
+          image_url: updatedData.image,
         })
         .eq("id", id);
-      if (error) throw error;
-      fetchProducts();
     } catch (err) {
-      console.error("Failed to update product:", err);
+      console.warn("Failed to update product in Supabase:", err);
     }
   };
 

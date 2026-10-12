@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useCallback } from "react";
-import axios from "axios";
 import {
   Plus, Search, Edit2, Trash2, Tags, ChevronRight,
   Loader2, FolderOpen, AlertCircle,
@@ -7,7 +6,7 @@ import {
 import "./AdminPages.css";
 import "./Settings.css";
 
-import { API_BASE, getAuthHeaders, formatINR } from "../../config/api.js";
+import { adminService } from "../adminService";
 
 const EMPTY_FORM = { name: "", description: "", parentId: "", sortOrder: 0, status: "ACTIVE" };
 
@@ -31,8 +30,8 @@ const Categories = () => {
   const fetchCategories = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_BASE}/categories`);
-      setCategories(res.data.data ?? []);
+      const data = await adminService.getCategories();
+      setCategories(data || []);
     } catch (err) {
       console.error("Failed to load categories:", err);
     } finally {
@@ -66,24 +65,17 @@ const Categories = () => {
     if (!form.name.trim()) { setError("Name is required."); return; }
     setSaving(true);
     try {
-      const payload = {
+      await adminService.saveCategory({
+        id: editItem?.id,
         name: form.name.trim(),
         description: form.description || undefined,
-        parentId: form.parentId || null,
-        sortOrder: Number(form.sortOrder) || 0,
         status: form.status,
-      };
-      if (editItem) {
-        await axios.put(`${API_BASE}/categories/${editItem.id}`, payload, { headers: getAuthHeaders() });
-        showToast("Category updated successfully.");
-      } else {
-        await axios.post(`${API_BASE}/categories`, payload, { headers: getAuthHeaders() });
-        showToast("Category created successfully.");
-      }
+      });
+      showToast(editItem ? "Category updated successfully." : "Category created successfully.");
       setShowModal(false);
       fetchCategories();
     } catch (err) {
-      setError(err.response?.data?.message ?? "Failed to save category.");
+      setError(err.message ?? "Failed to save category.");
     } finally {
       setSaving(false);
     }
@@ -93,11 +85,11 @@ const Categories = () => {
     if (!window.confirm("Delete this category? This cannot be undone.")) return;
     setDeleting(id);
     try {
-      await axios.delete(`${API_BASE}/categories/${id}`, { headers: getAuthHeaders() });
+      await adminService.deleteCategory(id);
       showToast("Category deleted.");
       fetchCategories();
     } catch (err) {
-      alert(err.response?.data?.message ?? "Failed to delete category.");
+      alert(err.message ?? "Failed to delete category.");
     } finally {
       setDeleting(null);
     }

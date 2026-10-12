@@ -14,12 +14,11 @@ import {
 } from "lucide-react";
 import Papa from "papaparse";
 import { saveAs } from "file-saver";
-import axios from "axios";
-import { API_BASE, getAuthHeaders, formatINR } from "../../config/api.js";
+import { formatINR } from "../../config/api.js";
 import "./AdminPages.css";
 
 const Products = () => {
-  const { products, deleteProduct, loading } = useProducts();
+  const { products, deleteProduct, addProduct, loading } = useProducts();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [importing, setImporting] = useState(false);
@@ -96,36 +95,61 @@ const Products = () => {
     if (!file) return;
 
     setImporting(true);
-    const token = localStorage.getItem("adminToken");
-    
-    const formData = new FormData();
-    formData.append("file", file);
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        try {
+          const rows = results.data;
+          let count = 0;
+          for (const row of rows) {
+            const title = row.Title || row.title || row.Name || row.name;
+            if (!title) continue;
 
-    try {
-      const res = await axios.post(
-        `${API_BASE}/products/bulk/import`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
+            const price = parseFloat(row.Price || row.price || 0);
+            const salePrice =
+              parseFloat(
+                row.SalePrice || row.sale_price || row.salePrice || 0,
+              ) || null;
+            const sku =
+              row.SKU ||
+              row.sku ||
+              `SR-${Date.now()}-${Math.floor(Math.random() * 100)}`;
+            const category = row.Category || row.category || "Uncategorized";
+            const stock = parseInt(row.Stock || row.stock || 10, 10);
+            const description = row.Description || row.description || "";
+            const image =
+              row.Image || row.image || row.Images || row.images || "";
+
+            await addProduct({
+              title,
+              price,
+              salePrice,
+              sku,
+              category,
+              stock,
+              description,
+              image,
+              images: image ? [image] : [],
+            });
+            count++;
+          }
+          alert(`Successfully imported ${count} products!`);
+        } catch (err) {
+          console.error("Bulk import failed:", err);
+          alert("Failed to import products: " + err.message);
+        } finally {
+          setImporting(false);
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
         }
-      );
-      
-      const { success, failed } = res.data.data;
-      alert(`Import complete! Successfully imported ${success} products. ${failed > 0 ? `Failed to import ${failed} products.` : ""}`);
-      window.location.reload();
-    } catch (err) {
-      console.error("Bulk import failed:", err);
-      alert(err.response?.data?.message || "Failed to import products. Check console for details.");
-    } finally {
-      setImporting(false);
-      // Reset input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
+      },
+      error: (err) => {
+        alert("Failed to parse CSV: " + err.message);
+        setImporting(false);
+      },
+    });
   };
 
   return (

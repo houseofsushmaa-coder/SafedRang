@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import axios from "axios";
 import { Link } from "react-router-dom";
 import {
   IndianRupee,
@@ -37,7 +36,8 @@ import {
 import "./AdminPages.css";
 import "./Dashboard.css";
 
-import { API_BASE, getAuthHeaders, formatINR } from "../../config/api.js";
+import { formatINR } from "../../config/api.js";
+import { adminService } from "../adminService";
 const REFRESH_INTERVAL = 30;
 
 const PERIOD_OPTIONS = [
@@ -108,36 +108,26 @@ const Dashboard = () => {
       if (isManual) setRefreshing(true);
       setError(null);
       try {
-        const res = await axios.get(`${API_BASE}/analytics/dashboard`, {
-          params: { filter: period },
-          headers: getAuthHeaders(),
-        });
-        setData(res.data.data);
+        const res = await adminService.getDashboard(period);
+        setData(res.data);
         setLastUpdated(new Date());
         setIsOnline(true);
       } catch (err) {
         console.error("Dashboard fetch failed:", err);
         setIsOnline(false);
-        // Only show error if we have no previous data to show
         setError((prevErr) => (data === null ? "Unable to load dashboard data." : prevErr));
       } finally {
         setLoading(false);
         setRefreshing(false);
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [period], // intentionally omitting `data` to avoid fetch loop
+    [period, data],
   );
 
   const fetchChart = useCallback(async () => {
     setChartLoading(true);
     try {
-      const chartFilter = period === "last7" ? "last7" : "last30";
-      const res = await axios.get(`${API_BASE}/analytics/sales-chart`, {
-        params: { filter: chartFilter },
-        headers: getAuthHeaders(),
-      });
-      const raw = res.data.data ?? [];
+      const raw = await adminService.getSalesChart(period);
       setChartData(
         raw.map((d) => ({ name: formatChartDate(d.date), revenue: d.revenue })),
       );

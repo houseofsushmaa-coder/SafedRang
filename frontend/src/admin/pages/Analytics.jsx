@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useCallback } from "react";
-import axios from "axios";
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -11,7 +10,8 @@ import {
 import "./AdminPages.css";
 import "./Analytics.css";
 
-import { API_BASE, getAuthHeaders, formatINR } from "../../config/api.js";
+import { formatINR } from "../../config/api.js";
+import { adminService } from "../adminService.js";
 
 const PERIOD_OPTIONS = [
   { label: "Last 7 Days", value: "last7" },
@@ -54,28 +54,20 @@ const Analytics = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-
-
   const fetchAll = useCallback(async (manual = false) => {
     if (manual) setRefreshing(true);
     else setLoading(true);
     try {
-      const [chartRes, dashRes] = await Promise.all([
-        axios.get(`${API_BASE}/analytics/sales-chart`, {
-          params: { filter: period === "last7" ? "last7" : "last30" },
-          headers: getAuthHeaders(),
-        }),
-        axios.get(`${API_BASE}/analytics/dashboard`, {
-          params: { filter: period },
-          headers: getAuthHeaders(),
-        }),
+      const [chartPoints, metrics] = await Promise.all([
+        adminService.getSalesChart(period === "last7" ? "last7" : "last30"),
+        adminService.getAnalytics(period),
       ]);
-      setSalesData((chartRes.data.data ?? []).map((d) => ({
+      setSalesData((chartPoints ?? []).map((d) => ({
         name: formatChartDate(d.date),
         Revenue: d.revenue ?? 0,
         Orders: d.orders ?? 0,
       })));
-      setDashData(dashRes.data.data);
+      setDashData(metrics);
     } catch (err) {
       console.error("Analytics fetch failed:", err);
     } finally {

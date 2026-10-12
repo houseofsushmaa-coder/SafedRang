@@ -15,14 +15,16 @@ import "./EditProduct.css";
 const EditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { products, updateProduct, loading } = useProducts();
+  const { products, updateProduct, addProduct, loading } = useProducts();
+  const isNew = id === "new" || !id;
   const mainUploadRef = useRef(null);
   const galleryUploadRef = useRef(null);
   const [draggingMain, setDraggingMain] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
-    category: "",
+    category: "Sarees",
     price: "",
     salePrice: "",
     sku: "",
@@ -33,27 +35,25 @@ const EditProduct = () => {
   });
 
   useEffect(() => {
-    if (!loading && products.length > 0) {
+    if (!isNew && !loading && products.length > 0) {
       const product = products.find((p) => p.id === id);
       if (product) {
-        // Strip basic HTML tags from description for easier text editing if needed,
-        // or just load it as is.
         let rawDesc = product.description || "";
 
         setFormData({
           title: product.title || "",
-          category: product.category || "",
+          category: product.category || "Sarees",
           price: product.price || "",
           salePrice: product.salePrice || "",
           sku: product.sku || "",
           stockStatus: product.stockStatus || "In Stock",
           image: product.image || "",
-          images: product.images || [],
+          images: product.images || (product.image ? [product.image] : []),
           description: rawDesc,
         });
       }
     }
-  }, [id, products, loading]);
+  }, [id, isNew, products, loading]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -87,6 +87,7 @@ const EditProduct = () => {
     setFormData((prev) => ({
       ...prev,
       images: [...prev.images, ...base64List],
+      image: prev.image || base64List[0] || "",
     }));
   };
 
@@ -119,17 +120,41 @@ const EditProduct = () => {
     handleMainImageUpload(e.dataTransfer.files);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    updateProduct(id, {
+    if (!formData.title.trim()) {
+      alert("Please enter a product title.");
+      return;
+    }
+    if (!formData.price) {
+      alert("Please enter a regular price.");
+      return;
+    }
+
+    setSaving(true);
+    const payload = {
       ...formData,
       price: parseFloat(formData.price) || 0,
       salePrice: formData.salePrice ? parseFloat(formData.salePrice) : null,
-    });
-    navigate("/admin/products");
+      stock: formData.stockStatus === "In Stock" ? 10 : 0,
+    };
+
+    try {
+      if (isNew) {
+        await addProduct(payload);
+      } else {
+        await updateProduct(id, payload);
+      }
+      navigate("/admin/products");
+    } catch (err) {
+      console.error("Save failed:", err);
+      alert("Failed to save product. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  if (loading) {
+  if (!isNew && loading) {
     return (
       <div className="admin-loading-state">Loading product details...</div>
     );
@@ -139,26 +164,38 @@ const EditProduct = () => {
     <div className="admin-page edit-product-page">
       <div className="page-header sticky-header">
         <div>
-          <h2>{formData.title || "Edit Product"}</h2>
+          <h2>
+            {isNew
+              ? formData.title || "Add New Product"
+              : formData.title || "Edit Product"}
+          </h2>
           <p className="page-subtitle">
-            Make changes to product information, pricing, and media.
+            {isNew
+              ? "Enter product information, pricing, and media to list in your store."
+              : "Make changes to product information, pricing, and media."}
           </p>
         </div>
         <div className="header-actions">
-          <button
-            className="admin-btn admin-btn-outline icon-left"
-            onClick={() => window.open(`/product/${id}`, "_blank")}
-          >
-            <Star size={16} /> Preview
-          </button>
+          {!isNew && (
+            <button
+              className="admin-btn admin-btn-outline icon-left"
+              onClick={() => window.open(`/product/${id}`, "_blank")}
+            >
+              <Star size={16} /> Preview
+            </button>
+          )}
           <button
             className="admin-btn admin-btn-outline icon-left"
             onClick={() => navigate("/admin/products")}
           >
             <X size={16} /> Cancel
           </button>
-          <button className="admin-btn icon-left" onClick={handleSave}>
-            <Save size={16} /> Save Product
+          <button
+            className="admin-btn icon-left"
+            onClick={handleSave}
+            disabled={saving}
+          >
+            <Save size={16} /> {saving ? "Saving…" : isNew ? "Create Product" : "Save Product"}
           </button>
         </div>
       </div>
