@@ -189,6 +189,15 @@ const Settings = () => {
                 {(get("seo", "meta_description") ?? "").length}/160
               </p>
             </FormField>
+            <FormField label="Google Analytics Measurement ID" hint="Your GA4 Measurement ID (e.g. G-XXXXXXXXXX) from Google Analytics -> Data streams.">
+              <input
+                className="admin-input"
+                value={get("seo", "google_analytics_id")}
+                onChange={(e) => set("seo", "google_analytics_id", e.target.value)}
+                placeholder="G-XXXXXXXXXX"
+                id="google-analytics-id"
+              />
+            </FormField>
             <FormField label="Sitemap URL" hint="Your sitemap URL.">
               <input className="admin-input" value={`${typeof window !== "undefined" ? window.location.origin : ""}/sitemap.xml`} readOnly style={{ background: "#f8fafc", color: "var(--admin-text-muted)" }} />
             </FormField>

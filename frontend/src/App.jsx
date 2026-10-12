@@ -33,6 +33,7 @@ import { CurrencyProvider } from "./context/CurrencyContext";
 import { CartProvider } from "./context/CartContext";
 
 import { Toaster } from "react-hot-toast";
+import GoogleAnalytics from "./components/GoogleAnalytics";
 
 const StorefrontLayout = () => (
   <div className="app-layout">
@@ -65,6 +66,7 @@ function App() {
         <CurrencyProvider>
           <CartProvider>
             <Router>
+              <GoogleAnalytics />
               <Toaster 
                 position="bottom-center"
                 toastOptions={{

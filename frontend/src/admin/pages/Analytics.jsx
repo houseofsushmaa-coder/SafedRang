@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { Link } from "react-router-dom";
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import {
   TrendingUp, IndianRupee, ShoppingBag, Users,
-  RefreshCw, BarChart3, Calendar,
+  RefreshCw, BarChart3, Calendar, ExternalLink, Activity,
 } from "lucide-react";
 import "./AdminPages.css";
 import "./Analytics.css";
@@ -51,6 +52,7 @@ const Analytics = () => {
   const [period, setPeriod] = useState("last30");
   const [salesData, setSalesData] = useState([]);
   const [dashData, setDashData] = useState(null);
+  const [gaId, setGaId] = useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -58,9 +60,10 @@ const Analytics = () => {
     if (manual) setRefreshing(true);
     else setLoading(true);
     try {
-      const [chartPoints, metrics] = await Promise.all([
+      const [chartPoints, metrics, settings] = await Promise.all([
         adminService.getSalesChart(period === "last7" ? "last7" : "last30"),
         adminService.getAnalytics(period),
+        adminService.getSettings(),
       ]);
       setSalesData((chartPoints ?? []).map((d) => ({
         name: formatChartDate(d.date),
@@ -68,6 +71,7 @@ const Analytics = () => {
         Orders: d.orders ?? 0,
       })));
       setDashData(metrics);
+      setGaId(settings?.seo?.google_analytics_id || import.meta.env.VITE_GA_MEASUREMENT_ID || "");
     } catch (err) {
       console.error("Analytics fetch failed:", err);
     } finally {
@@ -118,6 +122,55 @@ const Analytics = () => {
             <RefreshCw size={15} className={refreshing ? "spin" : ""} />
             Refresh
           </button>
+        </div>
+      </div>
+
+      {/* Google Analytics Banner */}
+      <div style={{
+        background: gaId ? "#f0fdf4" : "#fefce8",
+        border: `1px solid ${gaId ? "#bbf7d0" : "#fef08a"}`,
+        borderRadius: "10px",
+        padding: "14px 18px",
+        marginBottom: "20px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        flexWrap: "wrap",
+        gap: "12px",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <Activity size={18} color={gaId ? "#16a34a" : "#ca8a04"} />
+          <div>
+            <strong style={{ fontSize: "0.9rem", color: gaId ? "#15803d" : "#854d0e" }}>
+              {gaId ? `Google Analytics Active (${gaId})` : "Google Analytics Not Connected"}
+            </strong>
+            <p style={{ margin: 0, fontSize: "0.8rem", color: gaId ? "#166534" : "#713f12" }}>
+              {gaId
+                ? "Live visitor traffic, conversions, and bounce rates are currently streaming to your Google Analytics property."
+                : "Connect your Google Analytics 4 Measurement ID to start streaming live traffic and audience data."}
+            </p>
+          </div>
+        </div>
+        <div>
+          {gaId ? (
+            <a
+              href="https://analytics.google.com/analytics/web/"
+              target="_blank"
+              rel="noreferrer"
+              className="admin-btn admin-btn-outline"
+              style={{ fontSize: "0.82rem", padding: "6px 12px", display: "inline-flex", alignItems: "center", gap: "6px" }}
+            >
+              Open GA4 Dashboard <ExternalLink size={13} />
+            </a>
+          ) : (
+            <Link
+              to="/admin/settings"
+              className="admin-btn"
+              style={{ fontSize: "0.82rem", padding: "6px 12px" }}
+            >
+              Connect in Settings
+            </Link>
+          )}
         </div>
       </div>
 
