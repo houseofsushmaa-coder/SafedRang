@@ -46,24 +46,22 @@
 
 /* 1. Left Column: Desktop Navigation & Mobile Toggle */
 .header-left {
-  flex: 1 1 auto;
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  min-width: 0;
+  z-index: 2;
 }
 
 .desktop-nav {
   display: flex;
   align-items: center;
-  min-width: 0;
 }
 
 .desktop-nav ul {
   list-style: none;
   display: flex;
   flex-wrap: nowrap;
-  gap: clamp(1rem, 1.5vw, 2.2rem);
+  gap: clamp(0.9rem, 1.4vw, 2rem);
   margin: 0;
   padding: 0;
   align-items: center;
@@ -76,7 +74,7 @@
 
 .desktop-nav a {
   font-family: var(--font-body, "Manrope", sans-serif);
-  font-size: clamp(0.76rem, 0.85vw, 0.85rem);
+  font-size: clamp(0.75rem, 0.82vw, 0.84rem);
   letter-spacing: 0.08em;
   font-weight: 600;
   color: var(--color-dark-charcoal, #2A211D);
@@ -118,16 +116,21 @@
   color: var(--color-dark-charcoal, #2A211D);
   align-items: center;
   justify-content: center;
+  z-index: 2;
 }
 
-/* 2. Center Column: Brand Logo (Mathematically Centered) */
+/* 2. Center Column: Brand Logo (Always In Dead Center of Screen) */
 .header-center {
-  flex: 0 0 auto;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 0 clamp(1rem, 2.5vw, 2.5rem);
+  z-index: 3;
+  pointer-events: auto;
 }
 
 .site-logo-img {
@@ -145,12 +148,12 @@
 
 /* 3. Right Column: Action Buttons */
 .header-right {
-  flex: 1 1 auto;
   display: flex;
-  gap: clamp(0.9rem, 1.4vw, 1.5rem);
+  gap: clamp(0.85rem, 1.3vw, 1.4rem);
   align-items: center;
   justify-content: flex-end;
-  min-width: 0;
+  margin-left: auto;
+  z-index: 2;
   white-space: nowrap;
 }
 
