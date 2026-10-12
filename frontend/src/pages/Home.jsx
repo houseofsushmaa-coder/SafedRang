@@ -46,29 +46,6 @@ export default function Home() {
             src="/videos/video4.mp4"
           />
         </div>
-        <div className="hero-overlay"></div>
-        <div className="hero-content container">
-          <span className="hero-subtitle fade-up-1">
-            LUCKNOW'S FINEST CRAFTSMANSHIP
-          </span>
-          <h1 className="hero-title fade-up-2">
-            THE ART OF
-            <br />
-            ELEGANCE
-          </h1>
-          <p className="hero-desc fade-up-3">
-            Handcrafted Chikankari, Zardozi, and Kamdani. Designed for the
-            modern woman, preserving the heritage of generations.
-          </p>
-          <div className="hero-ctas fade-up-4">
-            <Link to="/shop" className="btn-hero-primary">
-              SHOP COLLECTION
-            </Link>
-            <Link to="/craft" className="btn-hero-secondary">
-              <Play size={16} /> EXPLORE CRAFT
-            </Link>
-          </div>
-        </div>
       </section>
 
       {/* 2. Luxury Promise (Redesigned) */}
