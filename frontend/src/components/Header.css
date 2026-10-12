@@ -16,55 +16,68 @@
 .announcement-bar {
   background-color: var(--color-deep-wine, #6E1E2A);
   color: var(--color-warm-ivory, #FAF5EC);
-  padding: 0.55rem 0;
+  padding: 0.55rem clamp(1.2rem, 3vw, 3rem);
   font-size: 0.76rem;
   font-family: var(--font-body, "Manrope", sans-serif);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   font-weight: 600;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .announcement-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
 }
 
-/* --- Main Header Row (3-Column Equal Layout) --- */
+/* --- Main Header Row (Full Width · Single Row · Zero Wrapping) --- */
 .header-main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 1.25rem;
-  padding-bottom: 1.25rem;
+  padding: 1.15rem clamp(1.2rem, 3vw, 3rem);
   position: relative;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* 1. Left Column: Desktop Navigation & Mobile Toggle */
 .header-left {
-  flex: 1;
+  flex: 1 1 auto;
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  min-width: 0;
 }
 
 .desktop-nav {
   display: flex;
   align-items: center;
+  min-width: 0;
 }
 
 .desktop-nav ul {
   list-style: none;
   display: flex;
-  gap: 2rem;
+  flex-wrap: nowrap;
+  gap: clamp(1rem, 1.5vw, 2.2rem);
   margin: 0;
   padding: 0;
+  align-items: center;
+}
+
+.desktop-nav li {
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .desktop-nav a {
   font-family: var(--font-body, "Manrope", sans-serif);
-  font-size: 0.82rem;
-  letter-spacing: 0.1em;
+  font-size: clamp(0.76rem, 0.85vw, 0.85rem);
+  letter-spacing: 0.08em;
   font-weight: 600;
   color: var(--color-dark-charcoal, #2A211D);
   text-transform: uppercase;
@@ -72,6 +85,9 @@
   transition: color 0.25s ease;
   position: relative;
   padding-bottom: 4px;
+  white-space: nowrap;
+  word-break: keep-all;
+  display: inline-block;
 }
 
 .desktop-nav a::after {
@@ -106,17 +122,18 @@
 
 /* 2. Center Column: Brand Logo (Mathematically Centered) */
 .header-center {
-  flex: 1;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  padding: 0 clamp(1rem, 2.5vw, 2.5rem);
 }
 
 .site-logo-img {
-  height: 44px;
+  height: 42px;
   width: auto;
-  max-width: 190px;
+  max-width: 175px;
   object-fit: contain;
   display: block;
   transition: opacity 0.25s ease;
@@ -128,11 +145,13 @@
 
 /* 3. Right Column: Action Buttons */
 .header-right {
-  flex: 1;
+  flex: 1 1 auto;
   display: flex;
-  gap: 1.4rem;
+  gap: clamp(0.9rem, 1.4vw, 1.5rem);
   align-items: center;
   justify-content: flex-end;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .currency-selector select {
@@ -1026,7 +1045,7 @@
 /* ==========================================================================
    RESPONSIVE MEDIA QUERIES (MOBILE OPTIMIZATION)
    ========================================================================== */
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .desktop-nav {
     display: none;
   }

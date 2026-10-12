@@ -124,7 +124,7 @@ export default function Header() {
       <header className="site-header">
         {/* Top Announcement Bar */}
         <div className="announcement-bar">
-          <div className="container announcement-content">
+          <div className="announcement-content">
             <span>HANDCRAFTED IN LUCKNOW · WORLDWIDE SHIPPING</span>
             <span className="hidden-mobile">
               SLOW FASHION · HERITAGE CHIKANKARI
@@ -132,8 +132,8 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Main Header Row: Left Menu · Center Logo · Right Actions */}
-        <div className="header-main container">
+        {/* Main Header Row: Left Menu · Center Logo · Right Actions (Full Width) */}
+        <div className="header-main">
           {/* 1. LEFT: Desktop Navigation & Mobile Toggle */}
           <div className="header-left">
             <button
