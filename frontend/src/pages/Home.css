@@ -274,82 +274,119 @@
   margin: 0 auto;
 }
 
-/* 3. Editorial Categories */
-.editorial-categories {
-  padding: 6rem 2rem 8rem 2rem;
+/* 3. Shop by Clothing Category (Full Bleed Editorial Grid) */
+.shop-clothing-category-section {
+  width: 100%;
+  padding: 5rem 0 0 0;
+  background: #ffffff;
 }
 
-.category-grid {
+.clothing-category-header {
+  text-align: center;
+  padding: 0 1.5rem 2.8rem 1.5rem;
+}
+
+.clothing-category-heading {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: 1.6rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.clothing-category-grid {
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: 2rem;
-  min-height: 700px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  width: 100%;
 }
 
-.category-column {
-  display: grid;
-  grid-template-rows: 1fr 1fr;
-  gap: 2rem;
-}
 
-.category-card {
+.clothing-cat-card {
   position: relative;
-  overflow: hidden;
   display: block;
-  height: 100%;
-  min-height: 300px;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+  overflow: hidden;
+  height: 490px;
+  text-decoration: none;
+  background-color: #111111;
 }
 
-.category-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-}
-
-.category-card img {
+.clothing-cat-card img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 1.5s ease;
+  display: block;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.category-card:hover img {
-  transform: scale(1.05);
+.clothing-cat-card:hover img {
+  transform: scale(1.06);
 }
 
-.category-overlay {
+.clothing-cat-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 60%);
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 45%,
+    rgba(0, 0, 0, 0.42) 72%,
+    rgba(0, 0, 0, 0.78) 100%
+  );
   display: flex;
-  align-items: flex-end;
-  padding: 3rem;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 2.2rem 2.4rem;
+  gap: 0.95rem;
+  transition: background 0.4s ease;
 }
 
-.category-text h3 {
-  color: var(--color-white);
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
+.clothing-cat-card:hover .clothing-cat-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.05) 30%,
+    rgba(0, 0, 0, 0.5) 65%,
+    rgba(0, 0, 0, 0.86) 100%
+  );
 }
 
-.explore-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--color-white);
-  font-family: var(--font-body);
-  font-size: 0.85rem;
+.clothing-cat-title {
+  color: #ffffff;
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.3s ease;
+  margin: 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  transition: transform 0.3s ease;
 }
 
-.category-card:hover .explore-link {
-  opacity: 1;
-  transform: translateY(0);
+.clothing-cat-btn {
+  background: #ffffff;
+  color: #111111;
+  font-family: var(--font-body, "Manrope", sans-serif);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 10px 24px;
+  display: inline-block;
+  border: 1px solid #ffffff;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
 }
+
+.clothing-cat-card:hover .clothing-cat-btn {
+  background: #111111;
+  color: #ffffff;
+  border-color: #111111;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
 
 /* 4. One of One Immersive */
 .ooo-immersive {
@@ -610,16 +647,22 @@
   .promise-cards {
     grid-template-columns: 1fr;
   }
-  .category-grid {
-    grid-template-columns: 1fr;
-    min-height: auto;
+  .clothing-category-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
-  .category-card {
-    height: 400px;
+  .clothing-category-heading {
+    font-size: 1.35rem;
+    letter-spacing: 0.15em;
   }
-  .category-column {
-    grid-template-rows: 1fr;
-    grid-template-columns: 1fr;
+  .clothing-cat-card {
+    height: 420px;
+  }
+
+  .clothing-cat-overlay {
+    padding: 1.8rem 1.6rem;
+  }
+  .clothing-cat-title {
+    font-size: 1.18rem;
   }
   .ooo-glass-card {
     margin: 0 auto;
@@ -645,16 +688,51 @@
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 680px) {
+  .shop-clothing-category-section {
+    padding: 3.2rem 0 0 0;
+  }
+  .clothing-category-header {
+    padding: 0 1rem 1.6rem 1rem;
+  }
+  .clothing-category-heading {
+    font-size: 1.15rem;
+    letter-spacing: 0.12em;
+  }
+  /* 2x2 grid on mobile for categories */
+  .clothing-category-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+  }
+  .clothing-cat-card {
+    height: 260px;
+  }
+  .clothing-cat-title {
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+  }
+  .clothing-cat-overlay {
+    padding: 1.2rem 1rem;
+    gap: 0.6rem;
+  }
+  .clothing-cat-btn {
+    font-size: 0.6rem;
+    padding: 7px 14px;
+  }
+  /* Hero: show only 2 videos side-by-side (top two) - hide bottom two */
   .hero {
-    height: 70vh;
-    min-height: 500px;
+    height: 60vh;
+    min-height: 360px;
   }
   .hero-video-bg {
     grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
+    grid-template-rows: 1fr;
   }
-  /* Keep all 4 visible on mobile */
+  /* Hide the 3rd and 4th videos on small mobile - show only top 2 */
+  .hero-video-bg video:nth-child(3),
+  .hero-video-bg video:nth-child(4) {
+    display: none;
+  }
   .hero-title {
     font-size: 2.5rem;
   }
@@ -667,10 +745,8 @@
     text-align: center;
     justify-content: center;
   }
-  .category-card {
-    height: 300px;
-  }
   .j-image img {
     aspect-ratio: 16/9;
   }
 }
+

@@ -94,49 +94,60 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3. Featured Categories (Editorial Style) */}
-      <section className="editorial-categories container">
-        <h2 className="section-title text-center">CURATED COLLECTIONS</h2>
-        <div className="category-grid">
-          <Link to="/shop?category=sarees" className="category-card large">
-            <img src="/woman_chikankari_saree.jpg" alt="Chikankari Sarees" />
-            <div className="category-overlay">
-              <div className="category-text">
-                <h3>CHIKANKARI SAREES</h3>
-                <span className="explore-link">
-                  Explore <ArrowRight size={14} />
-                </span>
-              </div>
+      {/* 3. Shop by Category */}
+      <section className="shop-clothing-category-section">
+        <div className="clothing-category-header">
+          <h2 className="clothing-category-heading">SHOP BY CATEGORY</h2>
+        </div>
+        <div className="clothing-category-grid">
+          {/* Card 1: SAREES */}
+          <Link to="/shop?category=sarees" className="clothing-cat-card">
+            <img src="/woman_chikankari_saree.jpg" alt="Sarees" />
+            <div className="clothing-cat-overlay">
+              <h3 className="clothing-cat-title">SAREES</h3>
+              <span className="clothing-cat-btn">SHOP NOW</span>
             </div>
           </Link>
 
-          <div className="category-column">
-            <Link to="/shop?craft=zardozi" className="category-card">
-              <img src="/pdp-4.jpg" alt="Zardozi" />
-              <div className="category-overlay">
-                <div className="category-text">
-                  <h3>ZARDOZI CRAFT</h3>
-                  <span className="explore-link">
-                    Explore <ArrowRight size={14} />
-                  </span>
-                </div>
-              </div>
-            </Link>
+          {/* Card 2: DUPATTAS */}
+          <Link to="/shop?category=dupattas" className="clothing-cat-card">
+            <img
+              src="https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2023/03/Chanderi-Chikankari-Dupatta.webp"
+              alt="Dupattas"
+            />
+            <div className="clothing-cat-overlay">
+              <h3 className="clothing-cat-title">DUPATTAS</h3>
+              <span className="clothing-cat-btn">SHOP NOW</span>
+            </div>
+          </Link>
 
-            <Link to="/shop?category=kurta-sets" className="category-card">
-              <img src="/pdp-3.jpg" alt="Kurta Sets" />
-              <div className="category-overlay">
-                <div className="category-text">
-                  <h3>KURTA SETS</h3>
-                  <span className="explore-link">
-                    Explore <ArrowRight size={14} />
-                  </span>
-                </div>
-              </div>
-            </Link>
-          </div>
+          {/* Card 3: KURTA SETS */}
+          <Link to="/shop?category=kurta-sets" className="clothing-cat-card">
+            <img
+              src="https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/pista-green-semi-11-scaled.jpeg"
+              alt="Kurta Sets"
+            />
+            <div className="clothing-cat-overlay">
+              <h3 className="clothing-cat-title">KURTA SETS</h3>
+              <span className="clothing-cat-btn">SHOP NOW</span>
+            </div>
+          </Link>
+
+          {/* Card 4: BLOUSES */}
+          <Link to="/shop?category=blouses" className="clothing-cat-card">
+            <img
+              src="https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/05/rusty-red-1-scaled.jpeg"
+              alt="Blouses"
+            />
+            <div className="clothing-cat-overlay">
+              <h3 className="clothing-cat-title">BLOUSES</h3>
+              <span className="clothing-cat-btn">SHOP NOW</span>
+            </div>
+          </Link>
         </div>
       </section>
+
+
 
       {/* 4. One-of-One Immersive Banner */}
       <section className="ooo-immersive">

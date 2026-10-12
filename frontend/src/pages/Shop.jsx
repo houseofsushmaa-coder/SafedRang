@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { useProducts } from "../context/ProductContext";
 import { useCurrency } from "../context/CurrencyContext";
@@ -22,10 +22,18 @@ const SORT_OPTIONS = [
 export default function Shop() {
   const { products, getAllCategories } = useProducts();
   const { formatPrice } = useCurrency();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, []);
+
+  const urlSearch = searchParams.get("search") || "";
+  const urlCategory = searchParams.get("category") || "";
+  const urlCraft = searchParams.get("craft") || "";
+  const urlFabric = searchParams.get("fabric") || "";
+
+  const categories = getAllCategories();
 
   /* ── filter state ── */
   const [activeCategory, setActiveCategory] = useState("All");
@@ -35,7 +43,31 @@ export default function Shop() {
   const [sortBy, setSortBy] = useState("newest");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  const categories = getAllCategories();
+  // Sync URL params to filter state
+  useEffect(() => {
+    if (urlCategory) {
+      const matched = categories.find(
+        (c) => c.toLowerCase() === urlCategory.toLowerCase() ||
+               c.toLowerCase().replace(/\s+/g, "-") === urlCategory.toLowerCase()
+      );
+      if (matched) setActiveCategory(matched);
+    } else {
+      setActiveCategory("All");
+    }
+
+    if (urlCraft) {
+      setActiveCraft(urlCraft);
+    } else {
+      setActiveCraft("All");
+    }
+
+    if (urlFabric) {
+      setActiveFabric(urlFabric);
+    } else {
+      setActiveFabric("All");
+    }
+  }, [urlCategory, urlCraft, urlFabric, categories]);
+
   const crafts = useMemo(
     () => ["All", ...new Set(products.map((p) => p.craft).filter(Boolean))],
     [products],
@@ -49,6 +81,18 @@ export default function Shop() {
   const filteredProducts = useMemo(() => {
     let list = [...products];
 
+    // Filter by URL search query keyword (e.g. "viscose", "semi-stitched", "unstitched")
+    if (urlSearch.trim()) {
+      const q = urlSearch.toLowerCase().trim();
+      list = list.filter((p) =>
+        (p.title || "").toLowerCase().includes(q) ||
+        (p.description || "").toLowerCase().includes(q) ||
+        (p.category || "").toLowerCase().includes(q) ||
+        (p.fabric || "").toLowerCase().includes(q) ||
+        (p.craft || "").toLowerCase().includes(q)
+      );
+    }
+
     if (activeCategory !== "All")
       list = list.filter((p) => p.category === activeCategory);
     if (activeCraft !== "All")
@@ -61,8 +105,6 @@ export default function Shop() {
         return price >= activePriceRange.min && price <= activePriceRange.max;
       });
     }
-    
-    console.log("Shop.jsx debug -> products.length:", products.length, "filtered list.length:", list.length);
 
     switch (sortBy) {
       case "price-asc":
@@ -72,7 +114,7 @@ export default function Shop() {
         break;
       case "price-desc":
         list.sort(
-          (a, b) => (b.salePrice ?? b.price) - (a.salePrice ?? a.price),
+          (b, bVal) => (bVal.salePrice ?? bVal.price) - (b.salePrice ?? b.price),
         );
         break;
       case "name-asc":
@@ -83,23 +125,26 @@ export default function Shop() {
     }
 
     return list;
-  }, [products, activeCategory, activeCraft, activeFabric, activePriceRange, sortBy]);
+  }, [products, urlSearch, activeCategory, activeCraft, activeFabric, activePriceRange, sortBy]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
+    if (urlSearch) count++;
     if (activeCategory !== "All") count++;
     if (activeCraft !== "All") count++;
     if (activeFabric !== "All") count++;
     if (activePriceRange) count++;
     return count;
-  }, [activeCategory, activeCraft, activeFabric, activePriceRange]);
+  }, [urlSearch, activeCategory, activeCraft, activeFabric, activePriceRange]);
 
   const clearAllFilters = useCallback(() => {
     setActiveCategory("All");
     setActiveCraft("All");
     setActiveFabric("All");
     setActivePriceRange(null);
-  }, []);
+    setSearchParams({});
+  }, [setSearchParams]);
+
 
   /* ── Couture Filter Sidebar ── */
   const renderFilters = () => (
@@ -209,18 +254,54 @@ export default function Shop() {
       <div className="shop-top-bar container">
         <div className="active-filters">
           <span className="active-label">ACTIVE:</span>
+          {urlSearch && (
+            <span
+              className="active-tag"
+              onClick={() => {
+                const newParams = new URLSearchParams(searchParams);
+                newParams.delete("search");
+                setSearchParams(newParams);
+              }}
+            >
+              SEARCH: &quot;{urlSearch.toUpperCase()}&quot; ✕
+            </span>
+          )}
           {activeCategory !== "All" && (
-            <span className="active-tag" onClick={() => setActiveCategory("All")}>
+            <span
+              className="active-tag"
+              onClick={() => {
+                setActiveCategory("All");
+                const newParams = new URLSearchParams(searchParams);
+                newParams.delete("category");
+                setSearchParams(newParams);
+              }}
+            >
               {activeCategory.toUpperCase()} ✕
             </span>
           )}
           {activeCraft !== "All" && (
-            <span className="active-tag" onClick={() => setActiveCraft("All")}>
+            <span
+              className="active-tag"
+              onClick={() => {
+                setActiveCraft("All");
+                const newParams = new URLSearchParams(searchParams);
+                newParams.delete("craft");
+                setSearchParams(newParams);
+              }}
+            >
               {activeCraft.toUpperCase()} ✕
             </span>
           )}
           {activeFabric !== "All" && (
-            <span className="active-tag" onClick={() => setActiveFabric("All")}>
+            <span
+              className="active-tag"
+              onClick={() => {
+                setActiveFabric("All");
+                const newParams = new URLSearchParams(searchParams);
+                newParams.delete("fabric");
+                setSearchParams(newParams);
+              }}
+            >
               {activeFabric.toUpperCase()} ✕
             </span>
           )}

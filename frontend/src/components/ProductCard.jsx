@@ -84,8 +84,7 @@ export default function ProductCard({ product }) {
           )}
 
           <div className="editorial-badge">
-            <span className="badge-line-1">ATELIER EXCLUSIVE</span>
-            <span className="badge-line-2">GI CERTIFIED</span>
+            <span className="badge-line-1">ONE OF ONE</span>
           </div>
 
           <button
@@ -116,7 +115,7 @@ export default function ProductCard({ product }) {
               {formatPrice(hasSale ? product.salePrice : product.price)}
             </span>
             <span className="examine-btn">
-              EXAMINE <span className="arrow">→</span>
+              EXPLORE <span className="arrow">→</span>
             </span>
           </div>
         </div>
