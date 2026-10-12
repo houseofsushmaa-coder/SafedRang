@@ -2,11 +2,19 @@ import { Search, ShoppingBag, Heart, User, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCurrency } from "../context/CurrencyContext";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 import "./Header.css";
 
 export default function Header() {
   const { currency, changeCurrency, supportedCurrencies, loadingRates, formatPrice } = useCurrency();
   const { cart, cartCount, wishlistCount } = useCart();
+  const { user, session, token, isAdmin } = useAuth();
+
+  const isLoggedIn = !!(user || session || token);
+  const accountDestination = isLoggedIn ? "/dashboard" : "/login";
+  const accountTitle = isLoggedIn 
+    ? (isAdmin ? "Admin Dashboard" : "My Account Dashboard") 
+    : "Sign In / Login";
   return (
     <header className="site-header">
       <div className="announcement-bar">
@@ -85,9 +93,15 @@ export default function Header() {
             <Heart size={20} />
             {wishlistCount > 0 && <span className="cart-count wishlist-count">{wishlistCount}</span>}
           </button>
-          <button aria-label="Account" className="hidden-mobile">
+          <Link
+            to={accountDestination}
+            aria-label={accountTitle}
+            title={accountTitle}
+            className="header-account-btn"
+          >
             <User size={20} />
-          </button>
+            {isLoggedIn && <span className="account-status-dot" />}
+          </Link>
           <div className="cart-wrapper">
             <Link to="/checkout" aria-label="Cart" className="cart-btn" style={{ textDecoration: 'none' }}>
               <ShoppingBag size={20} />

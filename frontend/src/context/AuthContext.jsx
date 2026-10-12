@@ -129,6 +129,22 @@ export const AuthProvider = ({ children }) => {
     return { success: true, data };
   };
 
+  const resetPassword = async (emailToReset) => {
+    try {
+      const origin = typeof window !== "undefined" ? window.location.origin : "https://safedrang.com";
+      const { error } = await supabase.auth.resetPasswordForEmail(emailToReset, {
+        redirectTo: `${origin}/admin/login`,
+      });
+      if (error) {
+        console.error("Password reset error:", error.message);
+        return { success: false, error: error.message };
+      }
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message || "Failed to send reset email." };
+    }
+  };
+
   const logout = async () => {
     await supabase.auth.signOut();
     localStorage.removeItem("adminToken");
@@ -141,7 +157,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, token, loading, login, loginWithGoogle, logout, isAdmin }}
+      value={{ user, session, token, loading, login, loginWithGoogle, resetPassword, logout, isAdmin }}
     >
       {children}
     </AuthContext.Provider>

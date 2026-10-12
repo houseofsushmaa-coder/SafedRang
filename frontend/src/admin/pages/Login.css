@@ -1,278 +1,754 @@
-/* ── Safedrang Admin Login — Bulletproof & Premium Styles ── */
-.admin-login-container {
+/* ==========================================================================
+   SAFED RANG — ROYAL HERITAGE GLASSMORPHIC LOGIN
+   Warm Indian Haveli & Chikankari Saree Aesthetic
+   ========================================================================== */
+
+/* Google Fonts Import for Royal Editorial Typography */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Manrope:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --glass-bg: rgba(22, 15, 11, 0.76);
+  --glass-border: rgba(212, 175, 55, 0.28);
+  --glass-border-hover: rgba(212, 175, 55, 0.55);
+  --glass-inner-glow: inset 0 1px 1px rgba(255, 255, 255, 0.18);
+  --glass-shadow: 0 28px 70px rgba(0, 0, 0, 0.65), 0 0 35px rgba(174, 138, 84, 0.12);
+  --gold-primary: #AE8A54;
+  --gold-bright: #D4AF37;
+  --gold-pale: #F0DFC8;
+  --text-ivory: #FAF5EC;
+  --text-muted: #C4B3A3;
+  --wine-deep: #6E1E2A;
+}
+
+/* --- Fullscreen Wrapper with Saree Background --- */
+.heritage-login-wrapper {
+  position: relative;
   min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #FAF5EC;
-  background-image:
-    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(174, 138, 84, 0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 80% 90%, rgba(110, 30, 42, 0.08) 0%, transparent 60%);
-  font-family: "Manrope", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  padding: 24px 16px;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow-x: hidden;
+  font-family: "Manrope", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text-ivory);
   box-sizing: border-box;
 }
 
-.admin-login-card {
-  background: #FFFFFF;
-  padding: 40px 36px;
-  border-radius: 16px;
-  border: 1px solid #E8DFD0;
-  box-shadow: 0 12px 40px rgba(42, 33, 29, 0.08), 0 2px 6px rgba(42, 33, 29, 0.04);
+/* Background image with subtle artistic blur as requested */
+.heritage-login-bg {
+  position: fixed;
+  inset: -20px; /* Slight overflow to hide blur edge falloff */
+  width: calc(100% + 40px);
+  height: calc(100% + 40px);
+  background-image: url('/chikankari_login_bg.jpg');
+  background-size: cover;
+  background-position: center 75%;
+  background-repeat: no-repeat;
+  z-index: 0;
+  filter: blur(8px) brightness(0.82) contrast(1.05);
+  transform: scale(1.04);
+  pointer-events: none;
+}
+
+/* Heritage Vignette & Ambient Warm Overlay */
+.heritage-login-overlay {
+  position: fixed;
+  inset: 0;
   width: 100%;
-  max-width: 420px;
+  height: 100%;
+  background:
+    radial-gradient(ellipse 90% 80% at 50% 50%, rgba(20, 14, 11, 0.38) 0%, rgba(14, 9, 7, 0.82) 100%),
+    linear-gradient(180deg, rgba(16, 11, 9, 0.5) 0%, rgba(20, 14, 11, 0.72) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* --- Top Navigation Bar --- */
+.heritage-login-topbar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px;
+  width: 100%;
   box-sizing: border-box;
 }
 
-.admin-login-header {
+.heritage-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-ivory);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  border-radius: 30px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.25s ease;
+}
+
+.heritage-back-link:hover {
+  background: rgba(174, 138, 84, 0.25);
+  border-color: var(--gold-bright);
+  color: #FFFFFF;
+  transform: translateX(-2px);
+}
+
+.heritage-topbar-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold-pale);
+  font-weight: 600;
+  background: rgba(110, 30, 42, 0.35);
+  border: 1px solid rgba(174, 138, 84, 0.25);
+  padding: 6px 14px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.gold-sparkle {
+  color: var(--gold-bright);
+}
+
+/* --- Main Layout Center (Strictly Center-Aligned) --- */
+.heritage-login-main {
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center aligned */
+  padding: 24px 20px;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* --- Glassmorphic Card Container --- */
+.heritage-glass-card {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), var(--glass-inner-glow);
+  border-radius: 24px;
+  padding: 38px 36px 32px;
+  box-sizing: border-box;
+  animation: cardGlassFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  margin: 0 auto;
+}
+
+@keyframes cardGlassFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(22px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Heritage Traditional Filigree Corners */
+.card-filigree {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+}
+
+.card-filigree.corner-tl {
+  top: 14px;
+  left: 14px;
+  border-top: 2px solid var(--gold-bright);
+  border-left: 2px solid var(--gold-bright);
+  border-top-left-radius: 8px;
+  opacity: 0.65;
+}
+
+.card-filigree.corner-br {
+  bottom: 14px;
+  right: 14px;
+  border-bottom: 2px solid var(--gold-bright);
+  border-right: 2px solid var(--gold-bright);
+  border-bottom-right-radius: 8px;
+  opacity: 0.65;
+}
+
+/* --- Card Header & Royal Branding --- */
+.glass-card-header {
   text-align: center;
   margin-bottom: 24px;
 }
 
-.admin-login-logo {
-  width: 52px;
-  height: 52px;
-  background: linear-gradient(135deg, #1D1510 0%, #3D2B1F 100%);
-  border-radius: 14px;
-  display: inline-flex;
+/* Updated Brand Logo Frame using favicon.png */
+.heritage-brand-logo-frame {
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(174, 138, 84, 0.3) 0%, rgba(20, 14, 11, 0.95) 100%);
+  border: 1.5px solid var(--gold-bright);
+  box-shadow: 0 0 24px rgba(174, 138, 84, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 14px;
-  box-shadow: 0 4px 12px rgba(29, 21, 16, 0.2);
-}
-
-.admin-login-logo span {
-  color: #AE8A54;
-  font-weight: 800;
-  font-size: 1.4rem;
-  letter-spacing: 0.02em;
-}
-
-.admin-login-header h2 {
-  font-size: 1.6rem;
-  color: #2A211D;
-  margin: 0 0 6px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-.admin-login-header p {
-  color: #8B7863;
-  margin: 0;
-  font-size: 0.88rem;
-}
-
-/* ── Google Sign In Button ── */
-.admin-google-btn {
-  width: 100%;
+  padding: 8px;
   box-sizing: border-box;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.heritage-brand-logo-frame:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 32px rgba(212, 175, 55, 0.5), inset 0 1px 3px rgba(255, 255, 255, 0.4);
+}
+
+.heritage-brand-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 50%;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+
+.heritage-brand-title {
+  font-family: 'Cinzel', 'Cormorant Garamond', serif;
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  margin: 0 0 6px;
+  color: #FFFFFF;
+  text-align: center;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.heritage-brand-subtitle {
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  color: var(--gold-pale);
+  text-transform: uppercase;
+  margin: 0 0 16px;
+  font-weight: 600;
+  text-align: center;
+  opacity: 0.88;
+}
+
+.heritage-motif-divider {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  padding: 11px 16px;
-  background: #FFFFFF;
-  color: #2A211D;
-  border: 1.5px solid #E2D9CC;
-  border-radius: 9px;
-  font-size: 0.92rem;
+  margin: 0 auto;
+  max-width: 220px;
+}
+
+.motif-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(212, 175, 55, 0.4) 50%, transparent 100%);
+}
+
+.motif-symbol {
+  color: var(--gold-bright);
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+/* --- Alerts and Feedback Notice --- */
+.glass-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  margin-bottom: 20px;
+  animation: alertPopIn 0.3s ease;
+}
+
+@keyframes alertPopIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.glass-alert-error {
+  background: rgba(185, 28, 28, 0.22);
+  border: 1px solid rgba(239, 68, 68, 0.38);
+  color: #FECACA;
+}
+
+.glass-alert-warning {
+  background: rgba(180, 83, 9, 0.24);
+  border: 1px solid rgba(245, 158, 11, 0.42);
+  color: #FDE68A;
+}
+
+.alert-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* --- Google OAuth Button (Glass Theme) --- */
+.glass-google-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  color: #FFFFFF;
+  font-size: 0.9rem;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
 }
 
-.admin-google-btn:hover:not(:disabled) {
-  background: #FAF8F5;
-  border-color: #AE8A54;
-  box-shadow: 0 3px 8px rgba(174, 138, 84, 0.12);
+.glass-google-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--gold-bright);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4), 0 0 15px rgba(212, 175, 55, 0.2);
   transform: translateY(-1px);
 }
 
-.admin-google-btn:disabled {
-  opacity: 0.65;
+.glass-google-btn:disabled {
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
-.admin-google-btn .google-icon {
+.google-icon {
   width: 20px;
   height: 20px;
   flex-shrink: 0;
 }
 
-/* ── Divider ── */
-.login-divider {
+/* --- Divider --- */
+.glass-divider {
   display: flex;
   align-items: center;
-  margin: 22px 0;
-  text-align: center;
-  color: #B8A898;
-  font-size: 0.78rem;
+  margin: 22px 0 20px;
+  color: var(--text-muted);
+  font-size: 0.74rem;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-weight: 600;
+  letter-spacing: 0.08em;
+  font-weight: 500;
 }
 
-.login-divider::before,
-.login-divider::after {
+.glass-divider::before,
+.glass-divider::after {
   content: "";
   flex: 1;
-  border-bottom: 1px solid #E8DFD0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.login-divider span {
+.glass-divider span {
   padding: 0 12px;
 }
 
-/* ── Alerts ── */
-.admin-login-error {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  background-color: #FEF2F2;
-  color: #B91C1C;
-  padding: 12px 14px;
-  border-radius: 9px;
-  border: 1px solid #FECACA;
-  margin-bottom: 20px;
-  font-size: 0.85rem;
-  line-height: 1.4;
-}
-
-.admin-lockout-box {
-  background-color: #FFFBEB;
-  border: 1px solid #FDE68A;
-  color: #92400E;
-  padding: 12px 14px;
-  border-radius: 9px;
-  margin-bottom: 20px;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* ── Form Styles ── */
-.admin-login-form .form-group {
+/* --- Form Fields & Inputs --- */
+.glass-login-form .glass-form-group {
   margin-bottom: 18px;
 }
 
-.admin-login-form label {
+.glass-login-form label {
   display: block;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #2A211D;
-  margin-bottom: 6px;
-  letter-spacing: 0.01em;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gold-pale);
+  margin-bottom: 7px;
+  letter-spacing: 0.02em;
 }
 
-.input-with-icon {
+.label-with-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 7px;
+}
+
+.label-with-action label {
+  margin-bottom: 0;
+}
+
+.glass-input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.input-with-icon .input-icon {
+.glass-input-icon {
   position: absolute;
-  left: 13px;
-  color: #B8A898;
+  left: 14px;
+  color: var(--gold-primary);
   pointer-events: none;
+  transition: color 0.2s;
 }
 
-.input-with-icon input {
+.glass-input-wrapper input {
   width: 100%;
   box-sizing: border-box;
-  padding: 11px 40px 11px 40px;
-  border: 1.5px solid #E8DFD0;
-  border-radius: 8px;
-  font-size: 0.92rem;
+  padding: 13px 44px 13px 44px;
+  background: rgba(14, 10, 8, 0.6);
+  border: 1.5px solid rgba(212, 175, 55, 0.24);
+  border-radius: 12px;
+  color: #FFFFFF;
+  font-size: 0.94rem;
   outline: none;
-  transition: all 0.18s ease;
-  color: #2A211D;
-  background: #FAF8F5;
   font-family: inherit;
+  transition: all 0.22s ease;
+  backdrop-filter: blur(10px);
 }
 
-.input-with-icon input::placeholder {
-  color: #B8A898;
+.glass-input-wrapper input::placeholder {
+  color: rgba(191, 174, 160, 0.55);
 }
 
-.input-with-icon input:focus {
-  border-color: #AE8A54;
-  background: #FFFFFF;
-  box-shadow: 0 0 0 3px rgba(174, 138, 84, 0.15);
+.glass-input-wrapper input:focus {
+  border-color: var(--gold-bright);
+  background: rgba(22, 15, 12, 0.85);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2), 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
-.password-toggle-btn {
+.glass-input-wrapper input:focus ~ .glass-input-icon {
+  color: var(--gold-bright);
+}
+
+.glass-eye-btn {
   position: absolute;
   right: 12px;
   background: none;
   border: none;
-  color: #8B7863;
+  color: var(--text-muted);
   cursor: pointer;
-  padding: 4px;
+  padding: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.15s;
+  transition: color 0.2s;
 }
 
-.password-toggle-btn:hover {
-  color: #2A211D;
+.glass-eye-btn:hover {
+  color: var(--gold-bright);
 }
 
-/* ── Primary Submit Button ── */
-.admin-login-form .admin-btn {
-  width: 100%;
-  box-sizing: border-box;
-  margin-top: 8px;
-  padding: 12px;
-  background: #2A211D;
-  color: #FFFFFF;
+/* --- Options Row (Flawlessly Aligned Checkbox) --- */
+.glass-options-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 14px 0 22px;
+}
+
+.glass-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.2;
+}
+
+.glass-checkbox-input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid rgba(212, 175, 55, 0.45);
+  border-radius: 4px;
+  background: rgba(14, 10, 8, 0.7);
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.glass-checkbox-input:hover {
+  border-color: var(--gold-bright);
+  background: rgba(26, 18, 14, 0.9);
+}
+
+.glass-checkbox-input:checked {
+  background: linear-gradient(135deg, #D4AF37 0%, #AE8A54 100%);
+  border-color: var(--gold-bright);
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+}
+
+.glass-checkbox-input:checked::after {
+  content: "";
+  width: 4px;
+  height: 8px;
+  border: solid #1A120B;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-bottom: 2px;
+}
+
+.glass-checkbox-label .checkbox-text {
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: color 0.2s;
+}
+
+.glass-checkbox-label:hover .checkbox-text {
+  color: var(--text-ivory);
+}
+
+.glass-link-btn {
+  background: none;
   border: none;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 700;
+  color: var(--gold-bright);
+  font-size: 0.82rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.18s ease;
+  padding: 0;
   font-family: inherit;
-  letter-spacing: 0.02em;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: all 0.2s;
+}
+
+.glass-link-btn:hover {
+  color: #FFFFFF;
+  text-decoration-color: var(--gold-bright);
+}
+
+/* --- Primary Royal Gold Action Button --- */
+.glass-primary-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #C5A059 0%, #AE8A54 50%, #8C6A36 100%);
+  border: 1px solid rgba(255, 235, 175, 0.4);
+  border-radius: 12px;
+  color: #1A120B;
+  font-size: 0.96rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: inherit;
+  box-shadow: 0 8px 24px rgba(174, 138, 84, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 10px;
+}
+
+.glass-primary-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #D4AF37 0%, #C5A059 50%, #9E7940 100%);
+  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.45), 0 0 15px rgba(255, 255, 255, 0.2);
+  transform: translateY(-1.5px);
+  color: #0E0A06;
+}
+
+.glass-primary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-spinner-text {
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
 }
 
-.admin-login-form .admin-btn:hover:not(:disabled) {
-  background: #AE8A54;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(174, 138, 84, 0.25);
+.btn-mini-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(26, 18, 11, 0.3);
+  border-top-color: #1A120B;
+  border-radius: 50%;
+  animation: spinnerRotate 0.8s linear infinite;
 }
 
-.admin-login-form .admin-btn:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
+@keyframes spinnerRotate {
+  to { transform: rotate(360deg); }
 }
 
-/* ── Security Footers ── */
-.admin-login-footer {
-  margin-top: 24px;
+/* Secondary Button */
+.glass-btn-secondary {
+  padding: 12px 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 12px;
+  color: var(--text-ivory);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.glass-btn-secondary:hover {
+  background: rgba(174, 138, 84, 0.2);
+  border-color: var(--gold-bright);
+}
+
+/* --- Forgot Password Panel --- */
+.forgot-password-panel {
+  animation: panelFadeIn 0.35s ease;
+}
+
+@keyframes panelFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.forgot-panel-intro {
   text-align: center;
-  font-size: 0.8rem;
-  color: #8B7863;
-  border-top: 1px solid #F0E8DC;
-  padding-top: 16px;
+  margin-bottom: 22px;
 }
 
-.security-badge {
+.forgot-icon-bubble {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: rgba(174, 138, 84, 0.18);
+  border: 1px solid rgba(212, 175, 55, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--gold-bright);
+}
+
+.forgot-panel-intro h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.25rem;
+  margin: 0 0 6px;
+  color: #FFFFFF;
+}
+
+.forgot-panel-intro p {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.glass-success-notice {
+  background: rgba(16, 185, 129, 0.16);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+  color: #D1FAE5;
+  font-size: 0.86rem;
+}
+
+.glass-success-notice .notice-icon {
+  margin: 0 auto 8px;
+  color: #34D399;
+}
+
+.glass-success-notice strong {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 4px;
+  color: #FFFFFF;
+}
+
+.glass-success-notice p {
+  margin: 0;
+  line-height: 1.5;
+  color: #A7F3D0;
+}
+
+/* --- Footer & Security Badges --- */
+.glass-card-footer {
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+
+.security-status-tag {
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
-  margin-top: 8px;
   font-size: 0.72rem;
-  color: #A3907C;
-  font-weight: 500;
+  color: var(--gold-pale);
+  opacity: 0.85;
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+}
+
+.gold-icon {
+  color: var(--gold-bright);
+}
+
+.footer-copyright {
+  font-size: 0.68rem;
+  color: rgba(191, 174, 160, 0.65);
+  letter-spacing: 0.04em;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (MOBILE FRIENDLY OPTIMIZATION)
+   ========================================================================== */
+@media (max-width: 640px) {
+  .heritage-login-topbar {
+    padding: 16px 18px;
+  }
+
+  .heritage-topbar-tag {
+    display: none; /* Clean on mobile */
+  }
+
+  .heritage-login-main {
+    padding: 14px 14px 28px;
+  }
+
+  .heritage-glass-card {
+    padding: 28px 22px 24px;
+    border-radius: 20px;
+  }
+
+  .heritage-brand-title {
+    font-size: 1.55rem;
+    letter-spacing: 0.12em;
+  }
+
+  .glass-input-wrapper input {
+    font-size: 16px; /* Prevents auto-zoom on iOS */
+    padding: 12px 40px 12px 40px;
+  }
+
+  .glass-primary-btn {
+    padding: 13px;
+    font-size: 0.88rem;
+  }
+
+  .card-filigree {
+    display: none;
+  }
 }
