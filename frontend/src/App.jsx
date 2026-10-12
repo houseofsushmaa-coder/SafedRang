@@ -45,10 +45,10 @@ const StorefrontLayout = () => (
 );
 
 const ProtectedAdminRoute = ({ children }) => {
-  const { token, loading } = useAuth();
+  const { user, session, token, loading } = useAuth();
 
   if (loading) return <div>Loading...</div>;
-  if (!token) return <Navigate to="/admin/login" replace />;
+  if (!user && !session && !token) return <Navigate to="/admin/login" replace />;
 
   return children;
 };

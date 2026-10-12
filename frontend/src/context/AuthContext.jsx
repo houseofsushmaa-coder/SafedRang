@@ -43,8 +43,10 @@ export const AuthProvider = ({ children }) => {
     await supabase.auth.signOut();
   };
 
+  const token = session?.access_token || (user ? "authenticated" : null);
+
   return (
-    <AuthContext.Provider value={{ user, session, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, session, token, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

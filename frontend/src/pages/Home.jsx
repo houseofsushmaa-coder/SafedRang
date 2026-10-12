@@ -29,7 +29,7 @@ export default function Home() {
             loop
             muted
             playsInline
-            src="/videos/Video2.mp4"
+            src="/videos/video2.mp4"
           />
           <video
             autoPlay
