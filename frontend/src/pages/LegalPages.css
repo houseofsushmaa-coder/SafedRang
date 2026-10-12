@@ -1,0 +1,239 @@
+/* ── Safed Rang — Legal & Policy Pages (Luxury Brand Editorial) ── */
+
+.legal-page {
+  background-color: var(--color-ivory, #FAF5EC);
+  color: var(--color-dark-charcoal, #2A211D);
+  min-height: 100vh;
+}
+
+/* ════════════════════════════════════
+   1. HERO HEADER
+════════════════════════════════════ */
+.legal-hero {
+  padding: 8.5rem 1.5rem 4.5rem;
+  background-color: var(--color-ivory-deep, #F2EBDD);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-light-stone, #E8DFD0);
+}
+
+.legal-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 50% 30%,
+    rgba(174, 138, 84, 0.12) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.legal-breadcrumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  font-family: var(--font-body, "Inter", sans-serif);
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-warm-taupe, #8B7863);
+  margin-bottom: 1.2rem;
+}
+
+.legal-breadcrumb a {
+  color: var(--color-antique-gold, #AE8A54);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.legal-breadcrumb a:hover {
+  color: var(--color-wine, #6E1E2A);
+}
+
+.legal-breadcrumb-sep {
+  opacity: 0.5;
+}
+
+.legal-hero-title {
+  font-family: var(--font-heading, "Cinzel", serif);
+  font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  color: var(--color-dark-charcoal, #2A211D);
+  margin-bottom: 1.2rem;
+  text-transform: uppercase;
+}
+
+.legal-hero-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  color: var(--color-warm-taupe, #8B7863);
+  background: rgba(174, 138, 84, 0.1);
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(174, 138, 84, 0.25);
+}
+
+/* ════════════════════════════════════
+   2. CONTENT CONTAINER
+════════════════════════════════════ */
+.legal-content-container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 4.5rem 1.5rem 7rem;
+}
+
+.legal-card {
+  background: #FFFFFF;
+  border: 1px solid var(--color-light-stone, #E8DFD0);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(42, 33, 29, 0.04);
+  padding: 3.5rem 3rem;
+  position: relative;
+}
+
+@media (max-width: 640px) {
+  .legal-card {
+    padding: 2.2rem 1.5rem;
+    border-radius: 8px;
+  }
+}
+
+.legal-intro {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--color-dark-charcoal, #2A211D);
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px dashed var(--color-light-stone, #E8DFD0);
+}
+
+/* ════════════════════════════════════
+   3. SECTION TYPOGRAPHY
+════════════════════════════════════ */
+.legal-section {
+  margin-bottom: 2.5rem;
+}
+
+.legal-section-title {
+  font-family: var(--font-heading, "Cinzel", serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--color-wine, #6E1E2A);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.legal-section-num {
+  font-size: 0.95rem;
+  color: var(--color-antique-gold, #AE8A54);
+  font-family: var(--font-body, "Inter", sans-serif);
+  font-weight: 700;
+}
+
+.legal-text {
+  font-size: 0.96rem;
+  line-height: 1.8;
+  color: #3f3630;
+  margin-bottom: 1rem;
+}
+
+.legal-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 1rem 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.legal-list-item {
+  position: relative;
+  padding-left: 1.8rem;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #3f3630;
+}
+
+.legal-list-item::before {
+  content: "✦";
+  position: absolute;
+  left: 0.3rem;
+  top: 0;
+  color: var(--color-antique-gold, #AE8A54);
+  font-size: 0.8rem;
+}
+
+.legal-list-item strong {
+  color: var(--color-dark-charcoal, #2A211D);
+  font-weight: 600;
+}
+
+/* ════════════════════════════════════
+   4. CONTACT & HIGHLIGHT BOX
+════════════════════════════════════ */
+.legal-highlight-box {
+  background-color: var(--color-ivory-deep, #F2EBDD);
+  border-left: 3px solid var(--color-antique-gold, #AE8A54);
+  padding: 1.4rem 1.8rem;
+  border-radius: 0 8px 8px 0;
+  margin: 1.8rem 0;
+}
+
+.legal-highlight-box p {
+  margin: 0;
+  font-size: 0.94rem;
+  line-height: 1.65;
+  color: var(--color-dark-charcoal, #2A211D);
+}
+
+.legal-highlight-box strong {
+  color: var(--color-wine, #6E1E2A);
+}
+
+.legal-highlight-box a {
+  color: var(--color-antique-gold, #AE8A54);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s;
+}
+
+.legal-highlight-box a:hover {
+  color: var(--color-wine, #6E1E2A);
+}
+
+/* ════════════════════════════════════
+   5. FOOTER BADGE
+════════════════════════════════════ */
+.legal-footer-badge {
+  margin-top: 3rem;
+  padding-top: 1.8rem;
+  border-top: 1px solid var(--color-light-stone, #E8DFD0);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: var(--color-warm-taupe, #8B7863);
+}
+
+.legal-footer-badge a {
+  color: var(--color-antique-gold, #AE8A54);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.legal-footer-badge a:hover {
+  text-decoration: underline;
+}

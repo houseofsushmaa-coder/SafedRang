@@ -14,6 +14,8 @@ import Craft from "./pages/Craft";
 import ProductDetail from "./pages/ProductDetail";
 import Checkout from "./pages/Checkout";
 import PaymentVerify from "./pages/PaymentVerify";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsConditions from "./pages/TermsConditions";
 import AdminLayout from "./admin/AdminLayout";
 import AdminErrorBoundary from "./admin/components/AdminErrorBoundary";
 import Dashboard from "./admin/pages/Dashboard";
@@ -170,6 +172,11 @@ function App() {
                 <Route path="product/:id" element={<ProductDetail />} />
                 <Route path="checkout" element={<Checkout />} />
                 <Route path="payment/verify" element={<PaymentVerify />} />
+                <Route path="privacy" element={<PrivacyPolicy />} />
+                <Route path="privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="terms" element={<TermsConditions />} />
+                <Route path="terms-conditions" element={<TermsConditions />} />
+                <Route path="terms-and-conditions" element={<TermsConditions />} />
               </Route>
             </Routes>
           </Router>

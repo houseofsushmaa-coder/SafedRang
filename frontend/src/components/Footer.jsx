@@ -130,6 +130,12 @@ export default function Footer() {
               <li>
                 <Link to="/faq">FAQs</Link>
               </li>
+              <li>
+                <Link to="/privacy">Privacy Policy</Link>
+              </li>
+              <li>
+                <Link to="/terms">Terms & Conditions</Link>
+              </li>
             </ul>
           </div>
 
@@ -160,10 +166,10 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom container">
-        <p>&copy; 2024 Safedrang. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Safedrang. All rights reserved.</p>
         <div className="legal-links">
-          <Link to="/privacy">Privacy</Link>
-          <Link to="/terms">Terms</Link>
+          <Link to="/privacy">Privacy Policy</Link>
+          <Link to="/terms">Terms & Conditions</Link>
           <Link to="/shipping-policy">Shipping Policy</Link>
         </div>
       </div>
