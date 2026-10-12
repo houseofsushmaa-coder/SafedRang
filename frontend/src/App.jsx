@@ -24,6 +24,7 @@ import Users from "./admin/pages/Users";
 import AdminLogin from "./admin/pages/AdminLogin";
 import Inventory from "./admin/pages/Inventory";
 import Analytics from "./admin/pages/Analytics";
+import SalesAnalytics from "./admin/pages/SalesAnalytics";
 import Categories from "./admin/pages/Categories";
 import Payments from "./admin/pages/Payments";
 import Settings from "./admin/pages/Settings";
@@ -142,7 +143,7 @@ function App() {
                 <Route path="customers" element={<Users />} />
                 <Route path="inventory" element={<Inventory />} />
                 <Route path="analytics" element={<Analytics />} />
-                <Route path="analytics/sales" element={<Analytics />} />
+                <Route path="analytics/sales" element={<SalesAnalytics />} />
                 <Route path="categories" element={<Categories />} />
                 <Route path="payments" element={<Payments />} />
                 <Route path="settings" element={<Settings />} />

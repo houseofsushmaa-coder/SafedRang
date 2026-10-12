@@ -86,3 +86,12 @@
 .bs-bar-wrap { height: 4px; background: #f1f5f9; border-radius: 2px; overflow: hidden; }
 .bs-bar { height: 100%; background: linear-gradient(90deg, #10b981, #0891b2); border-radius: 2px; transition: width 0.6s ease; }
 .bs-qty { font-size: 0.78rem; font-weight: 600; color: var(--admin-text-muted); white-space: nowrap; }
+
+/* Responsive grids for Overview & Sales pages */
+@media (max-width: 900px) {
+  .overview-analytics-page div[style*="grid-template-columns: 1.3fr 1fr"],
+  .sales-analytics-page div[style*="grid-template-columns: 1.2fr 1fr"],
+  .sales-analytics-page div[style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
