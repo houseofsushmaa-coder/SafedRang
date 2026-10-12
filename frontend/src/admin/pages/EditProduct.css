@@ -20,15 +20,14 @@
 }
 
 .sticky-header {
-  position: sticky;
-  top: 70px; /* Offset for the AdminTopbar */
-  background: rgba(248, 250, 252, 0.9);
-  backdrop-filter: blur(8px);
-  padding: 16px 0 16px 0;
-  z-index: 40;
-  margin-bottom: 24px !important;
-  border-bottom: 1px solid var(--admin-border);
-  margin-top: -10px;
+  position: static;
+  background: transparent;
+  backdrop-filter: none;
+  padding: 0;
+  z-index: auto;
+  margin-bottom: 24px;
+  border-bottom: none;
+  margin-top: 0;
 }
 
 .admin-card {

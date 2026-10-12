@@ -162,7 +162,7 @@ const EditProduct = () => {
 
   return (
     <div className="admin-page edit-product-page">
-      <div className="page-header sticky-header">
+      <div className="page-header">
         <div>
           <h2>
             {isNew
