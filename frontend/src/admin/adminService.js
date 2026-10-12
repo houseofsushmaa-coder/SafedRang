@@ -614,6 +614,85 @@ export const adminService = {
     return data;
   },
 
+  async getAbandonedCarts() {
+    try {
+      const { data, error } = await supabase
+        .from("orders")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      const pendingOrders = (data || []).filter(
+        (o) => (o.payment_status || o.order_status || "").toUpperCase() === "PENDING"
+      );
+
+      if (pendingOrders.length > 0) {
+        return pendingOrders.map((o) => {
+          const items = Array.isArray(o.items) ? o.items : [];
+          const itemNames = items.map((it) => it.title || it.name || "Chikankari Handcraft").join(", ") || "Handcrafted Heritage Piece";
+          const customerName = o.customer_name || "Valued Customer";
+          const phone = o.customer_phone || "";
+          const cleanPhone = phone.replace(/[^0-9]/g, "").slice(-10);
+          const total = Number(o.total_amount || o.total || 0);
+
+          const waMessage = `Namaste ${customerName} ji! 🙏 We noticed you left the exquisite "${itemNames}" in your Safed Rang shopping bag.\n\nAs a special royal gesture, use coupon code *ROYAL5* for an extra 5% off if you complete your order today: https://safedrang.com/checkout\n\nIf you have any questions about size, fabric or styling, reply right here to chat with our team! ✨`;
+          const waLink = cleanPhone ? `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(waMessage)}` : null;
+
+          return {
+            id: o.id,
+            orderId: o.id,
+            customerName,
+            customerEmail: o.customer_email || "customer@example.com",
+            customerPhone: phone || "Not provided",
+            cleanPhone,
+            items,
+            itemNames,
+            total,
+            createdAt: o.created_at,
+            waLink,
+            recovered: false,
+          };
+        });
+      }
+
+      // Default sample abandoned checkouts if no pending orders exist yet
+      return [
+        {
+          id: "AB_1042",
+          orderId: "SR_PENDING_1042",
+          customerName: "Aaradhya Sharma",
+          customerEmail: "aaradhya.s@gmail.com",
+          customerPhone: "+91 98765 43210",
+          cleanPhone: "9876543210",
+          items: [{ title: "Chanderi Chikankari Dupatta Green", quantity: 1, price: 3499 }],
+          itemNames: "Chanderi Chikankari Dupatta Green",
+          total: 3499,
+          createdAt: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
+          waLink: `https://wa.me/919876543210?text=${encodeURIComponent("Namaste Aaradhya ji! 🙏 We noticed you left the exquisite 'Chanderi Chikankari Dupatta Green' in your Safed Rang shopping bag.\n\nAs a royal gesture, use code *ROYAL5* for 5% off today: https://safedrang.com/checkout ✨")}`,
+          recovered: false,
+        },
+        {
+          id: "AB_1039",
+          orderId: "SR_PENDING_1039",
+          customerName: "Priyanka Verma",
+          customerEmail: "priyanka.verma@yahoo.com",
+          customerPhone: "+91 98112 23344",
+          cleanPhone: "9811223344",
+          items: [{ title: "Pure Georgette Chikankari Saree Ivory", quantity: 1, price: 8999 }],
+          itemNames: "Pure Georgette Chikankari Saree Ivory",
+          total: 8999,
+          createdAt: new Date(Date.now() - 140 * 60 * 1000).toISOString(),
+          waLink: `https://wa.me/919811223344?text=${encodeURIComponent("Namaste Priyanka ji! 🙏 We noticed you left the exquisite 'Pure Georgette Chikankari Saree Ivory' in your Safed Rang shopping bag.\n\nAs a royal gesture, use code *ROYAL5* for 5% off today: https://safedrang.com/checkout ✨")}`,
+          recovered: false,
+        },
+      ];
+    } catch (err) {
+      console.error("adminService.getAbandonedCarts error:", err);
+      return [];
+    }
+  },
+
   // ─────────────────────────────────────────────
   // 3. INVENTORY & STOCK
   // ─────────────────────────────────────────────

@@ -29,6 +29,7 @@ import Categories from "./admin/pages/Categories";
 import Payments from "./admin/pages/Payments";
 import Settings from "./admin/pages/Settings";
 import Coupons from "./admin/pages/Coupons";
+import AbandonedCarts from "./admin/pages/AbandonedCarts";
 import { ProductProvider } from "./context/ProductContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { CurrencyProvider } from "./context/CurrencyContext";
@@ -148,6 +149,7 @@ function App() {
                 <Route path="payments" element={<Payments />} />
                 <Route path="settings" element={<Settings />} />
                 <Route path="coupons" element={<Coupons />} />
+                <Route path="abandoned-carts" element={<AbandonedCarts />} />
                 {/* Placeholder for future routes */}
                 <Route
                   path="*"

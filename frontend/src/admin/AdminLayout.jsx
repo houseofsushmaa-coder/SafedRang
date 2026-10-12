@@ -127,7 +127,6 @@ const AdminLayout = () => {
           path: "/admin/abandoned-carts",
           label: "Abandoned Carts",
           icon: <ShoppingBasket size={20} />,
-          launchingSoon: true,
         },
         {
           path: "/admin/notifications",
