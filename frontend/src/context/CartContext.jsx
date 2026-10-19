@@ -4,46 +4,75 @@ const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState(() => {
-    const saved = localStorage.getItem("safed_cart");
-    return saved ? JSON.parse(saved) : [];
+    try {
+      // Clear legacy cart with old demo items so user bag starts fresh & empty
+      localStorage.removeItem("safed_cart");
+      const saved = localStorage.getItem("safed_cart_v2");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
   });
 
   const [wishlist, setWishlist] = useState(() => {
-    const saved = localStorage.getItem("safed_wishlist");
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem("safed_wishlist");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
   });
 
   useEffect(() => {
-    localStorage.setItem("safed_cart", JSON.stringify(cart));
+    try {
+      localStorage.setItem("safed_cart_v2", JSON.stringify(cart));
+    } catch (e) {
+      console.warn("Could not save cart:", e);
+    }
   }, [cart]);
 
   useEffect(() => {
-    localStorage.setItem("safed_wishlist", JSON.stringify(wishlist));
+    try {
+      localStorage.setItem("safed_wishlist", JSON.stringify(wishlist));
+    } catch (e) {
+      console.warn("Could not save wishlist:", e);
+    }
   }, [wishlist]);
 
   // --- Cart Actions ---
   const addToCart = (product, quantity = 1) => {
     setCart((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
+      const cartItemId = product.selectedSize
+        ? `${product.id}-${product.selectedSize}`
+        : product.id;
+      const existing = prev.find(
+        (item) => (item.cartItemId || item.id) === cartItemId
+      );
       if (existing) {
         return prev.map((item) =>
-          item.id === product.id
+          (item.cartItemId || item.id) === cartItemId
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
-      return [...prev, { ...product, quantity }];
+      return [...prev, { ...product, cartItemId, quantity }];
     });
   };
 
-  const removeFromCart = (id) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
+  const removeFromCart = (targetId) => {
+    setCart((prev) =>
+      prev.filter((item) => (item.cartItemId || item.id) !== targetId && item.id !== targetId)
+    );
   };
 
-  const updateQuantity = (id, quantity) => {
+  const updateQuantity = (targetId, quantity) => {
     if (quantity < 1) return;
     setCart((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity } : item))
+      prev.map((item) =>
+        (item.cartItemId || item.id) === targetId || item.id === targetId
+          ? { ...item, quantity }
+          : item
+      )
     );
   };
 

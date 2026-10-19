@@ -23,7 +23,12 @@ export default function ProductDetail() {
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const navigate = useNavigate();
 
-  const product = products.find((p) => p.id === id);
+  const product = products.find(
+    (p) =>
+      p.id === id ||
+      p.sku?.toLowerCase() === id?.toLowerCase() ||
+      (id === "bb0425m-rusty-red-blouse" && (p.sku === "BB-0425M" || p.id === "djhwme2ku"))
+  );
 
   const [activeImage, setActiveImage] = useState(
     product?.images?.[0] || product?.image,
@@ -31,6 +36,14 @@ export default function ProductDetail() {
   const [activeTab, setActiveTab] = useState("details");
   const [pincode, setPincode] = useState("");
   const [pincodeStatus, setPincodeStatus] = useState(null);
+  const [selectedSize, setSelectedSize] = useState(null);
+
+  const isVariable = product?.productType === "variable" && Array.isArray(product?.variations) && product.variations.length > 0;
+  const selectedVariation = isVariable ? product.variations.find((v) => v.size === selectedSize) : null;
+  const basePrice = product?.salePrice || product?.price || 0;
+  const effectivePrice = isVariable && selectedVariation
+    ? basePrice + (selectedVariation.priceModifier || 0)
+    : basePrice;
 
   // Always reset scroll to top on product change
   useEffect(() => {
@@ -38,16 +51,25 @@ export default function ProductDetail() {
     if (product) {
       setActiveImage(product.images?.[0] || product.image);
       setPincodeStatus(null);
+      setSelectedSize(null);
     }
   }, [id, product]);
 
   const handleAddToCart = () => {
-    addToCart(product);
+    if (isVariable && !selectedSize) {
+      toast.error(`Please select a ${product.attributeName || 'Size'} first.`);
+      return;
+    }
+    addToCart({ ...product, selectedSize, price: effectivePrice });
     toast.success("Added to cart!");
   };
 
   const handleBuyNow = () => {
-    addToCart(product);
+    if (isVariable && !selectedSize) {
+      toast.error(`Please select a ${product.attributeName || 'Size'} first.`);
+      return;
+    }
+    addToCart({ ...product, selectedSize, price: effectivePrice });
     navigate("/checkout");
   };
 
@@ -162,7 +184,7 @@ export default function ProductDetail() {
             {product.salePrice ? (
               <>
                 <span className="sale-price">
-                  {formatPrice(product.salePrice)}
+                  {formatPrice(effectivePrice)}
                 </span>
                 <span
                   className="original-price"
@@ -173,9 +195,33 @@ export default function ProductDetail() {
                     fontSize: "1rem",
                   }}
                 >
-                  {formatPrice(product.price)}
+                  {formatPrice((product.price || 0) + (selectedVariation?.priceModifier || 0))}
                 </span>
+                {product.price > product.salePrice && (
+                  <span
+                    className="pdp-discount-badge"
+                    style={{
+                      marginLeft: "10px",
+                      fontSize: "0.85rem",
+                      fontWeight: 600,
+                      color: "#b91c1c",
+                      background: "#fee2e2",
+                      padding: "2px 8px",
+                      borderRadius: "4px",
+                    }}
+                  >
+                    {Math.round(((product.price - product.salePrice) / product.price) * 100)}% OFF
+                  </span>
+                )}
               </>
+            ) : isVariable ? (
+              <span>
+                {selectedVariation
+                  ? formatPrice(effectivePrice)
+                  : product.price > 0
+                  ? `From ${formatPrice(product.price)}`
+                  : "Select a size"}
+              </span>
             ) : (
               <span>{formatPrice(product.price)}</span>
             )}
@@ -212,13 +258,48 @@ export default function ProductDetail() {
             <span>(Customer Reviews)</span>
           </div>
 
+          {/* Size / Variation Selector */}
+          {isVariable && (
+            <div className="pdp-variation-section">
+              <p className="pdp-variation-label">
+                {product.attributeName || "Size"}:
+                {selectedSize && (
+                  <strong style={{ marginLeft: 6 }}>{selectedSize}</strong>
+                )}
+              </p>
+              <div className="pdp-size-options">
+                {product.variations.map((v) => {
+                  const soldOut = (v.stock || 0) === 0;
+                  return (
+                    <button
+                      key={v.size}
+                      type="button"
+                      disabled={soldOut}
+                      className={`pdp-size-btn${
+                        selectedSize === v.size ? " selected" : ""
+                      }${soldOut ? " sold-out" : ""}`}
+                      onClick={() => setSelectedSize(v.size)}
+                      title={soldOut ? "Sold out" : ""}
+                    >
+                      {v.size}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="product-actions">
             <button
               className="btn-primary btn-add-to-cart"
-              disabled={product.stockStatus === "Sold Out"}
+              disabled={product.stockStatus === "Sold Out" || (isVariable && !selectedSize)}
               onClick={handleAddToCart}
             >
-              {product.stockStatus === "Sold Out" ? "SOLD OUT" : "ADD TO CART"}
+              {product.stockStatus === "Sold Out"
+                ? "SOLD OUT"
+                : isVariable && !selectedSize
+                ? `SELECT ${(product.attributeName || "SIZE").toUpperCase()}`
+                : "ADD TO CART"}
             </button>
             {product.stockStatus !== "Sold Out" && (
               <button className="btn-secondary btn-buy-now" onClick={handleBuyNow}>BUY IT NOW</button>

@@ -5,7 +5,7 @@
 .product-card {
   display: flex;
   flex-direction: column;
-  gap: 0.875rem;
+  height: 100%;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -17,6 +17,14 @@
   opacity: 0.7;
 }
 
+.product-card-link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
 /* ── Image wrapper ── */
 .image-wrapper {
   position: relative;
@@ -24,6 +32,7 @@
   background-color: var(--color-ivory-deep);
   overflow: hidden;
   transition: box-shadow 0.4s ease;
+  flex-shrink: 0;
 }
 
 .product-card:hover .image-wrapper {
@@ -136,26 +145,37 @@
 
 /* ── Card info ── */
 .card-info {
-  padding-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  padding-top: 0.75rem;
 }
 
 .card-subtitle {
-  font-size: 0.55rem;
+  font-size: 0.6rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #8c7355; /* Antique Gold/Brown */
-  margin-bottom: 0.4rem;
+  letter-spacing: 0.14em;
+  color: var(--color-antique-gold, #AE8A54);
+  margin-bottom: 0.35rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .card-title {
   font-family: var(--font-heading);
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 500;
-  margin-bottom: 0.3rem;
-  line-height: 1.3;
+  margin-bottom: 0.35rem;
+  line-height: 1.35;
   color: var(--color-dark-charcoal);
   transition: color 0.3s ease;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.7em;
 }
 
 .product-card:hover .card-title {
@@ -163,44 +183,59 @@
 }
 
 .card-desc-snippet {
-  font-size: 0.7rem;
-  color: #777;
-  margin-bottom: 0.8rem;
-  line-height: 1.4;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  color: var(--color-warm-taupe, #8B7863);
+  margin-bottom: 0.85rem;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.2em;
 }
 
 .price-row-editorial {
+  margin-top: auto; /* Bottom align price and explore button */
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid #f0f0f0;
-  padding-top: 0.8rem;
+  border-top: 1px solid #EADFCF;
+  padding-top: 0.75rem;
+  padding-bottom: 0.2rem;
 }
 
 .price-editorial {
-  font-size: 0.85rem;
+  font-size: 0.92rem;
   font-weight: 700;
   color: var(--color-dark-charcoal);
+  letter-spacing: 0.02em;
 }
 
 .examine-btn {
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  color: #777;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--color-dark-charcoal);
   text-transform: uppercase;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  transition: color 0.3s ease;
+  gap: 0.35rem;
+  transition: color 0.3s ease, gap 0.3s ease;
 }
 
 .examine-btn .arrow {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .product-card:hover .examine-btn {
   color: var(--color-antique-gold);
+}
+
+.product-card:hover .examine-btn .arrow {
+  transform: translateX(4px);
 }
 
 /* ── Quick view overlay ── */

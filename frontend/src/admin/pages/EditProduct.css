@@ -320,3 +320,122 @@ textarea.admin-input {
   font-size: 0.8rem;
   font-weight: 500;
 }
+
+/* ── Product Type Selector ── */
+.form-row:has(.product-type-option) {
+  gap: 14px;
+}
+
+.product-type-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 2px solid var(--admin-border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--admin-surface);
+}
+
+.product-type-option:hover {
+  border-color: var(--admin-primary);
+  background: rgba(16, 185, 129, 0.04);
+}
+
+.product-type-option.selected {
+  border-color: var(--admin-primary);
+  background: rgba(16, 185, 129, 0.07);
+}
+
+.product-type-label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--admin-text-main);
+}
+
+.product-type-desc {
+  font-size: 0.78rem;
+  color: var(--admin-text-light);
+  line-height: 1.3;
+}
+
+/* ── Variation Table ── */
+.variation-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  margin-bottom: 0;
+}
+
+.variation-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.variation-table thead th {
+  padding: 10px 14px;
+  background: var(--admin-bg);
+  color: var(--admin-text-light);
+  font-weight: 600;
+  text-align: left;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.variation-table tbody td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--admin-border);
+  vertical-align: middle;
+}
+
+.variation-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.variation-table .admin-input {
+  padding: 7px 10px;
+  font-size: 0.88rem;
+  min-width: 60px;
+}
+
+.variation-table .input-with-prefix .admin-input {
+  padding-left: 26px;
+}
+
+.variation-table .input-prefix {
+  font-size: 0.85rem;
+  left: 10px;
+}
+
+.variation-remove-btn {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  transition: background 0.2s;
+}
+
+.variation-remove-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.variation-hint {
+  font-size: 0.82rem;
+  color: var(--admin-text-light);
+  margin-top: 10px;
+}
+
+.mt-3 {
+  margin-top: 12px;
+}

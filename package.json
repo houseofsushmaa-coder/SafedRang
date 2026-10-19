@@ -2,6 +2,9 @@
   "name": "safedrang",
   "type": "module",
   "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "lint": "npm --prefix frontend run lint",
     "set-role": "node scripts/set-role.mjs"
   },
   "dependencies": {

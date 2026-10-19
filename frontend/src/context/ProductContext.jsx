@@ -12,7 +12,8 @@ const formatProduct = (p) => ({
   price: Number(p.price || 0),
   salePrice: p.sale_price ? Number(p.sale_price) : p.salePrice ? Number(p.salePrice) : null,
   description: p.description || "",
-  sku: p.sku || "",
+  subcategory: p.subcategory || p.sub_category || "",
+  craft: p.craft || "",
   fabric: p.fabric || p.material || "",
   // Images can come from a joined table or a direct column
   image:
@@ -29,6 +30,10 @@ const formatProduct = (p) => ({
       : [],
   stockStatus: (p.stock > 0 || p.in_stock) ? "In Stock" : "Out of Stock",
   stock: p.stock ?? 0,
+  // Variation support
+  productType: p.productType || p.product_type || "simple",
+  attributeName: p.attributeName || p.attribute_name || "Size",
+  variations: Array.isArray(p.variations) ? p.variations : [],
 });
 
 export const ProductProvider = ({ children }) => {
@@ -95,6 +100,10 @@ export const ProductProvider = ({ children }) => {
       images: product.images || (product.image ? [product.image] : []),
       stockStatus: (product.stock > 0 || product.stockStatus === "In Stock") ? "In Stock" : "Out of Stock",
       stock: product.stock !== undefined ? Number(product.stock) : 10,
+      // Variation support
+      productType: product.productType || "simple",
+      attributeName: product.attributeName || "Size",
+      variations: Array.isArray(product.variations) ? product.variations : [],
     };
 
     setProducts((prev) => [formatted, ...prev]);

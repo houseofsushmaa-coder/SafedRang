@@ -30,7 +30,16 @@ const POPULAR_SEARCH_TAGS = [
 
 export default function Header() {
   const { currency, changeCurrency, supportedCurrencies, loadingRates, formatPrice } = useCurrency();
-  const { cart, cartCount, wishlist, wishlistCount, toggleWishlist, addToCart } = useCart();
+  const {
+    cart,
+    cartCount,
+    wishlist,
+    wishlistCount,
+    toggleWishlist,
+    addToCart,
+    removeFromCart,
+    clearCart,
+  } = useCart();
   const { user, session, token, isAdmin } = useAuth();
   const { products = [] } = useProducts();
   const navigate = useNavigate();
@@ -44,10 +53,12 @@ export default function Header() {
   const searchInputRef = useRef(null);
 
   const isLoggedIn = !!(user || session || token);
-  const accountDestination = isLoggedIn ? "/dashboard" : "/login";
+  const accountDestination = isLoggedIn 
+    ? (isAdmin ? "/admin" : "/account") 
+    : "/login";
   const accountTitle = isLoggedIn 
-    ? (isAdmin ? "Admin Dashboard" : "My Account Dashboard") 
-    : "Sign In / Login";
+    ? (isAdmin ? "Admin Dashboard" : "My Account") 
+    : "Sign In / Create Account";
 
   // Focus search input when search modal opens
   useEffect(() => {
@@ -240,22 +251,66 @@ export default function Header() {
               </Link>
 
               <div className="cart-dropdown">
-                <h4>Shopping Bag</h4>
+                <div className="cart-dropdown-header">
+                  <h4>Shopping Bag</h4>
+                  {cart.length > 0 && (
+                    <button
+                      type="button"
+                      className="cart-dropdown-clear-btn"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        clearCart();
+                        toast.success("Shopping bag cleared");
+                      }}
+                      title="Clear all items from bag"
+                    >
+                      Clear Bag
+                    </button>
+                  )}
+                </div>
                 {cart.length === 0 ? (
                   <p className="empty-cart">Your shopping bag is currently empty.</p>
                 ) : (
                   <div className="cart-items">
-                    {cart.map((item) => (
-                      <div key={item.id} className="cart-item">
-                        <img src={item.images?.[0] || item.image} alt={item.title} />
-                        <div className="cart-item-info">
-                          <div className="cart-item-title">{item.title.replace(/"/g, "")}</div>
-                          <div className="cart-item-price">
-                            {formatPrice(item.salePrice || item.price)} × {item.quantity}
+                    {cart.map((item) => {
+                      const itemKey = item.cartItemId || item.id;
+                      return (
+                        <div key={itemKey} className="cart-item">
+                          <img
+                            src={item.images?.[0] || item.image || "https://via.placeholder.com/60x80?text=SR"}
+                            alt={item.title}
+                            onError={(e) => {
+                              e.currentTarget.src = "/saree_category.jpeg";
+                            }}
+                          />
+                          <div className="cart-item-info">
+                            <div className="cart-item-title">{item.title.replace(/"/g, "")}</div>
+                            {item.selectedSize && (
+                              <div className="cart-item-variant">
+                                Size: <strong>{item.selectedSize}</strong>
+                              </div>
+                            )}
+                            <div className="cart-item-price">
+                              {formatPrice(item.salePrice || item.price)} × {item.quantity}
+                            </div>
                           </div>
+                          <button
+                            type="button"
+                            className="cart-item-remove-btn"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              removeFromCart(itemKey);
+                            }}
+                            title="Remove item"
+                            aria-label={`Remove ${item.title}`}
+                          >
+                            <X size={14} />
+                          </button>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                     <div className="cart-dropdown-footer">
                       <div className="cart-subtotal">
                         <span>Subtotal</span>

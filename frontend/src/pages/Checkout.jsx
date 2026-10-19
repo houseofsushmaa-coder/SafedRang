@@ -276,7 +276,7 @@ export default function Checkout() {
             <h2>Order Summary</h2>
             <div className="summary-items">
               {cart.map((item) => (
-                <div key={`${item.id}-${item.variantId || ""}`} className="summary-item">
+                <div key={item.cartItemId || `${item.id}-${item.selectedSize || ""}`} className="summary-item">
                   <div className="summary-item-img">
                     <img
                       src={item.images?.[0] || item.image}
@@ -291,6 +291,11 @@ export default function Checkout() {
                     <h4 style={{ textTransform: "capitalize" }}>
                       {item.title?.replace(/"/g, "")}
                     </h4>
+                    {item.selectedSize && (
+                      <p style={{ fontSize: "0.8rem", color: "#6E1E2A", fontWeight: 500, margin: "2px 0" }}>
+                        Size: {item.selectedSize}
+                      </p>
+                    )}
                     {item.fabric && <p>{item.fabric}</p>}
                   </div>
                   <div className="summary-item-price">

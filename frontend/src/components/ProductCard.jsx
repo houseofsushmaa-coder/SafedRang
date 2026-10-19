@@ -53,7 +53,7 @@ export default function ProductCard({ product }) {
     <div className={`product-card ${isSold ? "is-sold" : ""}`}>
       <Link
         to={`/product/${product.id}`}
-        style={{ textDecoration: "none", color: "inherit" }}
+        className="product-card-link"
       >
         <div
           className="image-wrapper"

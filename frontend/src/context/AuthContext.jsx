@@ -106,6 +106,37 @@ export const AuthProvider = ({ children }) => {
     };
   };
 
+  const signup = async (email, password, fullName = "") => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+          name: fullName,
+          role: "customer",
+        },
+      },
+    });
+
+    if (error) {
+      console.error("Signup failed:", error.message);
+      return { success: false, error: error.message };
+    }
+
+    let enrichedUser = null;
+    if (data?.user) {
+      enrichedUser = await resolveUserProfile(data.user);
+      setUser(enrichedUser);
+    }
+
+    return {
+      success: true,
+      user: enrichedUser || data.user,
+      session: data.session,
+    };
+  };
+
   const loginWithGoogle = async (redirectToPath = "/admin") => {
     const origin = typeof window !== "undefined" ? window.location.origin : "https://safedrang.com";
     const redirectTo = `${origin}${redirectToPath}`;
@@ -157,7 +188,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, session, token, loading, login, loginWithGoogle, resetPassword, logout, isAdmin }}
+      value={{ user, session, token, loading, login, signup, loginWithGoogle, resetPassword, logout, isAdmin }}
     >
       {children}
     </AuthContext.Provider>

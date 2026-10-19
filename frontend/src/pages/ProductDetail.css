@@ -439,3 +439,54 @@
   gap: 0.5rem;
   margin-bottom: 0.8rem;
 }
+
+/* ── Variation / Size Selector ── */
+.pdp-variation-section {
+  margin: 18px 0 8px;
+}
+
+.pdp-variation-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-dark-charcoal);
+  margin-bottom: 10px;
+}
+
+.pdp-size-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pdp-size-btn {
+  min-width: 48px;
+  padding: 6px 16px;
+  border: 1.5px solid #c8bfb0;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-dark-charcoal);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  letter-spacing: 0.03em;
+}
+
+.pdp-size-btn:hover:not(:disabled) {
+  border-color: var(--color-dark-charcoal);
+  background: #faf9f7;
+}
+
+.pdp-size-btn.selected {
+  border-color: var(--color-dark-charcoal);
+  background: var(--color-dark-charcoal);
+  color: #fff;
+}
+
+.pdp-size-btn.sold-out {
+  opacity: 0.4;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}

@@ -8,6 +8,11 @@ import {
   Sparkles,
   Gem,
   BadgeCheck,
+  Feather,
+  Crown,
+  MapPin,
+  Clock,
+  CheckCircle2,
 } from "lucide-react";
 import "./Home.css";
 
@@ -101,6 +106,7 @@ export default function Home() {
   const categoryRef = useScrollReveal({ threshold: 0.08 });
   const oooRef = useScrollReveal({ threshold: 0.1 });
   const journeyRef = useScrollReveal({ threshold: 0.08 });
+  const whyChooseUsRef = useScrollReveal({ threshold: 0.08 });
   const testimonialsRef = useScrollReveal({ threshold: 0.08 });
   const journalRef = useScrollReveal({ threshold: 0.08 });
 
@@ -278,7 +284,163 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. Testimonials — Real reviews carousel */}
+      {/* 6. Why Choose Us? — Lucknow Heritage, Chikankari & Zardozi Artistry */}
+      <section className="why-choose-us reveal-section" ref={whyChooseUsRef}>
+        <div className="container">
+          <div className="why-choose-header text-center">
+            <span className="why-choose-eyebrow">— AWADH HERITAGE &amp; SLOW CRAFT —</span>
+            <h2 className="why-choose-title">WHY CHOOSE US?</h2>
+            <p className="why-choose-subtitle">
+              The Soul of Lucknow Chikankari &amp; Royal Zardozi
+            </p>
+            <div className="why-choose-divider">
+              <span className="why-divider-line"></span>
+              <span className="why-divider-gem">✦</span>
+              <span className="why-divider-line"></span>
+            </div>
+            <p className="why-choose-lead">
+              Rooted in the timeless Tehzeeb of Awadh, every Safed Rang creation is an
+              ode to patient human artistry — handcrafted stitch-by-stitch by generational master
+              karigars in the historic lanes of Lucknow.
+            </p>
+          </div>
+
+          <div className="why-cards-grid">
+            {/* Card 1: Pure Lucknow Chikankari */}
+            <div className="why-card stagger-1">
+              <div className="why-card-top">
+                <span className="why-card-num">01</span>
+                <span className="why-card-tag">32 Classical Stitches</span>
+              </div>
+              <div className="why-icon-box">
+                <Feather size={26} strokeWidth={1.5} />
+              </div>
+              <h3 className="why-card-title">Pure Chikankari Needlework</h3>
+              <p className="why-card-desc">
+                Reviving 400 years of Awadhi needlecraft. From the delicate shadow work of <em>Bakhiya</em>,
+                embossed knots of <em>Murri &amp; Phanda</em>, to airy <em>Jaali</em> netting — every motif
+                is brought to life stitch-by-stitch with needle and thread, never by machine.
+              </p>
+              <div className="why-card-footer">
+                <span className="why-pill">
+                  <CheckCircle2 size={13} /> Bakhiya, Murri &amp; Phanda
+                </span>
+                <span className="why-pill">
+                  <CheckCircle2 size={13} /> Zero Machine Stitches
+                </span>
+              </div>
+            </div>
+
+            {/* Card 2: Royal Zardozi Work */}
+            <div className="why-card stagger-2">
+              <div className="why-card-top">
+                <span className="why-card-num">02</span>
+                <span className="why-card-tag">Mughal Court Grandeur</span>
+              </div>
+              <div className="why-icon-box">
+                <Crown size={26} strokeWidth={1.5} />
+              </div>
+              <h3 className="why-card-title">Opulent Royal Zardozi</h3>
+              <p className="why-card-desc">
+                Tracing its lineage to the royal courts of Awadh. Our karigars meticulously hand-weave
+                gilded <em>Kasab</em> wires, <em>Dabka</em>, <em>Moti</em>, and <em>Kamdani Sitara</em> — sculpting
+                three-dimensional textures that catch the light with subtle, regal magnificence.
+              </p>
+              <div className="why-card-footer">
+                <span className="why-pill">
+                  <CheckCircle2 size={13} /> Real Kasab &amp; Dabka Work
+                </span>
+                <span className="why-pill">
+                  <CheckCircle2 size={13} /> Hand-Set Kamdani &amp; Moti
+                </span>
+              </div>
+            </div>
+
+            {/* Card 3: 100% Handcrafted */}
+            <div className="why-card stagger-3">
+              <div className="why-card-top">
+                <span className="why-card-num">03</span>
+                <span className="why-card-tag">Slow Fashion Ethos</span>
+              </div>
+              <div className="why-icon-box">
+                <Clock size={26} strokeWidth={1.5} />
+              </div>
+              <h3 className="why-card-title">100% Handcrafted Devotion</h3>
+              <p className="why-card-desc">
+                In a world governed by mass production, we honour slow, unhurried craft. A single Safed Rang
+                saree demands 60 to 180 days of dedicated artisan work. No two pieces can ever be identical —
+                each piece carries the unique touch of its maker.
+              </p>
+              <div className="why-card-footer">
+                <span className="why-pill">
+                  <CheckCircle2 size={13} /> 120+ Dedicated Hours
+                </span>
+                <span className="why-pill">
+                  <CheckCircle2 size={13} /> Irreplaceable Slow Art
+                </span>
+              </div>
+            </div>
+
+            {/* Card 4: Born in Lucknow */}
+            <div className="why-card stagger-4">
+              <div className="why-card-top">
+                <span className="why-card-num">04</span>
+                <span className="why-card-tag">City of Nawabs &amp; Tehzeeb</span>
+              </div>
+              <div className="why-icon-box">
+                <MapPin size={26} strokeWidth={1.5} />
+              </div>
+              <h3 className="why-card-title">Direct From Lucknow</h3>
+              <p className="why-card-desc">
+                Safed Rang is deeply anchored in the historic craft lanes of Chowk, Lucknow. We bypass commercial
+                middlemen to work directly with generational karigar families — ensuring authentic provenance, fair
+                patronage, and true Awadhi cultural preservation.
+              </p>
+              <div className="why-card-footer">
+                <span className="why-pill">
+                  <CheckCircle2 size={13} /> Chowk Artisan Atelier
+                </span>
+                <span className="why-pill">
+                  <CheckCircle2 size={13} /> Fair-Trade Karigar Support
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Hallmark Trust Strip */}
+          <div className="why-hallmarks-strip">
+            <div className="why-hallmark-item">
+              <span className="why-hallmark-metric">400+</span>
+              <span className="why-hallmark-label">Years of Awadhi Legacy</span>
+            </div>
+            <div className="why-hallmark-divider"></div>
+            <div className="why-hallmark-item">
+              <span className="why-hallmark-metric">100%</span>
+              <span className="why-hallmark-label">Hand-Stitched Authenticity</span>
+            </div>
+            <div className="why-hallmark-divider"></div>
+            <div className="why-hallmark-item">
+              <span className="why-hallmark-metric">Pure</span>
+              <span className="why-hallmark-label">Chanderi, Georgette &amp; Mulmul</span>
+            </div>
+            <div className="why-hallmark-divider"></div>
+            <div className="why-hallmark-item">
+              <span className="why-hallmark-metric">Direct</span>
+              <span className="why-hallmark-label">Lucknow Karigar Atelier</span>
+            </div>
+          </div>
+
+          {/* Bottom Link to Craft Page */}
+          <div className="why-bottom-cta text-center">
+            <Link to="/craft" className="why-craft-btn">
+              <span>EXPLORE THE STORY OF OUR CRAFT</span>
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* 7. Testimonials — Real reviews carousel */}
       <section className="testimonials-v2 reveal-section" ref={testimonialsRef}>
         <div className="container">
           <div className="testimonials-header text-center">

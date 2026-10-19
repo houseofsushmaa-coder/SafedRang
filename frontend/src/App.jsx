@@ -17,6 +17,13 @@ import Checkout from "./pages/Checkout";
 import PaymentVerify from "./pages/PaymentVerify";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
+import CustomerLogin from "./pages/Login";
+import AccountLayout, { ProtectedCustomerRoute } from "./pages/Account/AccountLayout";
+import OverviewTab from "./pages/Account/tabs/OverviewTab";
+import OrdersTab from "./pages/Account/tabs/OrdersTab";
+import WishlistTab from "./pages/Account/tabs/WishlistTab";
+import AddressesTab from "./pages/Account/tabs/AddressesTab";
+import SettingsTab from "./pages/Account/tabs/SettingsTab";
 import AdminLayout from "./admin/AdminLayout";
 import AdminErrorBoundary from "./admin/components/AdminErrorBoundary";
 import Dashboard from "./admin/pages/Dashboard";
@@ -129,8 +136,23 @@ function App() {
               />
             <Routes>
               <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/login" element={<AdminLogin />} />
+              <Route path="/login" element={<CustomerLogin />} />
+              <Route path="/signup" element={<CustomerLogin />} />
               <Route path="/dashboard" element={<Navigate to="/admin" replace />} />
+              <Route
+                path="/account"
+                element={
+                  <ProtectedCustomerRoute>
+                    <AccountLayout />
+                  </ProtectedCustomerRoute>
+                }
+              >
+                <Route index element={<OverviewTab />} />
+                <Route path="orders" element={<OrdersTab />} />
+                <Route path="wishlist" element={<WishlistTab />} />
+                <Route path="addresses" element={<AddressesTab />} />
+                <Route path="settings" element={<SettingsTab />} />
+              </Route>
 
               <Route
                 path="/admin"

@@ -190,7 +190,7 @@ const AdminLogin = () => {
             </div>
             <h1 className="heritage-brand-title">SAFED RANG</h1>
             <p className="heritage-brand-subtitle">
-              {isForgotMode ? "ACCOUNT RECOVERY PORTAL" : "ROYAL STOREFRONT & ADMIN PORTAL"}
+              {isForgotMode ? "ACCOUNT RECOVERY PORTAL" : "ADMINISTRATIVE CONSOLE"}
             </p>
             <div className="heritage-motif-divider">
               <span className="motif-line"></span>

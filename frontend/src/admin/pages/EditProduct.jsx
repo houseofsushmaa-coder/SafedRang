@@ -8,6 +8,9 @@ import {
   UploadCloud,
   Star,
   Trash2,
+  Plus,
+  Layers,
+  ChevronDown,
 } from "lucide-react";
 import "./AdminPages.css";
 import "./EditProduct.css";
@@ -32,6 +35,9 @@ const EditProduct = () => {
     image: "",
     images: [],
     description: "",
+    productType: "simple",
+    attributeName: "Size",
+    variations: [],
   });
 
   useEffect(() => {
@@ -50,6 +56,9 @@ const EditProduct = () => {
           image: product.image || "",
           images: product.images || (product.image ? [product.image] : []),
           description: rawDesc,
+          productType: product.productType || "simple",
+          attributeName: product.attributeName || "Size",
+          variations: product.variations || [],
         });
       }
     }
@@ -120,6 +129,34 @@ const EditProduct = () => {
     handleMainImageUpload(e.dataTransfer.files);
   };
 
+  // ── Variation helpers ──────────────────────────────────────
+  const addVariation = () => {
+    setFormData((prev) => ({
+      ...prev,
+      variations: [
+        ...prev.variations,
+        { size: "", stock: 1, priceModifier: 0 },
+      ],
+    }));
+  };
+
+  const removeVariation = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      variations: prev.variations.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updateVariation = (index, field, value) => {
+    setFormData((prev) => {
+      const updated = prev.variations.map((v, i) =>
+        i === index ? { ...v, [field]: value } : v,
+      );
+      return { ...prev, variations: updated };
+    });
+  };
+  // ──────────────────────────────────────────────────────────
+
   const handleSave = async (e) => {
     e.preventDefault();
     if (!formData.title.trim()) {
@@ -127,7 +164,14 @@ const EditProduct = () => {
       return;
     }
     if (!formData.price) {
-      alert("Please enter a regular price.");
+      alert("Please enter a base regular price.");
+      return;
+    }
+    if (
+      formData.productType === "variable" &&
+      formData.variations.length === 0
+    ) {
+      alert("Please add at least one variation.");
       return;
     }
 
@@ -136,7 +180,12 @@ const EditProduct = () => {
       ...formData,
       price: parseFloat(formData.price) || 0,
       salePrice: formData.salePrice ? parseFloat(formData.salePrice) : null,
-      stock: formData.stockStatus === "In Stock" ? 10 : 0,
+      stock:
+        formData.productType === "variable"
+          ? formData.variations.reduce((sum, v) => sum + (Number(v.stock) || 0), 0)
+          : formData.stockStatus === "In Stock"
+          ? 10
+          : 0,
     };
 
     try {
@@ -159,6 +208,8 @@ const EditProduct = () => {
       <div className="admin-loading-state">Loading product details...</div>
     );
   }
+
+  const isVariable = formData.productType === "variable";
 
   return (
     <div className="admin-page edit-product-page">
@@ -229,8 +280,54 @@ const EditProduct = () => {
             </div>
           </div>
 
+          {/* ── Product Type ────────────────────────────────── */}
           <div className="admin-card">
-            <h3 className="card-heading">Pricing & Inventory</h3>
+            <h3 className="card-heading">Product Type</h3>
+            <div className="form-row">
+              <label
+                className={`product-type-option ${formData.productType === "simple" ? "selected" : ""}`}
+                onClick={() =>
+                  setFormData((prev) => ({ ...prev, productType: "simple" }))
+                }
+              >
+                <input
+                  type="radio"
+                  name="productType"
+                  value="simple"
+                  checked={formData.productType === "simple"}
+                  onChange={handleChange}
+                  style={{ display: "none" }}
+                />
+                <span className="product-type-label">Simple Product</span>
+                <span className="product-type-desc">Single SKU, fixed price — no size or colour choices</span>
+              </label>
+
+              <label
+                className={`product-type-option ${formData.productType === "variable" ? "selected" : ""}`}
+                onClick={() =>
+                  setFormData((prev) => ({ ...prev, productType: "variable" }))
+                }
+              >
+                <input
+                  type="radio"
+                  name="productType"
+                  value="variable"
+                  checked={formData.productType === "variable"}
+                  onChange={handleChange}
+                  style={{ display: "none" }}
+                />
+                <span className="product-type-label">
+                  <Layers size={14} style={{ verticalAlign: "middle", marginRight: 4 }} />
+                  Variable Product
+                </span>
+                <span className="product-type-desc">Multiple sizes / colours — each with its own stock</span>
+              </label>
+            </div>
+          </div>
+
+          {/* ── Pricing & Inventory ─────────────────────────── */}
+          <div className="admin-card">
+            <h3 className="card-heading">Pricing &amp; Inventory</h3>
             <div className="form-row">
               <div className="form-group half-width">
                 <label>Regular Price (₹)</label>
@@ -242,7 +339,8 @@ const EditProduct = () => {
                     value={formData.price}
                     onChange={handleChange}
                     className="admin-input full-width"
-                    required
+                    required={!isVariable}
+                    placeholder={isVariable ? "Set per variation" : ""}
                   />
                 </div>
               </div>
@@ -274,21 +372,130 @@ const EditProduct = () => {
                   className="admin-input full-width"
                 />
               </div>
-              <div className="form-group half-width">
-                <label>Stock Status</label>
-                <select
-                  name="stockStatus"
-                  value={formData.stockStatus}
-                  onChange={handleChange}
-                  className="admin-select full-width"
-                >
-                  <option value="In Stock">In Stock</option>
-                  <option value="Low Stock">Low Stock</option>
-                  <option value="Out of Stock">Out of Stock</option>
-                </select>
-              </div>
+              {!isVariable && (
+                <div className="form-group half-width">
+                  <label>Stock Status</label>
+                  <select
+                    name="stockStatus"
+                    value={formData.stockStatus}
+                    onChange={handleChange}
+                    className="admin-select full-width"
+                  >
+                    <option value="In Stock">In Stock</option>
+                    <option value="Low Stock">Low Stock</option>
+                    <option value="Out of Stock">Out of Stock</option>
+                  </select>
+                </div>
+              )}
             </div>
           </div>
+
+          {/* ── Variations ──────────────────────────────────── */}
+          {isVariable && (
+            <div className="admin-card">
+              <h3 className="card-heading">Variations</h3>
+
+              <div className="form-group" style={{ marginBottom: 16 }}>
+                <label>Attribute Name</label>
+                <input
+                  type="text"
+                  name="attributeName"
+                  value={formData.attributeName}
+                  onChange={handleChange}
+                  className="admin-input"
+                  placeholder="e.g. Size, Colour, Style"
+                  style={{ maxWidth: 240 }}
+                />
+              </div>
+
+              {formData.variations.length > 0 && (
+                <div className="variation-table-wrap">
+                  <table className="variation-table">
+                    <thead>
+                      <tr>
+                        <th>{formData.attributeName || "Attribute"}</th>
+                        <th>Stock Qty</th>
+                        <th>Price Adj. (₹)</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {formData.variations.map((v, idx) => (
+                        <tr key={idx}>
+                          <td>
+                            <input
+                              type="text"
+                              className="admin-input full-width"
+                              placeholder="e.g. S / M / L / Red"
+                              value={v.size}
+                              onChange={(e) =>
+                                updateVariation(idx, "size", e.target.value)
+                              }
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              className="admin-input full-width"
+                              min="0"
+                              value={v.stock}
+                              onChange={(e) =>
+                                updateVariation(idx, "stock", parseInt(e.target.value) || 0)
+                              }
+                            />
+                          </td>
+                          <td>
+                            <div className="input-with-prefix">
+                              <span className="input-prefix">₹</span>
+                              <input
+                                type="number"
+                                className="admin-input full-width"
+                                placeholder="0"
+                                value={v.priceModifier}
+                                onChange={(e) =>
+                                  updateVariation(idx, "priceModifier", parseFloat(e.target.value) || 0)
+                                }
+                              />
+                            </div>
+                          </td>
+                          <td>
+                            <button
+                              type="button"
+                              className="variation-remove-btn"
+                              title="Remove variation"
+                              onClick={() => removeVariation(idx)}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              <button
+                type="button"
+                className="admin-btn admin-btn-outline icon-left mt-3"
+                onClick={addVariation}
+                style={{ marginTop: 12 }}
+              >
+                <Plus size={14} /> Add Variation
+              </button>
+
+              {formData.variations.length > 0 && (
+                <p className="variation-hint">
+                  Total stock:{" "}
+                  <strong>
+                    {formData.variations.reduce((s, v) => s + (Number(v.stock) || 0), 0)}
+                  </strong>{" "}
+                  units across {formData.variations.length} variation
+                  {formData.variations.length !== 1 ? "s" : ""}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="edit-product-sidebar">
@@ -330,7 +537,7 @@ const EditProduct = () => {
                 <div className="upload-placeholder">
                   <ImageIcon size={32} className="upload-icon-svg" />
                   <p>
-                    Drag & drop or <strong>browse</strong>
+                    Drag &amp; drop or <strong>browse</strong>
                   </p>
                   <p className="upload-hint">
                     High resolution images recommended

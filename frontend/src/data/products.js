@@ -117,8 +117,8 @@ export const products = [
     "title": "RUSTY RED CHANDERI SILK BLOUSE",
     "category": "Blouses",
     "subcategory": "Blouse",
-    "price": 0,
-    "salePrice": null,
+    "price": 2500,
+    "salePrice": 2000,
     "image": "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/05/rusty-red-1-scaled.jpeg",
     "images": [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/05/rusty-red-1-scaled.jpeg",
@@ -126,11 +126,36 @@ export const products = [
     ],
     "sku": "BB-0425M",
     "stockStatus": "In Stock",
-    "craft": "Handcrafted",
-    "fabric": "Mixed",
-    "description": "",
+    "craft": "Lucknowi Chikankari",
+    "fabric": "Chanderi Silk",
+    "description": "Elevate your ethnic wardrobe with this stunning Rusty Red Chanderi Silk Blouse. Crafted from premium Chanderi silk, this ready-to-wear blouse pairs beautifully with sarees and lehengas for festive and formal occasions.\n\nProduct Details:\nFabric: Chanderi Silk\nColor: Rusty Red\nOccasion: Festive, Wedding, Party",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 4,
+    "productType": "variable",
+    "attributeName": "Size",
+    "variations": [
+      {
+        "size": "S",
+        "stock": 1,
+        "priceModifier": 0
+      },
+      {
+        "size": "M",
+        "stock": 1,
+        "priceModifier": 0
+      },
+      {
+        "size": "L",
+        "stock": 1,
+        "priceModifier": 0
+      },
+      {
+        "size": "XL",
+        "stock": 1,
+        "priceModifier": 0
+      }
+    ]
   },
   {
     "id": "2xamtsoli",
@@ -1349,8 +1374,8 @@ export const products = [
     "title": "Pink solid chanderi silk blouse",
     "category": "Blouses",
     "subcategory": "Blouse",
-    "price": 0,
-    "salePrice": null,
+    "price": 2000,
+    "salePrice": 1500,
     "image": "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/PINK-BLOUSE-1-scaled.jpeg",
     "images": [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/PINK-BLOUSE-1-scaled.jpeg",
@@ -1360,10 +1385,35 @@ export const products = [
     "sku": "BB-0225M",
     "stockStatus": "In Stock",
     "craft": "Handcrafted",
-    "fabric": "Mixed",
-    "description": "Our blouses comes with extra margine, allowing you to easily size up for a perfect fit.",
+    "fabric": "Chanderi Silk",
+    "description": "Our blouses come with extra margin, allowing you to easily size up for a perfect fit. Handcrafted from pure Chanderi silk with a radiant sheen.",
     "weight": ".100 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 4,
+    "productType": "variable",
+    "attributeName": "Size",
+    "variations": [
+      {
+        "size": "S",
+        "stock": 1,
+        "priceModifier": 0
+      },
+      {
+        "size": "M",
+        "stock": 1,
+        "priceModifier": 0
+      },
+      {
+        "size": "L",
+        "stock": 1,
+        "priceModifier": 0
+      },
+      {
+        "size": "XL",
+        "stock": 1,
+        "priceModifier": 0
+      }
+    ]
   },
   {
     "id": "7ptdw7iok",
@@ -2011,20 +2061,45 @@ export const products = [
     "title": "Mint-green solid chanderi silk blouse",
     "category": "Blouses",
     "subcategory": "Blouse",
-    "price": 0,
-    "salePrice": null,
+    "price": 1500,
+    "salePrice": 1000,
     "image": "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/GREEN-B-22.jpeg",
     "images": [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/GREEN-B-22.jpeg",
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/GREEN-B-11.jpeg"
     ],
-    "sku": "",
+    "sku": "BB-0325M",
     "stockStatus": "In Stock",
     "craft": "Handcrafted",
-    "fabric": "Silk",
-    "description": "Product Description:Elevate your ethnic look with this Basic Green Chanderi Silk Blouse, crafted to combine elegance with comfort. Made from premium Chanderi silk fabric, this blouse radiates a subtle sheen and sophistication, making it a perfect pairing for sarees of various fabrics and designs.\r\\n...",
+    "fabric": "Chanderi Silk",
+    "description": "Product Description: Elevate your ethnic look with this Basic Green Chanderi Silk Blouse, crafted to combine elegance with comfort. Made from premium Chanderi silk fabric, this blouse radiates a subtle sheen and sophistication, making it a perfect pairing for sarees of various fabrics and designs.",
     "weight": ".400 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 4,
+    "productType": "variable",
+    "attributeName": "Size",
+    "variations": [
+      {
+        "size": "38",
+        "stock": 1,
+        "priceModifier": 0
+      },
+      {
+        "size": "40",
+        "stock": 1,
+        "priceModifier": 0
+      },
+      {
+        "size": "42",
+        "stock": 1,
+        "priceModifier": 0
+      },
+      {
+        "size": "44",
+        "stock": 1,
+        "priceModifier": 0
+      }
+    ]
   },
   {
     "id": "pzdnue1j1",
@@ -2642,11 +2717,11 @@ export const products = [
   },
   {
     "id": "q3wqrub4i",
-    "title": "LIGHT PURPLE CHANDERI SILK BLOUSE (Copy)",
+    "title": "Light purple chanderi silk blouse",
     "category": "Blouses",
     "subcategory": "Blouse",
-    "price": 0,
-    "salePrice": null,
+    "price": 1500,
+    "salePrice": 1000,
     "image": "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/purple-1-scaled.jpeg",
     "images": [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/purple-1-scaled.jpeg",
@@ -2655,17 +2730,47 @@ export const products = [
     "sku": "BB-0125M",
     "stockStatus": "In Stock",
     "craft": "Handcrafted",
-    "fabric": "Mixed",
-    "description": "",
+    "fabric": "Chanderi Silk",
+    "description": "Refined and versatile, this Light Purple Chanderi Silk Blouse is a timeless addition to your ethnic wardrobe. Crafted from luxurious Chanderi Silk, this blouse carries a natural sheen and soft texture.",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 5,
+    "productType": "variable",
+    "attributeName": "Size",
+    "variations": [
+      {
+        "size": "36",
+        "stock": 1,
+        "priceModifier": 0
+      },
+      {
+        "size": "38",
+        "stock": 1,
+        "priceModifier": 0
+      },
+      {
+        "size": "40",
+        "stock": 1,
+        "priceModifier": 0
+      },
+      {
+        "size": "42",
+        "stock": 1,
+        "priceModifier": 0
+      },
+      {
+        "size": "44",
+        "stock": 1,
+        "priceModifier": 0
+      }
+    ]
   },
   {
     "id": "p2qrjy3hm",
     "title": "Muslin Chikankari Kurta Set (Kurta + Dupatta + Palazzo)",
     "category": "Kurta Sets",
     "subcategory": "Kurta Set",
-    "price": 0,
+    "price": 4500,
     "salePrice": null,
     "image": "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2026/03/WhatsApp-Image-2026-03-10-at-10.18.12-AM.jpeg",
     "images": [
@@ -2673,18 +2778,43 @@ export const products = [
     ],
     "sku": "MC-KSET-001",
     "stockStatus": "In Stock",
-    "craft": "Handcrafted",
-    "fabric": "Mixed",
-    "description": "",
+    "craft": "Handcrafted Chikankari",
+    "fabric": "Muslin Cotton",
+    "description": "Exquisite Muslin Chikankari 3-piece Kurta Set complete with hand-embroidered kurta, coordinating dupatta, and comfortable palazzo. Soft, breathable, and elegant for any occasion.",
     "weight": ".400 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 8,
+    "productType": "variable",
+    "attributeName": "Size",
+    "variations": [
+      {
+        "size": "38",
+        "stock": 2,
+        "priceModifier": 0
+      },
+      {
+        "size": "40",
+        "stock": 2,
+        "priceModifier": 0
+      },
+      {
+        "size": "42",
+        "stock": 2,
+        "priceModifier": 0
+      },
+      {
+        "size": "44",
+        "stock": 2,
+        "priceModifier": 0
+      }
+    ]
   },
   {
     "id": "0fghlor73",
     "title": "Viscose Georgette Chikankari Kurti",
     "category": "Kurta Sets",
     "subcategory": "Kurta Set",
-    "price": 0,
+    "price": 2400,
     "salePrice": null,
     "image": "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2026/03/WhatsApp-Image-2026-03-10-at-10.20.22-AM.jpeg",
     "images": [
@@ -2692,11 +2822,41 @@ export const products = [
     ],
     "sku": "VG-CK-001",
     "stockStatus": "In Stock",
-    "craft": "Handcrafted",
-    "fabric": "Mixed",
-    "description": "",
+    "craft": "Handcrafted Chikankari",
+    "fabric": "Viscose Georgette",
+    "description": "Elegant Viscose Georgette Chikankari Kurti, intricately hand-embroidered with Lucknowi stitches. Fluid drape with a feather-light feel.",
     "weight": "0.250 kg",
-    "dimensions": "44 × 25 × 5 cm"
+    "dimensions": "44 × 25 × 5 cm",
+    "stock": 15,
+    "productType": "variable",
+    "attributeName": "Size",
+    "variations": [
+      {
+        "size": "38",
+        "stock": 3,
+        "priceModifier": 0
+      },
+      {
+        "size": "40",
+        "stock": 3,
+        "priceModifier": 0
+      },
+      {
+        "size": "42",
+        "stock": 3,
+        "priceModifier": 0
+      },
+      {
+        "size": "44",
+        "stock": 3,
+        "priceModifier": 0
+      },
+      {
+        "size": "46",
+        "stock": 3,
+        "priceModifier": 0
+      }
+    ]
   },
   {
     "id": "4fpisctd7",
