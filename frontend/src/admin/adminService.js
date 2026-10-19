@@ -581,22 +581,31 @@ export const adminService = {
 
       if (error) throw error;
 
-      return (data || []).map((o) => ({
-        id: o.id,
-        orderNumber: o.id,
-        createdAt: o.created_at,
-        customer: {
-          firstName: o.customer_name?.split(" ")[0] || "Customer",
-          lastName: o.customer_name?.split(" ").slice(1).join(" ") || "",
-          email: o.customer_email || "",
-          phone: o.customer_phone || "",
-        },
-        shippingAddress: o.shipping_address || {},
-        items: Array.isArray(o.items) ? o.items : [],
-        paymentMethod: o.payment_method || "Cashfree / UPI",
-        total: Number(o.total_amount || o.total || 0),
-        orderStatus: (o.payment_status || o.order_status || "PENDING").toUpperCase(),
-      }));
+      return (data || []).map((o) => {
+        const rawName = o.customer_name || o.shipping_address?.name || o.shippingAddress?.name || (o.customer ? `${o.customer.firstName || ""} ${o.customer.lastName || ""}` : "") || "Customer";
+        const email = o.customer_email || o.shipping_address?.email || o.shippingAddress?.email || o.customer?.email || "";
+        const phone = o.customer_phone || o.shipping_address?.phone || o.shippingAddress?.phone || o.customer?.phone || "";
+        const nameParts = rawName.trim().split(" ");
+        const firstName = nameParts[0] || "Customer";
+        const lastName = nameParts.slice(1).join(" ") || "";
+
+        return {
+          id: o.id,
+          orderNumber: o.order_id || o.orderNumber || o.id,
+          createdAt: o.created_at || o.createdAt || new Date().toISOString(),
+          customer: {
+            firstName,
+            lastName,
+            email,
+            phone,
+          },
+          shippingAddress: o.shipping_address || o.shippingAddress || {},
+          items: Array.isArray(o.items) ? o.items : [],
+          paymentMethod: o.payment_method || o.paymentMethod || "Cashfree / UPI",
+          total: Number(o.total_amount || o.total || 0),
+          orderStatus: (o.order_status || o.orderStatus || o.payment_status || o.paymentStatus || "PENDING").toUpperCase(),
+        };
+      });
     } catch (err) {
       console.warn("Could not fetch orders from Supabase:", err.message);
       return [];
@@ -604,9 +613,25 @@ export const adminService = {
   },
 
   async updateOrderStatus(orderId, newStatus) {
+    const statusUpper = newStatus.toUpperCase();
+    const validPaymentStatuses = ["PENDING", "PAID", "FAILED", "PARTIALLY_REFUNDED", "REFUNDED"];
+    const validOrderStatuses = ["PENDING", "CONFIRMED", "PROCESSING", "PACKED", "SHIPPED", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED", "RETURNED", "REFUNDED"];
+
+    const updates = {
+      payment_status: statusUpper,
+      order_status: statusUpper,
+      updated_at: new Date().toISOString(),
+    };
+    if (validPaymentStatuses.includes(statusUpper)) {
+      updates.paymentStatus = statusUpper;
+    }
+    if (validOrderStatuses.includes(statusUpper)) {
+      updates.orderStatus = statusUpper;
+    }
+
     const { data, error } = await supabase
       .from("orders")
-      .update({ payment_status: newStatus.toUpperCase() })
+      .update(updates)
       .eq("id", orderId)
       .select();
 

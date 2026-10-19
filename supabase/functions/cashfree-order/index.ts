@@ -63,13 +63,26 @@ serve(async (req) => {
 
     const { error: dbError } = await supabaseClient.from('orders').insert({
       id: orderId,
+      order_id: orderId,
+      orderNumber: orderId,
+      subtotal: orderDetails.amount,
+      total: orderDetails.amount,
       total_amount: orderDetails.amount,
+      payment_method: 'CASHFREE',
+      paymentMethod: 'CASHFREE',
       payment_status: 'PENDING',
+      paymentStatus: 'PENDING',
+      order_status: 'PROCESSING',
+      orderStatus: 'PROCESSING',
       customer_email: customerDetails.email,
       customer_name: customerDetails.name,
       customer_phone: customerDetails.phone,
       shipping_address: customerDetails.address,
-      items: orderDetails.items
+      shippingAddress: customerDetails.address,
+      billingAddress: customerDetails.address,
+      items: orderDetails.items,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     })
 
     if (dbError) {

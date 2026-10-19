@@ -195,41 +195,62 @@ export default function Checkout() {
     try {
       const orderId = `SR_COD_${Date.now()}`;
       const customerName = `${formData.firstName} ${formData.lastName}`.trim();
+      const orderTotal = subtotal + COD_SHIPPING_INR;
+      const orderItems = cart.map((item) => ({
+        productId: item.id,
+        title: item.title,
+        quantity: item.quantity,
+        price: item.salePrice || item.price,
+        selectedSize: item.selectedSize || null,
+      }));
+
+      const addressData = {
+        address: formData.address,
+        apartment: formData.apartment || "",
+        city: formData.city,
+        state: formData.state,
+        pincode: formData.pincode,
+        country: selectedCountry.name,
+        country_code: selectedCountry.code,
+        name: customerName,
+        phone: fullPhone,
+        email: formData.email,
+      };
 
       const { error: insertError } = await supabase.from("orders").insert([
         {
+          id: orderId,
           order_id: orderId,
+          orderNumber: orderId,
           customer_name: customerName,
           customer_email: formData.email,
           customer_phone: fullPhone,
-          shipping_address: {
-            address: formData.address,
-            apartment: formData.apartment,
-            city: formData.city,
-            state: formData.state,
-            pincode: formData.pincode,
-            country: selectedCountry.name,
-            country_code: selectedCountry.code,
-          },
-          items: cart.map((item) => ({
-            productId: item.id,
-            title: item.title,
-            quantity: item.quantity,
-            price: item.salePrice || item.price,
-            selectedSize: item.selectedSize || null,
-          })),
+          shipping_address: addressData,
+          shippingAddress: addressData,
+          billingAddress: addressData,
+          items: orderItems,
           subtotal,
           shipping_charge: COD_SHIPPING_INR,
-          total: subtotal + COD_SHIPPING_INR,
+          shippingCharge: COD_SHIPPING_INR,
+          total: orderTotal,
+          total_amount: orderTotal,
           payment_method: "COD",
+          paymentMethod: "COD",
           payment_status: "PENDING",
-          order_status: "processing",
+          paymentStatus: "PENDING",
+          order_status: "PROCESSING",
+          orderStatus: "PROCESSING",
           currency_selected: currency,
           user_id: user?.id || null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         },
       ]);
 
-      if (insertError) console.error("COD order insert error:", insertError);
+      if (insertError) {
+        console.error("COD order insert error:", insertError);
+        throw new Error(insertError.message || "Unable to save your order. Please try again.");
+      }
 
       clearCart();
       navigate(`/order-success?order_id=${orderId}&method=cod`);
