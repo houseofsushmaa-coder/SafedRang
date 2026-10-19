@@ -4006,10 +4006,10 @@ export const products = [
   },
   {
     "id": "zz32ew75k",
-    "title": "Amber semi-precious ring (Copy)",
+    "title": "Amber semi-precious ring",
     "category": "Others",
     "subcategory": "Jewellery",
-    "price": 999,
+    "price": 699,
     "salePrice": null,
     "image": "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/Amber-ring-3-scaled.jpg",
     "images": [
