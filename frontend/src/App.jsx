@@ -15,6 +15,7 @@ import Craft from "./pages/Craft";
 import ProductDetail from "./pages/ProductDetail";
 import Checkout from "./pages/Checkout";
 import PaymentVerify from "./pages/PaymentVerify";
+import OrderSuccess from "./pages/OrderSuccess";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
 import CustomerLogin from "./pages/Login";
@@ -198,6 +199,7 @@ function App() {
                 <Route path="product/:id" element={<ProductDetail />} />
                 <Route path="checkout" element={<Checkout />} />
                 <Route path="payment/verify" element={<PaymentVerify />} />
+                <Route path="order-success" element={<OrderSuccess />} />
                 <Route path="one-of-one" element={<Shop />} />
                 <Route path="journal" element={<Craft />} />
                 <Route path="story" element={<About />} />
