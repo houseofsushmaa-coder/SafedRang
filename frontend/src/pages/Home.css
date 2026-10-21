@@ -82,9 +82,8 @@
 .hero {
   position: relative;
   width: 100%;
-  height: 52vh;
-  min-height: 420px;
-  max-height: 540px;
+  height: 85vh;
+  min-height: 800px;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -1088,9 +1087,8 @@
 /* Responsive */
 @media (max-width: 1024px) {
   .hero {
-    height: 40vh;
-    min-height: 320px;
-    max-height: 420px;
+    height: 70vh;
+    min-height: 600px;
   }
   .hero-video-bg {
     grid-template-columns: repeat(4, 1fr);

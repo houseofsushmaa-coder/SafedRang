@@ -67,6 +67,7 @@
 
 /* Tooltip Pill on Desktop */
 .whatsapp-tooltip {
+  display: none;
   background: var(--color-dark-charcoal, #2A211D);
   color: #FAF5EC;
   padding: 8px 14px;
@@ -76,18 +77,24 @@
   letter-spacing: 0.04em;
   white-space: nowrap;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateX(10px);
-  transition: all 0.25s ease;
   pointer-events: none;
   border: 1px solid rgba(174, 138, 84, 0.4);
 }
 
 .global-whatsapp-floating:hover .whatsapp-tooltip {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(0);
+  display: inline-block;
+  animation: fadeInTooltip 0.2s ease forwards;
+}
+
+@keyframes fadeInTooltip {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* Mobile responsive constraints */
