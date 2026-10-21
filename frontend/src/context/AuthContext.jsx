@@ -183,12 +183,25 @@ export const AuthProvider = ({ children }) => {
     setSession(null);
   };
 
+  const signUpFromCheckout = async (email, fullName, orderId = null) => {
+    try {
+      const { data, error } = await supabase.functions.invoke("provision-customer", {
+        body: { email, fullName, orderId },
+      });
+      if (error) throw error;
+      return { success: true, isNewUser: data?.isNewUser ?? false };
+    } catch (err) {
+      console.warn("signUpFromCheckout failed:", err);
+      return { success: false, isNewUser: false, error: err.message };
+    }
+  };
+
   const token = session?.access_token || (user ? "authenticated" : null);
   const isAdmin = user?.isAdmin ?? false;
 
   return (
     <AuthContext.Provider
-      value={{ user, session, token, loading, login, signup, loginWithGoogle, resetPassword, logout, isAdmin }}
+      value={{ user, session, token, loading, login, signup, loginWithGoogle, resetPassword, logout, isAdmin, signUpFromCheckout }}
     >
       {children}
     </AuthContext.Provider>

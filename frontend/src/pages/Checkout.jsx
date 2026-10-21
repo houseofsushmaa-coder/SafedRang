@@ -217,6 +217,24 @@ export default function Checkout() {
         email: formData.email,
       };
 
+      // ── 1. Provision customer account (create if new, send magic link) ──
+      let isNewUser = false;
+      if (!user) {
+        try {
+          const { data: provData } = await supabase.functions.invoke("provision-customer", {
+            body: {
+              email: formData.email,
+              fullName: customerName,
+              orderId,
+            },
+          });
+          isNewUser = provData?.isNewUser ?? false;
+        } catch (provErr) {
+          console.warn("Account provisioning failed (non-fatal):", provErr);
+        }
+      }
+
+      // ── 2. Insert COD order ──────────────────────────────────────────────
       const { error: insertError } = await supabase.from("orders").insert([
         {
           id: orderId,
@@ -253,13 +271,20 @@ export default function Checkout() {
       }
 
       clearCart();
-      navigate(`/order-success?order_id=${orderId}&method=cod`);
+      const params = new URLSearchParams({
+        order_id: orderId,
+        method: "cod",
+        email: formData.email,
+      });
+      if (isNewUser) params.set("new_account", "1");
+      navigate(`/order-success?${params.toString()}`);
     } catch (err) {
       console.error("COD order failed:", err);
       setError(err.message || "Order placement failed. Please try again.");
       setLoading(false);
     }
   };
+
 
   const handlePaymentConfirm = () => {
     if (paymentMethod === "online") handleOnlinePayment();
