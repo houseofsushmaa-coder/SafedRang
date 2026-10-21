@@ -39,6 +39,7 @@ import SalesAnalytics from "./admin/pages/SalesAnalytics";
 import Categories from "./admin/pages/Categories";
 import Payments from "./admin/pages/Payments";
 import Settings from "./admin/pages/Settings";
+import TrackingIntegrations from "./admin/pages/TrackingIntegrations";
 import Coupons from "./admin/pages/Coupons";
 import AbandonedCarts from "./admin/pages/AbandonedCarts";
 import { ProductProvider } from "./context/ProductContext";
@@ -48,6 +49,7 @@ import { CartProvider } from "./context/CartContext";
 
 import { Toaster } from "react-hot-toast";
 import GoogleAnalytics from "./components/GoogleAnalytics";
+import WhatsAppButton from "./components/WhatsAppButton";
 
 const StorefrontLayout = () => (
   <div className="app-layout">
@@ -117,6 +119,7 @@ function App() {
             <Router>
               <ScrollToTop />
               <GoogleAnalytics />
+              <WhatsAppButton />
               <Toaster 
                 position="bottom-center"
                 toastOptions={{
@@ -177,6 +180,8 @@ function App() {
                 <Route path="categories" element={<Categories />} />
                 <Route path="payments" element={<Payments />} />
                 <Route path="settings" element={<Settings />} />
+                <Route path="settings/tracking" element={<TrackingIntegrations />} />
+                <Route path="tracking" element={<TrackingIntegrations />} />
                 <Route path="coupons" element={<Coupons />} />
                 <Route path="abandoned-carts" element={<AbandonedCarts />} />
                 {/* Placeholder for future routes */}

@@ -1,57 +1,43 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { adminService } from "../admin/adminService";
+import {
+  loadTrackingIntegrations,
+  initStorefrontTracking,
+  trackEvent,
+} from "../lib/tracking";
 
 export const GoogleAnalytics = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // 1. Get GA4 ID from env or saved settings
-    const initGA = async () => {
-      let gaId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+    let isMounted = true;
 
-      if (!gaId) {
-        try {
-          const settings = await adminService.getSettings();
-          gaId = settings?.seo?.google_analytics_id;
-        } catch {}
-      }
+    const setup = async () => {
+      // Don't inject or run tracking on admin dashboard routes
+      if (location.pathname.startsWith("/admin")) return;
 
-      if (!gaId || !gaId.startsWith("G-")) {
-        return;
-      }
+      const integrations = await loadTrackingIntegrations();
+      if (!isMounted) return;
 
-      // Check if script already injected
-      if (!document.getElementById("ga-gtag-script")) {
-        const script = document.createElement("script");
-        script.id = "ga-gtag-script";
-        script.async = true;
-        script.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
-        document.head.appendChild(script);
+      initStorefrontTracking(integrations);
+      trackEvent("page_view");
+    };
 
-        window.dataLayer = window.dataLayer || [];
-        function gtag() {
-          window.dataLayer.push(arguments);
-        }
-        window.gtag = gtag;
-        gtag("js", new Date());
-        gtag("config", gaId, {
-          send_page_view: false, // We manually send page_views on route change
-        });
-      }
+    setup();
 
-      // Track page view on route change (storefront only)
-      if (window.gtag && !location.pathname.startsWith("/admin")) {
-        window.gtag("event", "page_view", {
-          page_path: location.pathname + location.search,
-          page_location: window.location.href,
-          page_title: document.title,
-        });
+    // Re-initialize if tracking settings change in admin
+    const handleUpdate = (e) => {
+      if (!location.pathname.startsWith("/admin")) {
+        initStorefrontTracking(e.detail);
       }
     };
 
-    initGA();
-  }, [location]);
+    window.addEventListener("safedrang:tracking_updated", handleUpdate);
+    return () => {
+      isMounted = false;
+      window.removeEventListener("safedrang:tracking_updated", handleUpdate);
+    };
+  }, [location.pathname, location.search]);
 
   return null;
 };

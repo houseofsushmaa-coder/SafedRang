@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { COUNTRIES, COUNTRY_MAP } from "../data/countries";
+import { trackEvent } from "../lib/tracking";
 import "./Checkout.css";
 
 const CF_ENV = import.meta.env.VITE_CASHFREE_ENV || "SANDBOX";
@@ -25,6 +26,7 @@ export default function Checkout() {
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    trackEvent("begin_checkout", { itemCount: cartCount, currency });
   }, []);
 
   // ── Country / dial-code state ───────────────────────

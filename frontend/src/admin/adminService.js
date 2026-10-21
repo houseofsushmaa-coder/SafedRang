@@ -1,5 +1,6 @@
 import { supabase } from "../lib/supabase";
 import { products as staticProducts } from "../data/products";
+import { loadTrackingIntegrations, saveTrackingIntegrations as saveTrackingData } from "../lib/tracking";
 
 // ==============================================================================
 // SAFED RANG — UNIFIED ADMIN DATA SERVICE
@@ -985,5 +986,16 @@ export const adminService = {
       "safedrang_store_settings",
       JSON.stringify(settingsObj)
     );
+  },
+
+  // ─────────────────────────────────────────────
+  // 8. TRACKING & INTEGRATIONS
+  // ─────────────────────────────────────────────
+  async getTrackingIntegrations() {
+    return await loadTrackingIntegrations();
+  },
+
+  async saveTrackingIntegrations(configs) {
+    return await saveTrackingData(configs);
   },
 };

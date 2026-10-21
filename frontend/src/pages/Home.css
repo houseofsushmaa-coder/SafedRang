@@ -82,8 +82,9 @@
 .hero {
   position: relative;
   width: 100%;
-  height: 85vh;
-  min-height: 800px;
+  height: 52vh;
+  min-height: 420px;
+  max-height: 540px;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -1087,8 +1088,9 @@
 /* Responsive */
 @media (max-width: 1024px) {
   .hero {
-    height: 70vh;
-    min-height: 600px;
+    height: 40vh;
+    min-height: 320px;
+    max-height: 420px;
   }
   .hero-video-bg {
     grid-template-columns: repeat(4, 1fr);
@@ -1180,17 +1182,24 @@
     font-size: 0.6rem;
     padding: 7px 14px;
   }
-  /* Hero: keep all 4 videos side-by-side like in PC view */
+  /* Hero: keep all 4 videos side-by-side in 1 row with compact height */
   .hero {
-    height: 60vh;
-    min-height: 360px;
+    height: 28vh;
+    min-height: 160px;
+    max-height: 220px;
   }
   .hero-video-bg {
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: 1fr;
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    grid-template-rows: 1fr !important;
+    gap: 1.5px;
+    background: #000;
   }
   .hero-video-bg video {
     display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
   .hero-title {
     font-size: 2.5rem;

@@ -14,6 +14,7 @@ import { useCurrency } from "../context/CurrencyContext";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { trackEvent } from "../lib/tracking";
 import "./ProductDetail.css";
 
 export default function ProductDetail() {
@@ -52,6 +53,11 @@ export default function ProductDetail() {
       setActiveImage(product.images?.[0] || product.image);
       setPincodeStatus(null);
       setSelectedSize(null);
+      trackEvent("view_item", {
+        productId: product.id,
+        productName: product.name,
+        price: effectivePrice,
+      });
     }
   }, [id, product]);
 
@@ -61,6 +67,12 @@ export default function ProductDetail() {
       return;
     }
     addToCart({ ...product, selectedSize, price: effectivePrice });
+    trackEvent("add_to_cart", {
+      productId: product.id,
+      productName: product.name,
+      price: effectivePrice,
+      quantity: 1,
+    });
     toast.success("Added to cart!");
   };
 
@@ -70,6 +82,12 @@ export default function ProductDetail() {
       return;
     }
     addToCart({ ...product, selectedSize, price: effectivePrice });
+    trackEvent("add_to_cart", {
+      productId: product.id,
+      productName: product.name,
+      price: effectivePrice,
+      quantity: 1,
+    });
     navigate("/checkout");
   };
 

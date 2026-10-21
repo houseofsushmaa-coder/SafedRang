@@ -1,12 +1,14 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Settings as SettingsIcon, Save, Loader2, Store, Truck, Percent,
-  Bell, Globe, Shield, AlertCircle, CheckCircle2,
+  Bell, Globe, Shield, AlertCircle, CheckCircle2, Activity, ArrowRight,
 } from "lucide-react";
 import "./AdminPages.css";
 import "./Settings.css";
 
 import { adminService } from "../adminService.js";
+import TrackingIntegrations from "./TrackingIntegrations";
 
 const TABS = [
   { key: "general", label: "General", icon: <Store size={16} /> },
@@ -14,6 +16,7 @@ const TABS = [
   { key: "tax", label: "Tax & Pricing", icon: <Percent size={16} /> },
   { key: "notifications", label: "Notifications", icon: <Bell size={16} /> },
   { key: "seo", label: "SEO", icon: <Globe size={16} /> },
+  { key: "tracking", label: "Tracking & Pixels", icon: <Activity size={16} /> },
 ];
 
 const FormField = ({ label, hint, children }) => (
@@ -204,6 +207,9 @@ const Settings = () => {
           </div>
         );
 
+      case "tracking":
+        return <TrackingIntegrations isEmbedded={true} />;
+
       default:
         return null;
     }
@@ -217,10 +223,12 @@ const Settings = () => {
           <h2>Settings</h2>
           <p className="page-subtitle">Configure your store preferences</p>
         </div>
-        <button className="admin-btn icon-left" onClick={handleSave} disabled={saving} id="save-settings-btn">
-          {saving ? <Loader2 size={15} className="spin" /> : <Save size={15} />}
-          {saving ? "Saving…" : "Save Changes"}
-        </button>
+        {tab !== "tracking" && (
+          <button className="admin-btn icon-left" onClick={handleSave} disabled={saving} id="save-settings-btn">
+            {saving ? <Loader2 size={15} className="spin" /> : <Save size={15} />}
+            {saving ? "Saving…" : "Save Changes"}
+          </button>
+        )}
       </div>
 
       {/* Success / Error banners */}

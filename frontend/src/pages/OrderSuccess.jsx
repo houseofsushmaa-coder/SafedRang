@@ -4,6 +4,7 @@ import {
   CheckCircle2, Package, Truck, Phone, Mail,
   ShoppingBag, User, Sparkles, ArrowRight, Star,
 } from "lucide-react";
+import { trackEvent } from "../lib/tracking";
 
 export default function OrderSuccess() {
   const [searchParams] = useSearchParams();
@@ -14,12 +15,15 @@ export default function OrderSuccess() {
 
   const isCOD = method === "cod";
 
-  // Confetti / entrance animation
+  // Confetti / entrance animation + Purchase tracking
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80);
+    if (orderId) {
+      trackEvent("purchase", { orderId, method, currency: "INR" });
+    }
     return () => clearTimeout(t);
-  }, []);
+  }, [orderId, method]);
 
   return (
     <div

@@ -29,6 +29,7 @@ import {
   ChevronRight,
   Sparkles,
   Store,
+  Activity,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import AdminErrorBoundary from "./components/AdminErrorBoundary";
@@ -127,6 +128,7 @@ const AdminLayout = () => {
       items: [
         { path: "/admin/users", label: "Admin Users", icon: <Shield size={18} /> },
         { path: "/admin/settings", label: "Settings", icon: <Settings size={18} /> },
+        { path: "/admin/settings/tracking", label: "Tracking & Pixels", icon: <Activity size={18} /> },
         { path: "/admin/audit-logs", label: "Audit Logs", icon: <FileClock size={18} />, launchingSoon: true },
       ],
     },

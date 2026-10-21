@@ -982,57 +982,58 @@
     display: none;
   }
 
+  .shop-body.container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
   .product-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem 0.75rem;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 1.25rem 0.65rem !important;
+    width: 100% !important;
   }
 
-  /* Shop top bar: stack vertically on mobile */
-  .shop-top-bar {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-    padding: 1rem 0;
+  /* 2 products per row nicely formatted on mobile */
+  .card-subtitle {
+    font-size: 0.55rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.15rem;
   }
 
-  .active-filters {
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .shop-toolbar-right {
-    width: 100%;
-    justify-content: space-between;
-    gap: 0.75rem;
-    min-width: 0;
-  }
-
-  .shop-toolbar-right .custom-sort-dropdown {
-    display: none; /* Already available in mobile-toolbar-row right above grid */
-  }
-
-  .mobile-toolbar-row {
-    margin-bottom: 1rem;
-    gap: 0.5rem;
-  }
-
-  .sort-menu {
-    right: 0;
-    left: auto;
-    max-width: calc(100vw - 24px);
-  }
-
-  /* Make card titles smaller on mobile */
   .card-title {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    line-height: 1.25;
+    min-height: 2.2em;
+    margin-bottom: 0.35rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .card-desc-snippet {
-    display: none;
+    display: none !important;
   }
 
   .price-row-editorial {
-    flex-wrap: wrap;
-    gap: 0.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.4rem;
+    padding-bottom: 0.1rem;
+    border-top: 1px solid #EADFCF;
+    gap: 4px;
+    flex-wrap: nowrap;
+  }
+
+  .price-editorial {
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .examine-btn {
+    display: none !important;
   }
 }
