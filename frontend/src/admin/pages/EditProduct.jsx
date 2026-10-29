@@ -78,6 +78,8 @@ const EditProduct = () => {
     variations: [],
     badge: "",
     isOneOfOne: false,
+    isArchived: false,
+    needsReview: false,
   });
 
   useEffect(() => {
@@ -101,6 +103,8 @@ const EditProduct = () => {
           variations: product.variations || [],
           badge: product.badge || (product.isOneOfOne ? "One of One" : ""),
           isOneOfOne: Boolean(product.isOneOfOne || product.badge === "One of One"),
+          isArchived: Boolean(product.isArchived),
+          needsReview: Boolean(product.needsReview),
         });
       }
     }
@@ -274,6 +278,8 @@ const EditProduct = () => {
       images: syncedImages,
       badge: formData.badge && formData.badge !== "__new__" ? formData.badge : (formData.isOneOfOne ? "One of One" : null),
       isOneOfOne: formData.badge === "One of One" || Boolean(formData.isOneOfOne),
+      isArchived: Boolean(formData.isArchived),
+      needsReview: Boolean(formData.needsReview),
       price: parseFloat(formData.price) || 0,
       salePrice: formData.salePrice ? parseFloat(formData.salePrice) : null,
       stock:
@@ -572,14 +578,31 @@ const EditProduct = () => {
                 </div>
               )}
 
-              <button
-                type="button"
-                className="admin-btn admin-btn-outline icon-left mt-3"
-                onClick={addVariation}
-                style={{ marginTop: 12 }}
-              >
-                <Plus size={14} /> Add Variation
-              </button>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginTop: 14 }}>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-outline icon-left"
+                  onClick={addVariation}
+                >
+                  <Plus size={14} /> Add Size
+                </button>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-outline icon-left"
+                  onClick={populateBlouseSizes}
+                  title="Auto-fill blouse numeric sizes: 36, 38, 40, 42, 44"
+                >
+                  <Layers size={14} /> Quick Blouse Sizes (36–44)
+                </button>
+                <button
+                  type="button"
+                  className="admin-btn admin-btn-outline icon-left"
+                  onClick={populateStandardSizes}
+                  title="Auto-fill standard sizes: XS, S, M, L, XL, XXL"
+                >
+                  <Layers size={14} /> Standard Sizes (XS–XXL)
+                </button>
+              </div>
 
               {formData.variations.length > 0 && (
                 <p className="variation-hint">
@@ -748,6 +771,48 @@ const EditProduct = () => {
                   Badges page
                 </button>
               </p>
+            </div>
+
+            <div className="form-group" style={{ marginTop: "20px", paddingTop: "16px", borderTop: "1px solid var(--admin-border)" }}>
+              <label style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--admin-text-main)", marginBottom: "12px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                Catalogue Status &amp; Visibility
+              </label>
+
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", marginBottom: "12px" }}>
+                <input
+                  id="product-is-archived"
+                  type="checkbox"
+                  checked={Boolean(formData.isArchived)}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, isArchived: e.target.checked }))}
+                  style={{ width: "18px", height: "18px", accentColor: "#6E1E2A", marginTop: "2px", cursor: "pointer" }}
+                />
+                <div>
+                  <label htmlFor="product-is-archived" style={{ fontSize: "0.88rem", fontWeight: 600, cursor: "pointer", display: "inline-block", margin: 0 }}>
+                    Archive this product
+                  </label>
+                  <p className="field-hint" style={{ margin: 0, fontSize: "0.78rem", color: "var(--admin-text-muted)" }}>
+                    Archived pieces are hidden from the storefront shop and cannot be purchased, but remain editable and restorable here.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                <input
+                  id="product-needs-review"
+                  type="checkbox"
+                  checked={Boolean(formData.needsReview)}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, needsReview: e.target.checked }))}
+                  style={{ width: "18px", height: "18px", accentColor: "#d97706", marginTop: "2px", cursor: "pointer" }}
+                />
+                <div>
+                  <label htmlFor="product-needs-review" style={{ fontSize: "0.88rem", fontWeight: 600, cursor: "pointer", display: "inline-block", margin: 0 }}>
+                    Needs Review / Missing Info
+                  </label>
+                  <p className="field-hint" style={{ margin: 0, fontSize: "0.78rem", color: "var(--admin-text-muted)" }}>
+                    Flag this piece if it needs replacement photos, price confirmation, or description updates.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 

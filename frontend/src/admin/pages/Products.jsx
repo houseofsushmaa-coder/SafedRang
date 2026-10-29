@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useProducts } from "../../context/ProductContext";
 import { adminService } from "../adminService";
@@ -17,6 +17,10 @@ import {
   ChevronDown,
   Tag,
   RefreshCw,
+  Archive,
+  RotateCcw,
+  Flag,
+  Layers,
 } from "lucide-react";
 import Papa from "papaparse";
 import "./AdminPages.css";
@@ -51,30 +55,46 @@ const LABEL_MAP = {
   category:    "Category",
   price:       "Regular Price (₹)",
   salePrice:   "Sale Price (₹)",
-  stock:       "Stock Qty",
+  stock:       "Stock Quantity",
   stockStatus: "Stock Status",
   description: "Description",
-  image:       "Image URL",
+  image:       "Featured Image URL",
 };
 
-// ── CSV Template download helper ───────────────────────────────────────
 function downloadTemplate() {
   const headers = [
-    "Title","SKU","Category","Price","SalePrice",
-    "Stock","StockStatus","Description","Image",
+    "Product Title",
+    "SKU",
+    "Category",
+    "Regular Price",
+    "Sale Price",
+    "Stock",
+    "Stock Status",
+    "Description",
+    "Featured Image URL",
   ];
   const sample = [
     [
-      "Chanderi Chikankari Dupatta Green","SR-DUP-001","Dupattas",
-      "1499","1299","10","In Stock",
-      "Enhance your look with this green Chanderi dupatta handcrafted with intricate thread embroidery.",
-      "https://example.com/image.jpg",
+      "Lucknowi Chanderi Silk Saree",
+      "SR-SAREE-001",
+      "Sarees",
+      "12999",
+      "10999",
+      "5",
+      "In Stock",
+      "Handcrafted pure Chanderi silk saree with intricate Chikankari embroidery.",
+      "https://example.com/images/saree1.jpg",
     ],
     [
-      "Pure Georgette Chikankari Saree","SR-SAR-001","Sarees",
-      "8999","","5","Low Stock",
-      "Elegant saree in luxurious georgette with traditional Chikankari embroidery.",
+      "Embroidered Silk Blouse Size 38",
+      "SR-BLOUSE-038",
+      "Blouses",
+      "3499",
       "",
+      "3",
+      "In Stock",
+      "Premium padded blouse with delicate handwork.",
+      "https://example.com/images/blouse1.jpg",
     ],
   ];
   const csv = Papa.unparse({ fields: headers, data: sample });
@@ -90,34 +110,189 @@ function downloadTemplate() {
 }
 
 const Products = () => {
-  const { products, deleteProduct, addProduct, loading } = useProducts();
+  const {
+    products,
+    deleteProduct,
+    addProduct,
+    archiveProduct,
+    restoreProduct,
+    toggleNeedsReview,
+    quickUpdateStock,
+    bulkArchive,
+    bulkRestore,
+    bulkUpdateStockStatus,
+    bulkDelete,
+    loading,
+  } = useProducts();
+
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // ── Navigation View Tabs: all | instock | outofstock | archived | needsreview ──
+  const [viewTab, setViewTab] = useState(searchParams.get("tab") || "all");
 
   // ── Filter state ───────────────────────────────────────────────────
   const [searchTerm, setSearchTerm]         = useState("");
   const [categoryFilter, setCategoryFilter] = useState(searchParams.get("category") || "all");
   const [statusFilter, setStatusFilter]     = useState("all");
-  const [oneOfOneFilter, setOneOfOneFilter] = useState("all");
+  const [badgeFilter, setBadgeFilter]       = useState(searchParams.get("badge") || "all");
   const [categories, setCategories]         = useState([]);
   const [badges, setBadges]                 = useState([]);
 
+  // ── Bulk selection state ───────────────────────────────────────────
+  const [selectedIds, setSelectedIds]       = useState(new Set());
+
+  // ── Fetch metadata ─────────────────────────────────────────────────
   useEffect(() => {
-    adminService.getBadges()
-      .then((b) => setBadges(b || []))
-      .catch(() => setBadges([]));
+    adminService.getCategories().then((cats) => setCategories(cats || []));
+    adminService.getBadges().then((b) => setBadges(b || []));
   }, []);
 
   useEffect(() => {
     const urlCat = searchParams.get("category");
-    if (urlCat) {
-      setCategoryFilter(urlCat);
-    }
+    if (urlCat) setCategoryFilter(urlCat);
     const urlBadge = searchParams.get("badge");
-    if (urlBadge) {
-      setOneOfOneFilter(urlBadge);
-    }
+    if (urlBadge) setBadgeFilter(urlBadge);
+    const urlTab = searchParams.get("tab");
+    if (urlTab) setViewTab(urlTab);
   }, [searchParams]);
+
+  const handleTabChange = (tabKey) => {
+    setViewTab(tabKey);
+    setSelectedIds(new Set());
+    setSearchParams((prev) => {
+      const p = new URLSearchParams(prev);
+      if (tabKey === "all") p.delete("tab");
+      else p.set("tab", tabKey);
+      return p;
+    });
+  };
+
+  // ── Dynamic live counts ────────────────────────────────────────────
+  const counts = useMemo(() => {
+    let all = 0, inStock = 0, outOfStock = 0, archived = 0, needsReview = 0;
+    products.forEach((p) => {
+      if (p.isArchived) {
+        archived++;
+      } else {
+        all++;
+        const isOut = p.stockStatus === "Out of Stock" || (p.stock !== undefined && Number(p.stock) <= 0);
+        if (isOut) {
+          outOfStock++;
+        } else {
+          inStock++;
+        }
+      }
+      if (p.needsReview) {
+        needsReview++;
+      }
+    });
+    return { all, inStock, outOfStock, archived, needsReview };
+  }, [products]);
+
+  // ── Filtered products ──────────────────────────────────────────────
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) => {
+      // 1. Tab filtering
+      if (viewTab === "archived") {
+        if (!p.isArchived) return false;
+      } else if (viewTab === "needsreview") {
+        if (!p.needsReview) return false;
+      } else {
+        if (p.isArchived) return false;
+        const isOut = p.stockStatus === "Out of Stock" || (p.stock !== undefined && Number(p.stock) <= 0);
+        if (viewTab === "instock" && isOut) return false;
+        if (viewTab === "outofstock" && !isOut) return false;
+      }
+
+      // 2. Search
+      if (searchTerm.trim()) {
+        const term = searchTerm.toLowerCase().trim();
+        const matchesTitle = (p.title || "").toLowerCase().includes(term);
+        const matchesSku = (p.sku || "").toLowerCase().includes(term);
+        if (!matchesTitle && !matchesSku) return false;
+      }
+
+      // 3. Category
+      if (categoryFilter !== "all") {
+        const pCat = (p.category || "").toLowerCase().trim();
+        const fCat = categoryFilter.toLowerCase().trim();
+        if (pCat !== fCat && pCat.replace(/s$/, "") !== fCat.replace(/s$/, "")) {
+          return false;
+        }
+      }
+
+      // 4. Status dropdown
+      if (statusFilter !== "all") {
+        const pStatus = (p.stockStatus || "").toLowerCase();
+        if (pStatus !== statusFilter.toLowerCase()) return false;
+      }
+
+      // 5. Badge / One of One dropdown
+      if (badgeFilter === "one-of-one" || badgeFilter === "One of One") {
+        if (!p.isOneOfOne && p.badge !== "One of One") return false;
+      } else if (badgeFilter === "regular") {
+        if (p.isOneOfOne || p.badge) return false;
+      } else if (badgeFilter !== "all") {
+        if ((p.badge || "").toLowerCase() !== badgeFilter.toLowerCase()) return false;
+      }
+
+      return true;
+    });
+  }, [products, viewTab, searchTerm, categoryFilter, statusFilter, badgeFilter]);
+
+  // ── Selection Handlers ─────────────────────────────────────────────
+  const isAllSelected = filteredProducts.length > 0 && filteredProducts.every((p) => selectedIds.has(p.id));
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedIds(new Set(filteredProducts.map((p) => p.id)));
+    } else {
+      setSelectedIds(new Set());
+    }
+  };
+
+  const toggleSelectOne = (id) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleBulkArchive = async () => {
+    if (!window.confirm(`Archive ${selectedIds.size} selected products? They will be retired from the storefront.`)) return;
+    await bulkArchive(Array.from(selectedIds));
+    setSelectedIds(new Set());
+  };
+
+  const handleBulkRestore = async () => {
+    await bulkRestore(Array.from(selectedIds));
+    setSelectedIds(new Set());
+  };
+
+  const handleBulkStockStatus = async (status) => {
+    await bulkUpdateStockStatus(Array.from(selectedIds), status);
+    setSelectedIds(new Set());
+  };
+
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`Permanently delete ${selectedIds.size} selected products? This action cannot be undone.`)) return;
+    await bulkDelete(Array.from(selectedIds));
+    setSelectedIds(new Set());
+  };
+
+  const handleQuickStock = async (product) => {
+    const current = product.stock ?? 0;
+    const input = window.prompt(`Update available stock for "${product.title}":`, String(current));
+    if (input !== null) {
+      const val = parseInt(input, 10);
+      if (!isNaN(val) && val >= 0) {
+        await quickUpdateStock(product.id, val);
+      }
+    }
+  };
 
   // ── Bulk import state ──────────────────────────────────────────────
   const [showImportModal, setShowImportModal] = useState(false);
@@ -131,17 +306,12 @@ const Products = () => {
 
   const csvPickerRef = useRef(null);
 
-  // ── Fetch categories for filter dropdown ───────────────────────────
-  useEffect(() => {
-    adminService.getCategories().then((cats) => setCategories(cats || []));
-  }, []);
-
   const categoryOptions = categories.length > 0
     ? categories.map((c) => c.name)
     : [...new Set(products.map((p) => p.category).filter(Boolean))];
 
-  // ── Status helpers ─────────────────────────────────────────────────
-  const getStatusClass = (status) => {
+  const getStatusClass = (status, isArchived) => {
+    if (isArchived) return "status-cancelled";
     switch (status?.toLowerCase()) {
       case "in stock":   return "status-completed";
       case "low stock":  return "status-pending";
@@ -156,44 +326,25 @@ const Products = () => {
       style: "currency", currency: "INR", maximumFractionDigits: 0,
     }).format(val);
 
-  // ── Filtered products ──────────────────────────────────────────────
-  const filteredProducts = products.filter((p) => {
-    const matchSearch =
-      (p.title || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase()));
-
-    let matchCat = categoryFilter === "all";
-    if (!matchCat) {
-      const pCat = (p.category || "").toLowerCase().trim();
-      const fCat = categoryFilter.toLowerCase().trim();
-      matchCat = pCat === fCat || pCat.replace(/s$/, "") === fCat.replace(/s$/, "");
-    }
-
-    const matchStatus = statusFilter === "all" ||
-      (p.stockStatus || "").toLowerCase() === statusFilter.toLowerCase();
-
-    let matchOneOfOne = true;
-    if (oneOfOneFilter === "one-of-one" || oneOfOneFilter === "One of One") {
-      matchOneOfOne = Boolean(p.isOneOfOne || p.badge === "One of One");
-    } else if (oneOfOneFilter === "regular") {
-      matchOneOfOne = !p.isOneOfOne && !p.badge;
-    } else if (oneOfOneFilter !== "all") {
-      matchOneOfOne = (p.badge || "").toLowerCase() === oneOfOneFilter.toLowerCase();
-    }
-
-    return matchSearch && matchCat && matchStatus && matchOneOfOne;
-  });
-
   // ── Export ────────────────────────────────────────────────────────
   const handleExport = () => {
     try {
-      const csvData = filteredProducts.map((p) => ({
-        Title: p.title || "", SKU: p.sku || "", Category: p.category || "",
-        Price: p.price || 0, SalePrice: p.salePrice || "",
-        Stock: p.stock || 0, StockStatus: p.stockStatus || "",
-        Description: p.description || "", Image: p.image || "",
+      const rows = filteredProducts.map((p) => ({
+        "Product Title":      p.title,
+        "SKU":                p.sku,
+        "Category":           p.category,
+        "Regular Price":      p.price,
+        "Sale Price":         p.salePrice || "",
+        "Stock":              p.stock,
+        "Stock Status":       p.stockStatus,
+        "Product Type":       p.productType || "simple",
+        "Badge":              p.badge || (p.isOneOfOne ? "One of One" : ""),
+        "Is Archived":        p.isArchived ? "YES" : "NO",
+        "Needs Review":       p.needsReview ? "YES" : "NO",
+        "Description":        p.description,
+        "Featured Image URL": p.image,
       }));
-      const csv = Papa.unparse(csvData);
+      const csv = Papa.unparse(rows);
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -261,12 +412,11 @@ const Products = () => {
         setImportResult({ success: count, errors });
         setImporting(false);
       },
-      error: (err) => { alert("CSV parse error: " + err.message); setImporting(false); },
+      error: (err) => { alert("Failed to read CSV: " + err.message); setImporting(false); },
     });
   };
 
-  const progressPct = importProgress.total > 0
-    ? Math.round((importProgress.done / importProgress.total) * 100) : 0;
+  const progressPct = importProgress.total > 0 ? Math.round((importProgress.done / importProgress.total) * 100) : 0;
 
   return (
     <div className="admin-page">
@@ -274,7 +424,7 @@ const Products = () => {
       <div className="page-header">
         <div>
           <h2>Products</h2>
-          <p className="page-subtitle">Manage your store's inventory — {products.length} total</p>
+          <p className="page-subtitle">Manage inventory, stock availability, sizes, and collection badges</p>
         </div>
         <div className="header-actions">
           <button className="admin-btn admin-btn-outline icon-left" onClick={downloadTemplate} title="Download CSV template">
@@ -292,6 +442,120 @@ const Products = () => {
         </div>
       </div>
 
+      {/* ── Segmented Navigation View Tabs ── */}
+      <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap" }}>
+        <button
+          type="button"
+          onClick={() => handleTabChange("all")}
+          className={`admin-btn ${viewTab === "all" ? "" : "admin-btn-outline"}`}
+          style={{ padding: "8px 16px", fontSize: "0.88rem", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "8px" }}
+        >
+          <Layers size={15} /> All Products ({counts.all})
+        </button>
+        <button
+          type="button"
+          onClick={() => handleTabChange("instock")}
+          className={`admin-btn ${viewTab === "instock" ? "" : "admin-btn-outline"}`}
+          style={{ padding: "8px 16px", fontSize: "0.88rem", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "8px" }}
+        >
+          <CheckCircle2 size={15} color="#16a34a" /> In Stock ({counts.inStock})
+        </button>
+        <button
+          type="button"
+          onClick={() => handleTabChange("outofstock")}
+          className={`admin-btn ${viewTab === "outofstock" ? "" : "admin-btn-outline"}`}
+          style={{ padding: "8px 16px", fontSize: "0.88rem", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "8px" }}
+        >
+          <AlertCircle size={15} color="#dc2626" /> Out of Stock ({counts.outOfStock})
+        </button>
+        <button
+          type="button"
+          onClick={() => handleTabChange("archived")}
+          className={`admin-btn ${viewTab === "archived" ? "" : "admin-btn-outline"}`}
+          style={{ padding: "8px 16px", fontSize: "0.88rem", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "8px" }}
+        >
+          <Archive size={15} color="#6b7280" /> Archived ({counts.archived})
+        </button>
+        <button
+          type="button"
+          onClick={() => handleTabChange("needsreview")}
+          className={`admin-btn ${viewTab === "needsreview" ? "" : "admin-btn-outline"}`}
+          style={{ padding: "8px 16px", fontSize: "0.88rem", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "8px" }}
+        >
+          <Flag size={15} color="#d97706" /> Needs Review ({counts.needsReview})
+        </button>
+      </div>
+
+      {/* ── Bulk Actions Banner (appears when items are selected) ── */}
+      {selectedIds.size > 0 && (
+        <div style={{
+          background: "rgba(110, 30, 42, 0.08)",
+          border: "1px solid rgba(110, 30, 42, 0.2)",
+          padding: "10px 18px",
+          borderRadius: "8px",
+          marginBottom: "16px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: "12px"
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <span style={{ fontWeight: 700, color: "#6E1E2A", fontSize: "0.9rem" }}>
+              {selectedIds.size} product{selectedIds.size !== 1 ? "s" : ""} selected
+            </span>
+            <button
+              type="button"
+              className="text-link"
+              style={{ fontSize: "0.82rem", color: "#6E1E2A", textDecoration: "underline" }}
+              onClick={() => setSelectedIds(new Set())}
+            >
+              Clear selection
+            </button>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+            {viewTab === "archived" ? (
+              <button
+                className="admin-btn admin-btn-outline icon-left"
+                style={{ fontSize: "0.82rem", padding: "6px 12px" }}
+                onClick={handleBulkRestore}
+              >
+                <RotateCcw size={14} /> Restore to Active
+              </button>
+            ) : (
+              <button
+                className="admin-btn admin-btn-outline icon-left"
+                style={{ fontSize: "0.82rem", padding: "6px 12px" }}
+                onClick={handleBulkArchive}
+              >
+                <Archive size={14} /> Archive Selected
+              </button>
+            )}
+            <button
+              className="admin-btn admin-btn-outline icon-left"
+              style={{ fontSize: "0.82rem", padding: "6px 12px" }}
+              onClick={() => handleBulkStockStatus("In Stock")}
+            >
+              <CheckCircle2 size={14} color="#16a34a" /> Mark In Stock
+            </button>
+            <button
+              className="admin-btn admin-btn-outline icon-left"
+              style={{ fontSize: "0.82rem", padding: "6px 12px" }}
+              onClick={() => handleBulkStockStatus("Out of Stock")}
+            >
+              <AlertCircle size={14} color="#dc2626" /> Mark Out of Stock
+            </button>
+            <button
+              className="admin-btn admin-btn-outline icon-left"
+              style={{ fontSize: "0.82rem", padding: "6px 12px", color: "#dc2626", borderColor: "#fca5a5" }}
+              onClick={handleBulkDelete}
+            >
+              <Trash2 size={14} /> Delete Selected
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── Table Card ── */}
       <div className="admin-table-card">
         <div className="table-toolbar">
@@ -299,7 +563,7 @@ const Products = () => {
             <Search size={18} className="search-icon" />
             <input
               type="text"
-              placeholder="Search by name or SKU…"
+              placeholder="Search by product name or SKU…"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -314,6 +578,20 @@ const Products = () => {
               </select>
               <ChevronDown size={13} className="filter-chevron" />
             </div>
+
+            {/* Badges / Collections filter */}
+            <div className="filter-select-wrap">
+              <select className="filter-select" value={badgeFilter} onChange={(e) => setBadgeFilter(e.target.value)}>
+                <option value="all">All Badges</option>
+                <option value="one-of-one">One of One</option>
+                {badges.filter((b) => b.name !== "One of One").map((b) => (
+                  <option key={b.id || b.name} value={b.name}>{b.name}</option>
+                ))}
+                <option value="regular">Regular (No Badge)</option>
+              </select>
+              <ChevronDown size={13} className="filter-chevron" />
+            </div>
+
             {/* Status filter */}
             <div className="filter-select-wrap">
               <select className="filter-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
@@ -324,119 +602,254 @@ const Products = () => {
               </select>
               <ChevronDown size={13} className="filter-chevron" />
             </div>
-            {/* Badges / Collections filter */}
-            <div className="filter-select-wrap">
-              <select className="filter-select" value={oneOfOneFilter} onChange={(e) => setOneOfOneFilter(e.target.value)}>
-                <option value="all">All Badges</option>
-                <option value="one-of-one">One of One</option>
-                {badges.filter((b) => b.name !== "One of One").map((b) => (
-                  <option key={b.id || b.name} value={b.name}>{b.name}</option>
-                ))}
-                <option value="regular">Regular (No Badge)</option>
-              </select>
-              <ChevronDown size={13} className="filter-chevron" />
-            </div>
-            {(categoryFilter !== "all" || statusFilter !== "all" || oneOfOneFilter !== "all" || searchTerm) && (
+
+            {(categoryFilter !== "all" || statusFilter !== "all" || badgeFilter !== "all" || searchTerm || viewTab !== "all") && (
               <button
                 className="admin-btn admin-btn-outline icon-left"
                 style={{ padding: "6px 10px", fontSize: "0.8rem" }}
-                onClick={() => { setCategoryFilter("all"); setStatusFilter("all"); setOneOfOneFilter("all"); setSearchTerm(""); }}
+                onClick={() => { setCategoryFilter("all"); setStatusFilter("all"); setBadgeFilter("all"); setSearchTerm(""); setViewTab("all"); }}
               >
-                <RefreshCw size={13} /> Clear
+                <RefreshCw size={13} /> Reset
               </button>
             )}
-            <span className="filter-count">{filteredProducts.length} of {products.length}</span>
+            <span className="filter-count">{filteredProducts.length} results</span>
           </div>
         </div>
 
         {loading ? (
           <div className="admin-loading-state">
             <Loader2 size={24} className="spin" style={{ display: "block", margin: "0 auto 8px" }} />
-            Loading products…
+            Loading catalogue…
           </div>
         ) : (
           <div className="table-responsive">
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th width="50"><input type="checkbox" /></th>
+                  <th width="45">
+                    <input
+                      type="checkbox"
+                      checked={isAllSelected}
+                      onChange={handleSelectAll}
+                      style={{ cursor: "pointer" }}
+                    />
+                  </th>
                   <th>Product</th>
                   <th>Category</th>
                   <th>Price</th>
-                  <th>Stock</th>
+                  <th>Stock Quantity</th>
                   <th>Status</th>
                   <th className="text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredProducts.map((product) => (
-                  <tr key={product.id}>
-                    <td><input type="checkbox" /></td>
-                    <td>
-                      <div className="product-cell">
-                        <div className="product-img" style={{ backgroundImage: `url(${product.image})` }} />
-                        <div className="product-info">
-                          <span className="product-title">{product.title}</span>
-                          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", marginTop: "2px" }}>
-                            <span className="product-sku">{product.sku || product.id?.substring(0, 8)}</span>
-                            {(product.badge || product.isOneOfOne) && (
-                              <span
-                                style={{
+                {filteredProducts.map((product) => {
+                  const isChecked = selectedIds.has(product.id);
+                  const isVariable = product.productType === "variable" || (product.variations && product.variations.length > 0);
+                  const varCount = product.variations?.length || 0;
+                  return (
+                    <tr key={product.id} style={{ backgroundColor: isChecked ? "rgba(110, 30, 42, 0.03)" : undefined }}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggleSelectOne(product.id)}
+                          style={{ cursor: "pointer" }}
+                        />
+                      </td>
+                      <td>
+                        <div className="product-cell">
+                          <div
+                            className="product-img"
+                            style={{ backgroundImage: `url(${product.image})`, cursor: "pointer" }}
+                            onClick={() => navigate(`/admin/product/${product.id}`)}
+                          />
+                          <div className="product-info">
+                            <span
+                              className="product-title"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => navigate(`/admin/product/${product.id}`)}
+                            >
+                              {product.title}
+                            </span>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", marginTop: "3px" }}>
+                              <span className="product-sku">{product.sku || product.id?.substring(0, 8)}</span>
+
+                              {/* Variable Product Pill */}
+                              {isVariable ? (
+                                <span style={{
                                   fontSize: "0.62rem",
                                   fontWeight: 700,
-                                  letterSpacing: "0.08em",
-                                  backgroundColor: "#6E1E2A",
-                                  color: "#FAF5EC",
+                                  background: "#EEF2FF",
+                                  color: "#4338CA",
                                   padding: "2px 6px",
                                   borderRadius: "3px",
-                                  display: "inline-block",
-                                  lineHeight: 1.2
-                                }}
-                              >
-                                {(product.badge || "ONE OF ONE").toUpperCase()}
-                              </span>
-                            )}
+                                  border: "1px solid #C7D2FE",
+                                  lineHeight: 1.2,
+                                }}>
+                                  Variable ({varCount} sizes)
+                                </span>
+                              ) : (
+                                <span style={{
+                                  fontSize: "0.62rem",
+                                  fontWeight: 600,
+                                  background: "#F3F4F6",
+                                  color: "#4B5563",
+                                  padding: "2px 6px",
+                                  borderRadius: "3px",
+                                  lineHeight: 1.2,
+                                }}>
+                                  Simple
+                                </span>
+                              )}
+
+                              {/* Assigned Storefront Badge */}
+                              {(product.badge || product.isOneOfOne) && (
+                                <span
+                                  style={{
+                                    fontSize: "0.62rem",
+                                    fontWeight: 700,
+                                    letterSpacing: "0.08em",
+                                    backgroundColor: "#6E1E2A",
+                                    color: "#FAF5EC",
+                                    padding: "2px 6px",
+                                    borderRadius: "3px",
+                                    display: "inline-block",
+                                    lineHeight: 1.2,
+                                  }}
+                                >
+                                  {(product.badge || "ONE OF ONE").toUpperCase()}
+                                </span>
+                              )}
+
+                              {/* Needs Review Pill */}
+                              {product.needsReview && (
+                                <span
+                                  style={{
+                                    fontSize: "0.62rem",
+                                    fontWeight: 700,
+                                    letterSpacing: "0.05em",
+                                    backgroundColor: "#FEF3C7",
+                                    color: "#92400E",
+                                    border: "1px solid #FCD34D",
+                                    padding: "2px 6px",
+                                    borderRadius: "3px",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: "3px",
+                                    lineHeight: 1.2,
+                                  }}
+                                >
+                                  <Flag size={10} color="#92400E" /> REVIEW
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td><span className="category-badge">{product.category || "—"}</span></td>
-                    <td className="font-medium">
-                      {product.salePrice ? (
-                        <div>
-                          <span className="sale-price">{formatCurrency(product.salePrice)}</span>
-                          <span className="original-price">{formatCurrency(product.price)}</span>
-                        </div>
-                      ) : (
-                        <span>{formatCurrency(product.price)}</span>
-                      )}
-                    </td>
-                    <td>
-                      <div className="inventory-cell">
-                        <span className="stock-count">{product.stock ?? 0}</span>
-                        <span className="stock-label"> units</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`status-badge ${getStatusClass(product.stockStatus)}`}>
-                        {product.stockStatus || "Active"}
-                      </span>
-                    </td>
-                    <td className="text-right">
-                      <div className="action-buttons">
-                        <button className="action-btn" title="Edit" onClick={() => navigate(`/admin/product/${product.id}`)}>
-                          <Edit size={16} />
-                        </button>
-                        <button
-                          className="action-btn delete" title="Delete"
-                          onClick={() => { if (window.confirm("Delete this product?")) deleteProduct(product.id); }}
+                      </td>
+
+                      <td>
+                        <span className="category-badge">{product.category || "—"}</span>
+                      </td>
+
+                      <td className="font-medium">
+                        {product.salePrice ? (
+                          <div>
+                            <span className="sale-price">{formatCurrency(product.salePrice)}</span>
+                            <span className="original-price">{formatCurrency(product.price)}</span>
+                          </div>
+                        ) : (
+                          <span>{formatCurrency(product.price)}</span>
+                        )}
+                      </td>
+
+                      <td>
+                        <div
+                          className="inventory-cell"
+                          style={{ cursor: "pointer" }}
+                          onClick={() => handleQuickStock(product)}
+                          title="Click to quickly update stock quantity"
                         >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          <span
+                            className="stock-count"
+                            style={{
+                              fontWeight: 700,
+                              color: (product.stock ?? 0) <= 0 ? "#DC2626" : "inherit"
+                            }}
+                          >
+                            {product.stock ?? 0}
+                          </span>
+                          <span className="stock-label"> units</span>
+                          <span style={{ fontSize: "0.7rem", color: "var(--admin-text-light)", marginLeft: 4 }}>✎</span>
+                        </div>
+                      </td>
+
+                      <td>
+                        <span className={`status-badge ${getStatusClass(product.stockStatus, product.isArchived)}`}>
+                          {product.isArchived ? "Archived" : product.stockStatus || "In Stock"}
+                        </span>
+                      </td>
+
+                      <td className="text-right">
+                        <div className="action-buttons">
+                          {/* Edit */}
+                          <button
+                            className="action-btn"
+                            title="Edit product"
+                            onClick={() => navigate(`/admin/product/${product.id}`)}
+                          >
+                            <Edit size={15} />
+                          </button>
+
+                          {/* Archive or Restore */}
+                          {product.isArchived ? (
+                            <button
+                              className="action-btn"
+                              title="Restore to active catalogue"
+                              onClick={() => restoreProduct(product.id)}
+                            >
+                              <RotateCcw size={15} color="#16a34a" />
+                            </button>
+                          ) : (
+                            <button
+                              className="action-btn"
+                              title="Archive product (retire from shop)"
+                              onClick={() => {
+                                if (window.confirm(`Archive "${product.title}"? It will be hidden from the storefront.`)) {
+                                  archiveProduct(product.id);
+                                }
+                              }}
+                            >
+                              <Archive size={15} color="#6b7280" />
+                            </button>
+                          )}
+
+                          {/* Toggle Needs Review */}
+                          <button
+                            className="action-btn"
+                            title={product.needsReview ? "Unflag Review" : "Flag for Review"}
+                            onClick={() => toggleNeedsReview(product.id)}
+                          >
+                            <Flag size={14} color={product.needsReview ? "#D97706" : "var(--admin-text-light)"} />
+                          </button>
+
+                          {/* Delete */}
+                          <button
+                            className="action-btn delete"
+                            title="Delete permanently"
+                            onClick={() => {
+                              if (window.confirm(`Permanently delete "${product.title}"? This cannot be undone.`)) {
+                                deleteProduct(product.id);
+                              }
+                            }}
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -446,7 +859,7 @@ const Products = () => {
           <div className="empty-state">
             <Package size={48} className="empty-icon" />
             <h3>No products found</h3>
-            <p>Try adjusting your search or filters.</p>
+            <p>Try adjusting your search, filters, or selected tab.</p>
           </div>
         )}
       </div>

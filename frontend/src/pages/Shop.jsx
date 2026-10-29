@@ -339,7 +339,7 @@ export default function Shop() {
 
   /* ── Filtering + Sorting ── */
   const filteredProducts = useMemo(() => {
-    let list = [...products];
+    let list = products.filter((p) => !p.isArchived);
 
     // Filter by search query
     if (urlSearch.trim()) {

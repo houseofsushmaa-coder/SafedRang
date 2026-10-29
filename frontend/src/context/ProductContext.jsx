@@ -19,9 +19,17 @@ export const normalizeCategoryName = (rawCat) => {
 
 // Helper to normalize a raw Supabase product row into the frontend shape
 const formatProduct = (p) => {
-  const stock = p.stock !== undefined && p.stock !== null ? Number(p.stock) : 2;
+  const isArchived = Boolean(p.is_archived ?? p.isArchived ?? (p.status === "ARCHIVED"));
+  const needsReview = Boolean(p.needs_review ?? p.needsReview ?? false);
+  const isVariable = p.product_type === "variable" || p.productType === "variable";
+
+  let computedStock = p.stock !== undefined && p.stock !== null ? Number(p.stock) : 2;
+  if (isVariable && Array.isArray(p.variations) && p.variations.length > 0) {
+    computedStock = p.variations.reduce((sum, v) => sum + (Number(v.stock) || 0), 0);
+  }
+
   const rawStatus = (p.stock_status || p.status || p.stockStatus || "").toLowerCase();
-  const isOut = rawStatus === "out of stock" || rawStatus === "sold out" || stock <= 0;
+  const isOut = rawStatus === "out of stock" || rawStatus === "sold out" || computedStock <= 0;
 
   // Resolve images from jsonb column, joined table, or image_url
   let resolvedImages = [];
@@ -68,8 +76,10 @@ const formatProduct = (p) => {
     fabric: p.fabric || p.material || "",
     image: primaryImage,
     images: finalImages,
-    stockStatus: isOut ? "Out of Stock" : "In Stock",
-    stock,
+    stockStatus: isOut ? "Out of Stock" : (computedStock < 5 ? "Low Stock" : "In Stock"),
+    stock: computedStock,
+    isArchived,
+    needsReview,
     sku: p.sku || "",
     // Variation support
     productType: p.productType || p.product_type || "simple",
@@ -152,6 +162,8 @@ export const ProductProvider = ({ children }) => {
       variations: Array.isArray(product.variations) ? product.variations : [],
       badge: product.badge || (product.isOneOfOne ? "One of One" : null),
       isOneOfOne: product.badge === "One of One" || Boolean(product.isOneOfOne),
+      isArchived: Boolean(product.isArchived),
+      needsReview: Boolean(product.needsReview),
     };
 
     setProducts((prev) => [formatted, ...prev]);
@@ -175,6 +187,8 @@ export const ProductProvider = ({ children }) => {
           variations: formatted.variations || [],
           badge: formatted.badge || (formatted.isOneOfOne ? "One of One" : null),
           is_one_of_one: Boolean(formatted.isOneOfOne),
+          is_archived: Boolean(formatted.isArchived),
+          needs_review: Boolean(formatted.needsReview),
         },
       ]);
       if (error) {
@@ -213,6 +227,11 @@ export const ProductProvider = ({ children }) => {
       ? (updatedData.badge || null)
       : (updatedData.isOneOfOne ? "One of One" : null);
 
+    const isArchivedVal = updatedData.isArchived !== undefined
+      ? Boolean(updatedData.isArchived)
+      : Boolean(updatedData.status === "ARCHIVED");
+    const needsReviewVal = Boolean(updatedData.needsReview);
+
     const merged = {
       ...updatedData,
       id: String(id),
@@ -220,6 +239,8 @@ export const ProductProvider = ({ children }) => {
       images: syncedImages,
       badge: assignedBadge,
       isOneOfOne: assignedBadge === "One of One" || Boolean(updatedData.isOneOfOne),
+      isArchived: isArchivedVal,
+      needsReview: needsReviewVal,
       category: normalizeCategoryName(updatedData.category),
     };
 
@@ -258,6 +279,8 @@ export const ProductProvider = ({ children }) => {
         is_one_of_one: assignedBadge === "One of One" || Boolean(updatedData.isOneOfOne),
         bestseller: assignedBadge === "Best Seller",
         newArrival: assignedBadge === "New Arrival",
+        is_archived: isArchivedVal,
+        needs_review: needsReviewVal,
         "updatedAt": new Date().toISOString(),
       };
 
@@ -284,6 +307,107 @@ export const ProductProvider = ({ children }) => {
     return ["All", ...Array.from(cats)];
   };
 
+
+  const archiveProduct = async (id) => {
+    setProducts((prev) =>
+      prev.map((p) => (String(p.id) === String(id) ? { ...p, isArchived: true, status: "ARCHIVED" } : p))
+    );
+    try {
+      await supabase.from("products").update({ is_archived: true, status: "ARCHIVED" }).eq("id", id);
+    } catch (err) {
+      console.warn("Failed to archive product:", err);
+    }
+  };
+
+  const restoreProduct = async (id) => {
+    setProducts((prev) =>
+      prev.map((p) => (String(p.id) === String(id) ? { ...p, isArchived: false, status: "PUBLISHED" } : p))
+    );
+    try {
+      await supabase.from("products").update({ is_archived: false, status: "PUBLISHED" }).eq("id", id);
+    } catch (err) {
+      console.warn("Failed to restore product:", err);
+    }
+  };
+
+  const toggleNeedsReview = async (id) => {
+    let nextVal = false;
+    setProducts((prev) =>
+      prev.map((p) => {
+        if (String(p.id) === String(id)) {
+          nextVal = !p.needsReview;
+          return { ...p, needsReview: nextVal };
+        }
+        return p;
+      })
+    );
+    try {
+      await supabase.from("products").update({ needs_review: nextVal }).eq("id", id);
+    } catch (err) {
+      console.warn("Failed to toggle needs_review:", err);
+    }
+  };
+
+  const quickUpdateStock = async (id, newStock) => {
+    const qty = Math.max(0, Number(newStock));
+    const stockStatus = qty > 0 ? "In Stock" : "Out of Stock";
+    setProducts((prev) =>
+      prev.map((p) => (String(p.id) === String(id) ? { ...p, stock: qty, stockStatus } : p))
+    );
+    try {
+      await supabase.from("products").update({ stock: qty, stock_status: stockStatus }).eq("id", id);
+    } catch (err) {
+      console.warn("Failed to update stock:", err);
+    }
+  };
+
+  const bulkArchive = async (ids) => {
+    const idSet = new Set(ids.map(String));
+    setProducts((prev) =>
+      prev.map((p) => (idSet.has(String(p.id)) ? { ...p, isArchived: true, status: "ARCHIVED" } : p))
+    );
+    try {
+      await supabase.from("products").update({ is_archived: true, status: "ARCHIVED" }).in("id", Array.from(idSet));
+    } catch (err) {
+      console.warn("Failed to bulk archive:", err);
+    }
+  };
+
+  const bulkRestore = async (ids) => {
+    const idSet = new Set(ids.map(String));
+    setProducts((prev) =>
+      prev.map((p) => (idSet.has(String(p.id)) ? { ...p, isArchived: false, status: "PUBLISHED" } : p))
+    );
+    try {
+      await supabase.from("products").update({ is_archived: false, status: "PUBLISHED" }).in("id", Array.from(idSet));
+    } catch (err) {
+      console.warn("Failed to bulk restore:", err);
+    }
+  };
+
+  const bulkUpdateStockStatus = async (ids, newStatus) => {
+    const idSet = new Set(ids.map(String));
+    const qty = newStatus === "Out of Stock" ? 0 : 2;
+    setProducts((prev) =>
+      prev.map((p) => (idSet.has(String(p.id)) ? { ...p, stockStatus: newStatus, stock: p.stock > 0 && newStatus === "In Stock" ? p.stock : qty } : p))
+    );
+    try {
+      await supabase.from("products").update({ stock_status: newStatus, stock: qty }).in("id", Array.from(idSet));
+    } catch (err) {
+      console.warn("Failed to bulk update stock status:", err);
+    }
+  };
+
+  const bulkDelete = async (ids) => {
+    const idSet = new Set(ids.map(String));
+    setProducts((prev) => prev.filter((p) => !idSet.has(String(p.id))));
+    try {
+      await supabase.from("products").delete().in("id", Array.from(idSet));
+    } catch (err) {
+      console.warn("Failed to bulk delete:", err);
+    }
+  };
+
   return (
     <ProductContext.Provider
       value={{
@@ -294,6 +418,14 @@ export const ProductProvider = ({ children }) => {
         deleteProduct,
         importProducts,
         updateProduct,
+        archiveProduct,
+        restoreProduct,
+        toggleNeedsReview,
+        quickUpdateStock,
+        bulkArchive,
+        bulkRestore,
+        bulkUpdateStockStatus,
+        bulkDelete,
         getAllCategories,
         refetch: fetchProducts,
       }}

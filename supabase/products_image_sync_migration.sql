@@ -103,3 +103,8 @@ VALUES
   ('badge_5', 'Handcrafted', 'handcrafted', 'Authentic artisan hand embroidery', '#8B5E34', 'ACTIVE', 4),
   ('badge_6', 'Trending', 'trending', 'Currently trending styles', '#A13D2D', 'ACTIVE', 5)
 ON CONFLICT (name) DO NOTHING;
+
+
+-- 7. Add is_archived and needs_review columns to public.products
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS is_archived BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS needs_review BOOLEAN DEFAULT FALSE;

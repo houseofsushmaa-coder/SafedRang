@@ -86,6 +86,10 @@ export default function ProductDetail() {
   }, [id, product]);
 
   const handleAddToCart = () => {
+    if (product?.isArchived) {
+      toast.error("This creation has been archived and is not available for purchase.");
+      return;
+    }
     if (isOutOfStock) {
       toast.error("This product is currently out of stock.");
       return;
@@ -105,6 +109,10 @@ export default function ProductDetail() {
   };
 
   const handleBuyNow = () => {
+    if (product?.isArchived) {
+      toast.error("This creation has been archived and is not available for purchase.");
+      return;
+    }
     if (isOutOfStock) {
       toast.error("This product is currently out of stock.");
       return;
@@ -385,28 +393,60 @@ export default function ProductDetail() {
             </div>
           )}
 
-          <div className="product-actions">
-            <button
-              className="btn-primary btn-add-to-cart"
-              disabled={isOutOfStock || (isVariable && !selectedSize)}
-              onClick={handleAddToCart}
+          {product.isArchived ? (
+            <div
+              style={{
+                background: "rgba(110, 30, 42, 0.05)",
+                border: "1px solid rgba(110, 30, 42, 0.2)",
+                padding: "16px 20px",
+                borderRadius: "8px",
+                marginTop: "20px",
+                marginBottom: "20px",
+              }}
             >
-              {isOutOfStock
-                ? (product.stockStatus === "Sold Out" ? "SOLD OUT" : "OUT OF STOCK")
-                : isVariable && !selectedSize
-                ? `SELECT ${(product.attributeName || "SIZE").toUpperCase()}`
-                : "ADD TO CART"}
-            </button>
-            {!isOutOfStock && (
-              <button
-                className="btn-secondary btn-buy-now"
-                disabled={isVariable && !selectedSize}
-                onClick={handleBuyNow}
+              <span
+                style={{
+                  display: "inline-block",
+                  fontSize: "0.72rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.08em",
+                  backgroundColor: "#6E1E2A",
+                  color: "#FAF5EC",
+                  padding: "3px 8px",
+                  borderRadius: "3px",
+                  marginBottom: "8px",
+                }}
               >
-                BUY IT NOW
+                ARCHIVED PIECE
+              </span>
+              <p style={{ margin: "4px 0 0", fontSize: "0.88rem", color: "var(--color-charcoal)", lineHeight: 1.5 }}>
+                This exclusive piece has been retired or sold permanently and is kept for historical presentation. It is no longer available for order.
+              </p>
+            </div>
+          ) : (
+            <div className="product-actions">
+              <button
+                className="btn-primary btn-add-to-cart"
+                disabled={isOutOfStock || (isVariable && !selectedSize)}
+                onClick={handleAddToCart}
+              >
+                {isOutOfStock
+                  ? (product.stockStatus === "Sold Out" ? "SOLD OUT" : "OUT OF STOCK")
+                  : isVariable && !selectedSize
+                  ? `SELECT ${(product.attributeName || "SIZE").toUpperCase()}`
+                  : "ADD TO CART"}
               </button>
-            )}
-          </div>
+              {!isOutOfStock && (
+                <button
+                  className="btn-secondary btn-buy-now"
+                  disabled={isVariable && !selectedSize}
+                  onClick={handleBuyNow}
+                >
+                  BUY IT NOW
+                </button>
+              )}
+            </div>
+          )}
 
           <form className="pincode-checker" onSubmit={handleCheckPincode}>
             <div className="pincode-header">
