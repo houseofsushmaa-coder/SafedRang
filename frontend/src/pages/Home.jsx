@@ -211,12 +211,28 @@ export default function Home() {
       {/* 4. One-of-One Immersive Banner */}
       <section className="ooo-immersive reveal-section" ref={oooRef}>
         <div className="ooo-bg-image">
-          <img src="/one-of-one-banner.jpg" alt="The One of One Edit - Safed Rang" />
-          <div className="ooo-bg-overlay" />
+          <picture>
+            <source
+              type="image/webp"
+              srcSet="/one-of-one-banner-4k.webp 3840w, /one-of-one-banner.webp 2560w"
+              sizes="100vw"
+            />
+            <source
+              type="image/jpeg"
+              srcSet="/one-of-one-banner-4k.jpg 3840w, /one-of-one-banner.jpg 2560w"
+              sizes="100vw"
+            />
+            <img
+              src="/one-of-one-banner.jpg"
+              alt="The One of One Edit - Safed Rang"
+              loading="eager"
+              decoding="async"
+            />
+          </picture>
         </div>
         <div className="ooo-content-wrapper container">
           <div className="ooo-glass-card">
-            <span className="overline">— A RARE KIND OF BEAUTY —</span>
+            <span className="overline">&mdash; A RARE KIND OF BEAUTY &mdash;</span>
             <h2>THE ONE-OF-ONE EDIT</h2>
             <p className="italic">
               There will never be another exactly like it.

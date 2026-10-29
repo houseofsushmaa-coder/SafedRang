@@ -424,13 +424,13 @@
 /* 4. One of One Immersive */
 .ooo-immersive {
   position: relative;
-  min-height: 640px;
-  height: 84vh;
-  max-height: 820px;
+  min-height: 560px;
+  height: 76vh;
+  max-height: 760px;
   overflow: hidden;
   display: flex;
   align-items: center;
-  background-color: #F5EFEB;
+  background-color: #ECDCCF;
 }
 
 .ooo-bg-image {
@@ -439,24 +439,18 @@
   z-index: 1;
 }
 
+.ooo-bg-image picture,
 .ooo-bg-image img {
   width: 100%;
   height: 100%;
+  display: block;
   object-fit: cover;
-  object-position: 85% center;
+  object-position: right center;
+  image-rendering: -webkit-optimize-contrast;
 }
 
 .ooo-bg-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    rgba(245, 239, 235, 0.72) 0%,
-    rgba(245, 239, 235, 0.45) 32%,
-    rgba(245, 239, 235, 0.08) 58%,
-    transparent 100%
-  );
-  pointer-events: none;
+  display: none;
 }
 
 .ooo-content-wrapper {
@@ -1184,7 +1178,7 @@
     object-position: 70% top;
   }
   .ooo-bg-overlay {
-    background: rgba(245, 239, 235, 0.75);
+    display: none;
   }
   .ooo-content-wrapper {
     padding: 0;
