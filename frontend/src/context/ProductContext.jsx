@@ -23,6 +23,25 @@ const formatProduct = (p) => {
   const rawStatus = (p.stock_status || p.stockStatus || "").toLowerCase();
   const isOut = rawStatus === "out of stock" || rawStatus === "sold out" || stock <= 0;
 
+  // Resolve images — priority:
+  // 1. product_images joined table (array of {url} objects)
+  // 2. images column (jsonb array of strings or {url} objects)
+  // 3. image_url column (single string)
+  let resolvedImages = [];
+  if (Array.isArray(p.images) && p.images.length > 0) {
+    // Could be [{url: "..."}, ...] from joined table OR ["url", ...] from jsonb column
+    resolvedImages = p.images.map((img) =>
+      typeof img === "string" ? img : img?.url
+    ).filter(Boolean);
+  }
+  if (resolvedImages.length === 0 && p.image_url) {
+    resolvedImages = [p.image_url];
+  }
+
+  const primaryImage =
+    resolvedImages[0] ||
+    "https://via.placeholder.com/450x572?text=No+Image";
+
   return {
     id: p.id,
     title: p.name || p.title || "",
@@ -33,19 +52,8 @@ const formatProduct = (p) => {
     subcategory: p.subcategory || p.sub_category || "",
     craft: p.craft || "",
     fabric: p.fabric || p.material || "",
-    // Images can come from a joined table or a direct column
-    image:
-      p.images?.[0]?.url ||
-      p.images?.[0] ||
-      p.image_url ||
-      p.image ||
-      "https://via.placeholder.com/450x572?text=No+Image",
-    images:
-      Array.isArray(p.images)
-        ? p.images.map((img) => (typeof img === "string" ? img : img.url))
-        : p.image_url
-        ? [p.image_url]
-        : [],
+    image: primaryImage,
+    images: resolvedImages,
     stockStatus: isOut ? "Out of Stock" : "In Stock",
     stock,
     // Variation support
@@ -65,11 +73,12 @@ export const ProductProvider = ({ children }) => {
       setLoading(true);
       setFetchError(null);
 
-      // Try with joined images table first
+      // Fetch products with category join + separate img_gallery alias for product_images table
+      // We use 'img_gallery' alias to avoid shadowing the native 'images' column on the products table
       let { data, error } = await supabase
         .from("products")
         .select(
-          `*, category:categories(name), images:product_images(url)`
+          `*, category:categories(name), img_gallery:product_images(url)`
         )
         .limit(200);
 
@@ -89,7 +98,20 @@ export const ProductProvider = ({ children }) => {
         console.log("No products found in database, falling back to static products");
         setProducts(staticProducts);
       } else {
-        setProducts((data || []).map(formatProduct));
+        // Normalize: merge img_gallery (joined table) into images field for formatProduct
+        const normalized = data.map((row) => {
+          const galleryUrls =
+            Array.isArray(row.img_gallery) && row.img_gallery.length > 0
+              ? row.img_gallery.map((g) => g?.url).filter(Boolean)
+              : null;
+
+          return {
+            ...row,
+            // If product_images table has entries, use those (they take priority over the column)
+            images: galleryUrls || row.images || null,
+          };
+        });
+        setProducts(normalized.map(formatProduct));
       }
     } catch (err) {
       console.error("Failed to fetch products:", err);
@@ -128,18 +150,25 @@ export const ProductProvider = ({ children }) => {
     setProducts((prev) => [formatted, ...prev]);
 
     try {
-      await supabase.from("products").insert([
+      const imagesArr = formatted.images.filter(Boolean);
+      const { error } = await supabase.from("products").insert([
         {
           name: formatted.title,
           price: formatted.price,
-          sale_price: formatted.salePrice,
+          sale_price: formatted.salePrice ?? null,
           stock: formatted.stock,
+          stock_status: formatted.stockStatus,
           description: formatted.description,
           category_name: formatted.category,
           sku: formatted.sku,
-          image_url: formatted.image,
+          image_url: imagesArr[0] || formatted.image || null,
+          images: imagesArr,
+          product_type: formatted.productType || "simple",
+          attribute_name: formatted.attributeName || "Size",
+          variations: formatted.variations || [],
         },
       ]);
+      if (error) console.warn("Could not insert product into Supabase:", error.message);
     } catch (err) {
       console.warn("Could not insert product into Supabase:", err);
     }
@@ -155,23 +184,79 @@ export const ProductProvider = ({ children }) => {
   };
 
   const updateProduct = async (id, updatedData) => {
+    // Merge into local state immediately (optimistic update)
+    const merged = {
+      ...updatedData,
+      // Re-normalise category so UI stays consistent
+      category: normalizeCategoryName(updatedData.category),
+    };
     setProducts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, ...updatedData } : p))
+      prev.map((p) => (p.id === id ? { ...p, ...merged } : p))
     );
 
     try {
-      await supabase
+      // Build the images array — always an array of strings
+      const imagesArr = Array.isArray(updatedData.images)
+        ? updatedData.images.filter(Boolean)
+        : updatedData.image
+        ? [updatedData.image]
+        : [];
+
+      // Primary image — first of the gallery, or the standalone image field
+      const primaryImage = imagesArr[0] || updatedData.image || null;
+
+      const dbPayload = {
+        name: updatedData.title,
+        price: updatedData.price,
+        sale_price: updatedData.salePrice ?? null,
+        description: updatedData.description,
+        stock:
+          updatedData.productType === "variable"
+            ? (updatedData.stock ?? 0)
+            : updatedData.stockStatus === "In Stock"
+            ? updatedData.stock || 10
+            : 0,
+        stock_status: updatedData.stockStatus || "In Stock",
+        sku: updatedData.sku || null,
+        image_url: primaryImage,
+        // Store the full images array as a JSON column (images[])
+        // Works whether the column is jsonb or text[]
+        images: imagesArr,
+        category_name: normalizeCategoryName(updatedData.category),
+        product_type: updatedData.productType || "simple",
+        attribute_name: updatedData.attributeName || "Size",
+        variations: Array.isArray(updatedData.variations)
+          ? updatedData.variations
+          : [],
+      };
+
+      const { error } = await supabase
         .from("products")
-        .update({
-          name: updatedData.title,
-          price: updatedData.price,
-          sale_price: updatedData.salePrice,
-          description: updatedData.description,
-          stock: updatedData.stockStatus === "In Stock" ? (updatedData.stock || 10) : 0,
-          sku: updatedData.sku,
-          image_url: updatedData.image,
-        })
+        .update(dbPayload)
         .eq("id", id);
+
+      if (error) {
+        // If images column doesn't exist, retry without it
+        if (
+          error.message?.includes("images") ||
+          error.code === "PGRST204" ||
+          error.code === "42703"
+        ) {
+          console.warn(
+            "images column not found — retrying without images array:",
+            error.message
+          );
+          const { images: _ignored, ...payloadWithoutImages } = dbPayload;
+          const { error: retryError } = await supabase
+            .from("products")
+            .update(payloadWithoutImages)
+            .eq("id", id);
+          if (retryError)
+            console.error("Retry also failed:", retryError.message);
+        } else {
+          console.error("Failed to update product in Supabase:", error.message);
+        }
+      }
     } catch (err) {
       console.warn("Failed to update product in Supabase:", err);
     }

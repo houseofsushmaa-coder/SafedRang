@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useProducts } from "../../context/ProductContext";
 import { adminService } from "../adminService";
+import { supabase } from "../../lib/supabase";
 import {
   Save,
   X,
@@ -25,6 +26,7 @@ const EditProduct = () => {
   const galleryUploadRef = useRef(null);
   const [draggingMain, setDraggingMain] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   // ── Categories from API ────────────────────────────────────────────
   const [categories, setCategories] = useState([]);
@@ -91,35 +93,61 @@ const EditProduct = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const fileToBase64 = (file) =>
-    new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target.result);
-      reader.readAsDataURL(file);
-    });
+  // Upload a single file to Supabase Storage and return its public URL
+  const uploadToStorage = async (file) => {
+    const ext = file.name.split(".").pop();
+    const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+    const filePath = `products/${fileName}`;
+
+    const { error } = await supabase.storage
+      .from("product-images")
+      .upload(filePath, file, { upsert: true, contentType: file.type });
+
+    if (error) throw error;
+
+    const { data } = supabase.storage
+      .from("product-images")
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  };
 
   const handleMainImageUpload = async (files) => {
     const file = files[0];
     if (!file || !file.type.startsWith("image/")) return;
-    const base64 = await fileToBase64(file);
-    setFormData((prev) => ({
-      ...prev,
-      image: base64,
-      images:
-        prev.images.length === 0 ? [base64] : [base64, ...prev.images.slice(1)],
-    }));
+    setUploading(true);
+    try {
+      const url = await uploadToStorage(file);
+      setFormData((prev) => ({
+        ...prev,
+        image: url,
+        images: prev.images.length === 0 ? [url] : [url, ...prev.images.slice(1)],
+      }));
+    } catch (err) {
+      console.error("Image upload failed:", err);
+      alert("Image upload failed: " + err.message);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleGalleryUpload = async (files) => {
-    const imageFiles = Array.from(files).filter((f) =>
-      f.type.startsWith("image/"),
-    );
-    const base64List = await Promise.all(imageFiles.map(fileToBase64));
-    setFormData((prev) => ({
-      ...prev,
-      images: [...prev.images, ...base64List],
-      image: prev.image || base64List[0] || "",
-    }));
+    const imageFiles = Array.from(files).filter((f) => f.type.startsWith("image/"));
+    if (!imageFiles.length) return;
+    setUploading(true);
+    try {
+      const urls = await Promise.all(imageFiles.map(uploadToStorage));
+      setFormData((prev) => ({
+        ...prev,
+        images: [...prev.images, ...urls],
+        image: prev.image || urls[0] || "",
+      }));
+    } catch (err) {
+      console.error("Gallery upload failed:", err);
+      alert("Gallery upload failed: " + err.message);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const removeGalleryImage = (index) => {
@@ -266,9 +294,10 @@ const EditProduct = () => {
           <button
             className="admin-btn icon-left"
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || uploading}
           >
-            <Save size={16} /> {saving ? "Saving…" : isNew ? "Create Product" : "Save Product"}
+            <Save size={16} />
+            {uploading ? "Uploading image…" : saving ? "Saving…" : isNew ? "Create Product" : "Save Product"}
           </button>
         </div>
       </div>
