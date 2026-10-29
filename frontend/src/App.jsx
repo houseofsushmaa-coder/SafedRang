@@ -11,6 +11,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import Home from "./pages/Home";
 import Shop from "./pages/Shop";
 import About from "./pages/About";
+import Contact from "./pages/Contact";
 import Craft from "./pages/Craft";
 import Journey from "./pages/Journey";
 import CareGuide from "./pages/CareGuide";
@@ -214,7 +215,8 @@ function App() {
                 <Route path="artisans" element={<Craft />} />
                 <Route path="care" element={<CareGuide />} />
                 <Route path="care-guide" element={<CareGuide />} />
-                <Route path="contact" element={<About />} />
+                <Route path="contact" element={<Contact />} />
+                <Route path="contact-us" element={<Contact />} />
                 <Route path="faq" element={<About />} />
                 <Route path="archive" element={<Shop />} />
                 <Route path="shipping" element={<PrivacyPolicy />} />

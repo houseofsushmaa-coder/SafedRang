@@ -1,0 +1,963 @@
+/* ==========================================================================
+   SAFED RANG — CONTACT US & ATELIER CONCIERGE
+   Brand Palette:
+   - Royal Wine:      #6E1E2A
+   - Antique Gold:    #AE8A54
+   - Champagne Gold:  #C9A876
+   - Light Gold:      #E8D4B4
+   - Warm Ivory:      #FAF5EC
+   - Deep Ivory:      #F5EEE2
+   - Dark Charcoal:   #2A211D
+   - Muted Taupe:     #7D7065
+   ========================================================================== */
+
+:root {
+  --contact-wine: #6E1E2A;
+  --contact-wine-dark: #52151F;
+  --contact-wine-deep: #3B0E16;
+  --contact-gold: #AE8A54;
+  --contact-gold-light: #C9A876;
+  --contact-gold-pale: #E8D4B4;
+  --contact-gold-glow: rgba(174, 138, 84, 0.4);
+  --contact-ivory: #FAF5EC;
+  --contact-ivory-deep: #F5EEE2;
+  --contact-charcoal: #2A211D;
+  --contact-charcoal-dark: #1D1614;
+  --contact-taupe: #7D7065;
+  --contact-text: #4A3E36;
+  --contact-font-serif: var(--font-heading, "Cormorant Garamond", Georgia, serif);
+  --contact-font-sans: var(--font-body, "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+}
+
+.contact-page {
+  background-color: var(--contact-ivory);
+  color: var(--contact-charcoal);
+  font-family: var(--contact-font-sans);
+  line-height: 1.75;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   1. HERO SECTION
+   ────────────────────────────────────────────────────────────────────────── */
+.contact-hero {
+  position: relative;
+  min-height: 52vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6.5rem 2rem 5rem;
+  background-color: var(--contact-wine-deep);
+  color: #FAF5EC;
+  overflow: hidden;
+}
+
+.contact-hero-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+.contact-hero-bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  filter: brightness(0.48) saturate(1.1);
+  transform: scale(1.02);
+}
+
+.contact-hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(29, 10, 14, 0.72) 0%,
+    rgba(110, 30, 42, 0.82) 50%,
+    rgba(42, 33, 29, 0.94) 100%
+  );
+}
+
+.contact-hero-container {
+  position: relative;
+  z-index: 2;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.contact-eyebrow {
+  font-family: var(--contact-font-sans);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  color: var(--contact-gold-light);
+  text-transform: uppercase;
+  display: inline-block;
+  margin-bottom: 1.2rem;
+  position: relative;
+}
+
+.contact-eyebrow::after {
+  content: "";
+  display: block;
+  width: 36px;
+  height: 1px;
+  background-color: var(--contact-gold);
+  margin: 0.5rem auto 0;
+  opacity: 0.7;
+}
+
+.contact-hero-title {
+  font-family: var(--contact-font-serif);
+  font-size: clamp(2.4rem, 4.8vw, 3.8rem);
+  font-weight: 400;
+  line-height: 1.18;
+  letter-spacing: 0.02em;
+  color: #FFFFFF;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+}
+
+.contact-hero-title-italic {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--contact-gold-pale);
+}
+
+.contact-hero-subtitle {
+  font-size: clamp(1rem, 1.3vw, 1.14rem);
+  line-height: 1.85;
+  color: #F1E7DA;
+  max-width: 660px;
+  margin: 0 auto;
+  font-weight: 300;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   2. DIRECT CONTACT CHANNELS (CARDS)
+   ────────────────────────────────────────────────────────────────────────── */
+.contact-channels-section {
+  padding: 4.5rem 2rem 3rem;
+  position: relative;
+  margin-top: -2.5rem;
+  z-index: 3;
+}
+
+.contact-channels-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.channel-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(174, 138, 84, 0.25);
+  border-radius: 4px;
+  padding: 2.4rem 2rem 2rem;
+  box-shadow: 0 10px 30px rgba(42, 33, 29, 0.06);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+.channel-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(42, 33, 29, 0.12);
+  border-color: var(--contact-gold);
+}
+
+.channel-card--featured {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FAF5EC 100%);
+  border: 1.5px solid var(--contact-gold);
+  box-shadow: 0 12px 35px rgba(174, 138, 84, 0.15);
+}
+
+.channel-featured-badge {
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  background: var(--contact-wine);
+  color: #FFFFFF;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+
+.channel-icon-wrap {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(174, 138, 84, 0.1);
+  color: var(--contact-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.4rem;
+}
+
+.channel-icon-wrap--wine {
+  background: rgba(110, 30, 42, 0.1);
+  color: var(--contact-wine);
+}
+
+.channel-kicker {
+  font-family: var(--contact-font-sans);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  color: var(--contact-gold);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.channel-heading {
+  font-family: var(--contact-font-serif);
+  font-size: 1.45rem;
+  font-weight: 500;
+  color: var(--contact-charcoal);
+  margin-bottom: 0.8rem;
+  letter-spacing: 0.02em;
+}
+
+.channel-desc {
+  font-size: 0.94rem;
+  line-height: 1.7;
+  color: var(--contact-taupe);
+  margin-bottom: 1.4rem;
+  flex: 1;
+}
+
+.channel-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--contact-taupe);
+  margin-bottom: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(174, 138, 84, 0.18);
+}
+
+.channel-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0.75rem 1.4rem;
+  background: transparent;
+  color: var(--contact-charcoal);
+  border: 1px solid var(--contact-charcoal);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.channel-action-btn:hover {
+  background: var(--contact-charcoal);
+  color: #FFFFFF;
+}
+
+.channel-action-btn--gold {
+  background: var(--contact-gold);
+  border-color: var(--contact-gold);
+  color: var(--contact-charcoal-dark);
+  box-shadow: 0 4px 14px rgba(174, 138, 84, 0.3);
+}
+
+.channel-action-btn--gold:hover {
+  background: var(--contact-wine);
+  border-color: var(--contact-wine);
+  color: #FFFFFF;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   3. INQUIRY FORM & ATELIER STUDIO DETAILS
+   ────────────────────────────────────────────────────────────────────────── */
+.contact-main-section {
+  padding: 4.5rem 2rem 5.5rem;
+  position: relative;
+}
+
+.contact-main-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 4.5rem;
+  align-items: flex-start;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Form Styling */
+.contact-form-column {
+  background: #FFFFFF;
+  padding: 3rem 2.5rem;
+  border-radius: 4px;
+  border: 1px solid rgba(174, 138, 84, 0.25);
+  box-shadow: 0 10px 30px rgba(42, 33, 29, 0.05);
+}
+
+.form-header {
+  margin-bottom: 2.2rem;
+}
+
+.form-kicker {
+  font-family: var(--contact-font-sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  color: var(--contact-gold);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.form-title {
+  font-family: var(--contact-font-serif);
+  font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+  font-weight: 400;
+  line-height: 1.25;
+  color: var(--contact-charcoal);
+  margin-bottom: 0.8rem;
+}
+
+.form-subtitle {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--contact-taupe);
+  margin: 0;
+}
+
+.contact-inquiry-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.form-row-dual {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.form-group label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--contact-charcoal);
+  text-transform: uppercase;
+}
+
+.form-group .req {
+  color: var(--contact-wine);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background: var(--contact-ivory);
+  border: 1px solid rgba(174, 138, 84, 0.3);
+  border-radius: 2px;
+  font-family: var(--contact-font-sans);
+  font-size: 0.95rem;
+  color: var(--contact-charcoal);
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--contact-gold);
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(174, 138, 84, 0.12);
+}
+
+.form-group select {
+  cursor: pointer;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.contact-submit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 1rem 2.2rem;
+  background-color: var(--contact-wine);
+  color: #FFFFFF;
+  border: 1px solid var(--contact-wine);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 18px rgba(110, 30, 42, 0.35);
+}
+
+.contact-submit-btn:hover:not(:disabled) {
+  background-color: #8C2736;
+  border-color: #8C2736;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(110, 30, 42, 0.5);
+}
+
+.contact-submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.form-success-card {
+  padding: 3rem 2rem;
+  text-align: center;
+  background: rgba(174, 138, 84, 0.08);
+  border: 1px solid var(--contact-gold);
+  border-radius: 4px;
+}
+
+.success-icon-wrap {
+  color: var(--contact-wine);
+  margin-bottom: 1rem;
+}
+
+.form-success-card h3 {
+  font-family: var(--contact-font-serif);
+  font-size: 1.8rem;
+  color: var(--contact-charcoal);
+  margin-bottom: 0.8rem;
+}
+
+.form-success-card p {
+  color: var(--contact-taupe);
+  font-size: 0.96rem;
+  line-height: 1.7;
+  max-width: 480px;
+  margin: 0 auto 1.8rem;
+}
+
+.success-reset-btn {
+  padding: 0.75rem 1.8rem;
+  background: transparent;
+  border: 1px solid var(--contact-charcoal);
+  color: var(--contact-charcoal);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+}
+
+/* Atelier Info Column */
+.atelier-info-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(174, 138, 84, 0.25);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(42, 33, 29, 0.06);
+}
+
+.atelier-photo-wrap {
+  position: relative;
+  height: 240px;
+  overflow: hidden;
+}
+
+.atelier-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+  transition: transform 0.6s ease;
+}
+
+.atelier-info-card:hover .atelier-photo {
+  transform: scale(1.03);
+}
+
+.atelier-photo-badge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.75rem 1.2rem;
+  background: linear-gradient(180deg, transparent 0%, rgba(20, 15, 14, 0.9) 100%);
+  display: flex;
+  justify-content: space-between;
+  color: var(--contact-gold-pale);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+}
+
+.atelier-details-content {
+  padding: 2.2rem 2rem;
+}
+
+.atelier-kicker {
+  font-family: var(--contact-font-sans);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  color: var(--contact-gold);
+  text-transform: uppercase;
+}
+
+.atelier-name {
+  font-family: var(--contact-font-serif);
+  font-size: 1.6rem;
+  color: var(--contact-charcoal);
+  margin: 0.3rem 0 0.6rem;
+}
+
+.atelier-sub {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--contact-taupe);
+  margin-bottom: 1.6rem;
+}
+
+.atelier-contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding-bottom: 1.8rem;
+  border-bottom: 1px solid rgba(174, 138, 84, 0.18);
+  margin-bottom: 1.8rem;
+}
+
+.atelier-contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.item-icon {
+  color: var(--contact-gold);
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.item-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--contact-taupe);
+  text-transform: uppercase;
+}
+
+.item-val {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--contact-charcoal);
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+
+a.item-val:hover {
+  color: var(--contact-wine);
+}
+
+.item-val--text {
+  font-weight: 400;
+  color: var(--contact-text);
+}
+
+.commitments-title {
+  font-family: var(--contact-font-serif);
+  font-size: 1.15rem;
+  color: var(--contact-charcoal);
+  margin-bottom: 1rem;
+  letter-spacing: 0.02em;
+}
+
+.commitments-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.commitments-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--contact-text);
+}
+
+.commitments-list .bullet {
+  color: var(--contact-gold);
+  font-size: 0.75rem;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.care-link-wrap {
+  padding-top: 0.5rem;
+}
+
+.care-guide-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--contact-wine);
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: gap 0.25s ease;
+}
+
+.care-guide-link:hover {
+  gap: 10px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   4. CLIENT SERVICES FAQ ACCORDION
+   ────────────────────────────────────────────────────────────────────────── */
+.contact-faq-section {
+  padding: 5.5rem 2rem;
+  background-color: var(--contact-ivory-deep);
+  border-top: 1px solid rgba(174, 138, 84, 0.18);
+}
+
+.faq-header {
+  max-width: 680px;
+  margin: 0 auto 3.5rem;
+}
+
+.faq-kicker {
+  font-family: var(--contact-font-sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  color: var(--contact-gold);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.6rem;
+}
+
+.faq-title {
+  font-family: var(--contact-font-serif);
+  font-size: clamp(2rem, 3.2vw, 2.75rem);
+  font-weight: 400;
+  color: var(--contact-charcoal);
+  margin-bottom: 0.8rem;
+}
+
+.faq-subtitle {
+  font-size: 0.96rem;
+  line-height: 1.7;
+  color: var(--contact-taupe);
+  margin: 0;
+}
+
+.faq-accordion-wrap {
+  max-width: 820px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.faq-item-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(174, 138, 84, 0.22);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.faq-item-card:hover {
+  border-color: var(--contact-gold);
+}
+
+.faq-item-card--open {
+  border-color: var(--contact-gold);
+  box-shadow: 0 6px 20px rgba(42, 33, 29, 0.06);
+}
+
+.faq-question-btn {
+  width: 100%;
+  padding: 1.4rem 1.6rem;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+}
+
+.faq-question-text {
+  font-family: var(--contact-font-serif);
+  font-size: 1.18rem;
+  font-weight: 500;
+  color: var(--contact-charcoal);
+  letter-spacing: 0.01em;
+}
+
+.faq-toggle-icon {
+  font-size: 1.4rem;
+  color: var(--contact-gold);
+  font-weight: 300;
+  line-height: 1;
+}
+
+.faq-answer-pane {
+  padding: 0 1.6rem 1.4rem;
+  border-top: 1px solid rgba(174, 138, 84, 0.1);
+  padding-top: 1rem;
+}
+
+.faq-answer-pane p {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--contact-text);
+  margin: 0 0 0.8rem;
+}
+
+.faq-inline-link {
+  display: inline-block;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--contact-wine);
+  text-decoration: none;
+}
+
+.faq-inline-link:hover {
+  text-decoration: underline;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   5. CLOSING INVITATION
+   ────────────────────────────────────────────────────────────────────────── */
+.contact-closing-section {
+  padding: 6.5rem 2rem 5.5rem;
+  background-color: var(--contact-charcoal-dark);
+  color: #FAF5EC;
+  position: relative;
+  text-align: center;
+  border-top: 1px solid rgba(174, 138, 84, 0.3);
+}
+
+.closing-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 1.6rem;
+}
+
+.ornament-stitch {
+  width: 48px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--contact-gold), transparent);
+}
+
+.ornament-diamond {
+  color: var(--contact-gold);
+  font-size: 0.9rem;
+}
+
+.closing-title {
+  font-family: var(--contact-font-serif);
+  font-size: clamp(2.1rem, 4.2vw, 3.4rem);
+  font-weight: 400;
+  color: #FFFFFF;
+  line-height: 1.22;
+  margin-bottom: 1rem;
+}
+
+.closing-subtitle {
+  font-size: 1.05rem;
+  color: #DDD2C4;
+  max-width: 600px;
+  margin: 0 auto 2.8rem;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+.closing-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.4rem;
+  flex-wrap: wrap;
+  margin-bottom: 3.5rem;
+}
+
+.closing-btn-primary {
+  padding: 0.95rem 2.4rem;
+  background-color: var(--contact-wine);
+  color: #FFFFFF;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid var(--contact-wine);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 18px rgba(110, 30, 42, 0.4);
+}
+
+.closing-btn-primary:hover {
+  background-color: #8C2736;
+  border-color: #8C2736;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(110, 30, 42, 0.6);
+}
+
+.closing-btn-secondary {
+  padding: 0.95rem 2.4rem;
+  background: transparent;
+  color: var(--contact-gold-pale);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid var(--contact-gold);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.closing-btn-secondary:hover {
+  background: var(--contact-gold);
+  color: var(--contact-charcoal-dark);
+  transform: translateY(-2px);
+}
+
+.closing-brandmark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(174, 138, 84, 0.22);
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.brand-house {
+  font-family: var(--contact-font-sans);
+  font-size: 0.66rem;
+  letter-spacing: 0.3em;
+  color: var(--contact-gold);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.brand-name {
+  font-family: var(--contact-font-serif);
+  font-size: 1.35rem;
+  letter-spacing: 0.16em;
+  color: #FFFFFF;
+  font-weight: 500;
+}
+
+.brand-city {
+  font-family: var(--contact-font-sans);
+  font-size: 0.64rem;
+  letter-spacing: 0.26em;
+  color: var(--contact-taupe);
+  text-transform: uppercase;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   6. RESPONSIVE ADAPTATIONS
+   ────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .contact-channels-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .channel-card--featured {
+    grid-column: span 2;
+  }
+
+  .contact-main-grid {
+    grid-template-columns: 1fr;
+    gap: 3.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .contact-channels-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .channel-card--featured {
+    grid-column: span 1;
+  }
+
+  .form-row-dual {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-hero {
+    padding: 5.5rem 1.5rem 4rem;
+  }
+
+  .contact-channels-section {
+    padding: 3rem 1.5rem 2rem;
+    margin-top: -1.5rem;
+  }
+
+  .contact-form-column {
+    padding: 2.2rem 1.5rem;
+  }
+
+  .atelier-details-content {
+    padding: 1.8rem 1.5rem;
+  }
+
+  .closing-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .closing-btn-primary,
+  .closing-btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+}

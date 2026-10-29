@@ -252,3 +252,25 @@
     flex-wrap: wrap;
   }
 }
+
+
+/* Direct Atelier Contact Links in Footer */
+.footer-direct-contact-item {
+  margin-bottom: 0.65rem !important;
+}
+
+.footer-direct-contact-link {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 7px;
+  color: var(--color-antique-gold) !important;
+  font-size: 0.82rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.04em;
+  transition: all 0.3s ease;
+}
+
+.footer-direct-contact-link:hover {
+  color: var(--color-royal-wine) !important;
+  transform: translateX(2px);
+}

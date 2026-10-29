@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./Footer.css";
 import { Link } from "react-router-dom";
-import { Award, ShieldCheck, Globe, Leaf } from "lucide-react";
+import { Award, ShieldCheck, Globe, Leaf, Phone, Mail } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function Footer() {
@@ -139,6 +139,16 @@ export default function Footer() {
             <ul>
               <li>
                 <Link to="/contact">Contact Us</Link>
+              </li>
+              <li className="footer-direct-contact-item">
+                <a href="tel:+919151566602" className="footer-direct-contact-link">
+                  <Phone size={12} /> +91 91515 66602
+                </a>
+              </li>
+              <li className="footer-direct-contact-item">
+                <a href="mailto:contact@safedrang.com" className="footer-direct-contact-link">
+                  <Mail size={12} /> contact@safedrang.com
+                </a>
               </li>
               <li>
                 <Link to="/shipping">Shipping</Link>
