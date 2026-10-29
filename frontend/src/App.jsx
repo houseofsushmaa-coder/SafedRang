@@ -12,6 +12,7 @@ import Home from "./pages/Home";
 import Shop from "./pages/Shop";
 import About from "./pages/About";
 import Craft from "./pages/Craft";
+import CareGuide from "./pages/CareGuide";
 import ProductDetail from "./pages/ProductDetail";
 import Checkout from "./pages/Checkout";
 import PaymentVerify from "./pages/PaymentVerify";
@@ -209,7 +210,8 @@ function App() {
                 <Route path="journal" element={<Craft />} />
                 <Route path="story" element={<About />} />
                 <Route path="artisans" element={<Craft />} />
-                <Route path="care" element={<Craft />} />
+                <Route path="care" element={<CareGuide />} />
+                <Route path="care-guide" element={<CareGuide />} />
                 <Route path="contact" element={<About />} />
                 <Route path="faq" element={<About />} />
                 <Route path="archive" element={<Shop />} />

@@ -1,0 +1,1020 @@
+/* ==========================================================================
+   SAFED RANG — CARE GUIDE LUXURY STYLING
+   Brand Palette:
+   - Royal Wine:     #6E1E2A
+   - Antique Gold:   #AE8A54
+   - Warm Ivory:     #FAF5EC
+   - Deep Ivory:     #F2EBDD
+   - Soft Blush:     #E8DFD0
+   - Dark Charcoal:  #2A211D
+   - Warm Taupe:     #8B7863
+   ========================================================================== */
+
+.care-guide-page {
+  background-color: var(--color-warm-ivory, #FAF5EC);
+  color: var(--color-dark-charcoal, #2A211D);
+  font-family: var(--font-body, "Manrope", sans-serif);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── Common Section Header Styles ────────────────────────────────────────── */
+.care-guide-page .section-header {
+  max-width: 780px;
+  margin: 0 auto 3.5rem auto;
+}
+
+.care-guide-page .section-overline {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-antique-gold, #AE8A54);
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.care-guide-page .section-heading {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: clamp(2rem, 3.5vw, 2.75rem);
+  font-weight: 500;
+  color: var(--color-deep-wine, #6E1E2A);
+  letter-spacing: 0.02em;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.care-guide-page .section-subheading {
+  font-size: 0.95rem;
+  color: var(--color-warm-taupe, #8B7863);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.65;
+  font-weight: 300;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION A: EDITORIAL HERO
+   ────────────────────────────────────────────────────────────────────────── */
+.care-hero {
+  padding: 5rem 0 4rem 0;
+  background: linear-gradient(180deg, #F5EFE3 0%, var(--color-warm-ivory, #FAF5EC) 100%);
+  border-bottom: 1px solid rgba(174, 138, 84, 0.2);
+  position: relative;
+}
+
+.care-hero-container {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 3.5rem;
+  align-items: center;
+}
+
+.care-hero-content {
+  max-width: 620px;
+}
+
+.care-eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  color: var(--color-antique-gold, #AE8A54);
+  text-transform: uppercase;
+  display: inline-block;
+  margin-bottom: 1.25rem;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--color-antique-gold, #AE8A54);
+}
+
+.care-hero-title {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: clamp(2.4rem, 4.5vw, 3.6rem);
+  font-weight: 400;
+  color: var(--color-deep-wine, #6E1E2A);
+  line-height: 1.15;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.01em;
+}
+
+.care-hero-title-italic {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--color-dark-charcoal, #2A211D);
+}
+
+.care-hero-description {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: #4A3E39;
+  margin-bottom: 2.25rem;
+  font-weight: 300;
+}
+
+.care-hero-cta {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.care-hero-btn {
+  background-color: var(--color-deep-wine, #6E1E2A);
+  color: #FAF5EC;
+  border: 1px solid var(--color-deep-wine, #6E1E2A);
+  padding: 0.95rem 2rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(110, 30, 42, 0.12);
+}
+
+.care-hero-btn:hover {
+  background-color: transparent;
+  color: var(--color-deep-wine, #6E1E2A);
+  border-color: var(--color-deep-wine, #6E1E2A);
+  transform: translateY(-2px);
+}
+
+.care-hero-btn-secondary {
+  border: 1px solid rgba(42, 33, 29, 0.35);
+  color: var(--color-dark-charcoal, #2A211D);
+  padding: 0.95rem 1.85rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+.care-hero-btn-secondary:hover {
+  border-color: var(--color-antique-gold, #AE8A54);
+  color: var(--color-antique-gold, #AE8A54);
+  background-color: #FFFFFF;
+}
+
+.care-hero-media {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.care-hero-image-frame {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  aspect-ratio: 4 / 5;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(42, 33, 29, 0.12);
+  border: 1px solid rgba(174, 138, 84, 0.3);
+}
+
+.care-hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.8s ease;
+}
+
+.care-hero-image-frame:hover .care-hero-image {
+  transform: scale(1.04);
+}
+
+.care-hero-image-badge {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 1.25rem;
+  right: 1.25rem;
+  background: rgba(42, 33, 29, 0.88);
+  backdrop-filter: blur(8px);
+  color: #FAF5EC;
+  padding: 0.65rem 1rem;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 1px solid rgba(174, 138, 84, 0.4);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION B: QUICK CARE PRINCIPLES
+   ────────────────────────────────────────────────────────────────────────── */
+.care-principles-section {
+  padding: 6rem 0;
+  background-color: var(--color-warm-ivory, #FAF5EC);
+}
+
+.principles-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+}
+
+.principle-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(174, 138, 84, 0.25);
+  padding: 2.25rem 1.5rem 2rem 1.5rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.principle-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-antique-gold, #AE8A54);
+  box-shadow: 0 10px 25px rgba(174, 138, 84, 0.1);
+}
+
+.principle-number {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--color-antique-gold, #AE8A54);
+  line-height: 1;
+  margin-bottom: 1.25rem;
+  opacity: 0.85;
+}
+
+.principle-title {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: 1.28rem;
+  color: var(--color-deep-wine, #6E1E2A);
+  margin-bottom: 0.75rem;
+  line-height: 1.25;
+  font-weight: 600;
+}
+
+.principle-text {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #554841;
+  margin: 0;
+  font-weight: 300;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION C: FIND YOUR FABRIC (INTERACTIVE TABS)
+   ────────────────────────────────────────────────────────────────────────── */
+.care-fabric-section {
+  padding: 6rem 0;
+  background-color: #F6EFE3;
+  border-top: 1px solid rgba(174, 138, 84, 0.2);
+  border-bottom: 1px solid rgba(174, 138, 84, 0.2);
+}
+
+.fabric-selector-nav {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-bottom: 2.5rem;
+}
+
+.fabric-tab-btn {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(174, 138, 84, 0.3);
+  padding: 0.75rem 1.4rem;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: #4A3E39;
+  letter-spacing: 0.03em;
+  font-weight: 400;
+}
+
+.fabric-tab-btn:hover {
+  background: #FFFFFF;
+  border-color: var(--color-antique-gold, #AE8A54);
+  color: var(--color-deep-wine, #6E1E2A);
+}
+
+.fabric-tab-btn.active {
+  background: var(--color-deep-wine, #6E1E2A);
+  color: #FAF5EC;
+  border-color: var(--color-deep-wine, #6E1E2A);
+  font-weight: 500;
+  box-shadow: 0 4px 14px rgba(110, 30, 42, 0.15);
+}
+
+.fabric-detail-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(174, 138, 84, 0.3);
+  border-radius: 6px;
+  padding: 3rem;
+  box-shadow: 0 12px 35px rgba(42, 33, 29, 0.06);
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fabric-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  padding-bottom: 1.75rem;
+  border-bottom: 1px solid rgba(174, 138, 84, 0.2);
+  margin-bottom: 1.75rem;
+}
+
+.fabric-card-category {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-antique-gold, #AE8A54);
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.fabric-card-title {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: 2.2rem;
+  color: var(--color-deep-wine, #6E1E2A);
+  margin: 0 0 0.35rem 0;
+  line-height: 1.2;
+}
+
+.fabric-card-tagline {
+  font-size: 0.92rem;
+  color: #706259;
+  font-style: italic;
+  margin: 0;
+}
+
+.fabric-cleaning-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #FDF4E3;
+  color: #7B5418;
+  border: 1px solid #E2C790;
+  padding: 0.6rem 1.15rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.fabric-applies-row {
+  background: #FAF6EE;
+  padding: 1rem 1.25rem;
+  border-radius: 4px;
+  margin-bottom: 2rem;
+  border-left: 3px solid var(--color-antique-gold, #AE8A54);
+  font-size: 0.88rem;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.applies-label {
+  color: var(--color-deep-wine, #6E1E2A);
+  font-weight: 600;
+}
+
+.applies-text {
+  color: #4A3E39;
+}
+
+.fabric-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.75rem;
+  margin-bottom: 2rem;
+}
+
+.spec-card {
+  background: #FAF7F2;
+  border: 1px solid rgba(174, 138, 84, 0.2);
+  border-radius: 4px;
+  padding: 1.75rem;
+}
+
+.spec-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0.85rem;
+}
+
+.spec-card-head h4 {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: 1.25rem;
+  color: var(--color-deep-wine, #6E1E2A);
+  margin: 0;
+  font-weight: 600;
+}
+
+.spec-icon {
+  color: var(--color-antique-gold, #AE8A54);
+}
+
+.spec-card p {
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: #4A3E39;
+  margin: 0;
+  font-weight: 300;
+}
+
+.fabric-avoid-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #FFF7F5;
+  border: 1px solid #F5C6BC;
+  color: #8C2B1C;
+  padding: 1.15rem 1.4rem;
+  border-radius: 4px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.avoid-icon-wrap {
+  color: #8C2B1C;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION D: CARE BY CRAFTSMANSHIP
+   ────────────────────────────────────────────────────────────────────────── */
+.care-craft-section {
+  padding: 6rem 0;
+  background-color: var(--color-warm-ivory, #FAF5EC);
+}
+
+.craft-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.craft-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(174, 138, 84, 0.25);
+  border-radius: 4px;
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.craft-card:hover {
+  border-color: var(--color-antique-gold, #AE8A54);
+  box-shadow: 0 10px 30px rgba(174, 138, 84, 0.08);
+}
+
+.craft-card-top {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(174, 138, 84, 0.15);
+}
+
+.craft-card-tag {
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-antique-gold, #AE8A54);
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.craft-card-title {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: 1.7rem;
+  color: var(--color-deep-wine, #6E1E2A);
+  margin-bottom: 0.65rem;
+  font-weight: 600;
+}
+
+.craft-card-desc {
+  font-size: 0.9rem;
+  color: #554841;
+  line-height: 1.6;
+  margin: 0;
+  font-weight: 300;
+}
+
+.craft-notes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.craft-notes-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.86rem;
+  color: #3F332E;
+  line-height: 1.55;
+}
+
+.craft-check-icon {
+  color: var(--color-antique-gold, #AE8A54);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.craft-disclaimer-box {
+  background: #FDF9F2;
+  border: 1px dashed var(--color-antique-gold, #AE8A54);
+  padding: 1.25rem 1.75rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+.disclaimer-icon {
+  color: var(--color-antique-gold, #AE8A54);
+  flex-shrink: 0;
+}
+
+.craft-disclaimer-box p {
+  margin: 0;
+  font-size: 0.86rem;
+  color: #4A3E39;
+  line-height: 1.55;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION E: THE FOUR STEPS OF GARMENT CARE
+   ────────────────────────────────────────────────────────────────────────── */
+.care-steps-section {
+  padding: 6rem 0;
+  background-color: #F5EEE2;
+  border-top: 1px solid rgba(174, 138, 84, 0.2);
+  border-bottom: 1px solid rgba(174, 138, 84, 0.2);
+}
+
+.steps-sequence {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.75rem;
+}
+
+.step-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(174, 138, 84, 0.25);
+  border-radius: 4px;
+  padding: 2.25rem 1.75rem;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.step-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(42, 33, 29, 0.08);
+}
+
+.step-pill {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-deep-wine, #6E1E2A);
+  color: #FAF5EC;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--color-antique-gold, #AE8A54);
+}
+
+.step-title {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: 1.45rem;
+  color: var(--color-deep-wine, #6E1E2A);
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.step-desc {
+  font-size: 0.86rem;
+  line-height: 1.65;
+  color: #554841;
+  margin: 0;
+  font-weight: 300;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION F: COMMON CARE MISTAKES (DOs & AVOIDs)
+   ────────────────────────────────────────────────────────────────────────── */
+.care-dos-donts-section {
+  padding: 6rem 0;
+  background-color: var(--color-warm-ivory, #FAF5EC);
+}
+
+.dos-donts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+}
+
+.dos-card,
+.donts-card {
+  background: #FFFFFF;
+  border-radius: 4px;
+  padding: 2.75rem 2.25rem;
+  border: 1px solid rgba(174, 138, 84, 0.25);
+}
+
+.dos-header,
+.donts-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.25rem;
+}
+
+.dos-header {
+  border-bottom: 2px solid #2D5A43;
+}
+
+.dos-header h3 {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: 1.6rem;
+  color: #2D5A43;
+  margin: 0;
+  font-weight: 600;
+}
+
+.dos-icon {
+  color: #2D5A43;
+}
+
+.donts-header {
+  border-bottom: 2px solid #8C2B1C;
+}
+
+.donts-header h3 {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: 1.6rem;
+  color: #8C2B1C;
+  margin: 0;
+  font-weight: 600;
+}
+
+.donts-icon {
+  color: #8C2B1C;
+}
+
+.dos-list,
+.donts-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.dos-list li,
+.donts-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: #3F332E;
+}
+
+.dos-list .bullet-point {
+  color: #2D5A43;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.donts-list .bullet-point {
+  color: #8C2B1C;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION G: FREQUENTLY ASKED QUESTIONS
+   ────────────────────────────────────────────────────────────────────────── */
+.care-faq-section {
+  padding: 6rem 0;
+  background-color: #F8F2E7;
+  border-top: 1px solid rgba(174, 138, 84, 0.2);
+}
+
+.faq-accordion {
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.faq-item {
+  background: #FFFFFF;
+  border: 1px solid rgba(174, 138, 84, 0.25);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: all 0.25s ease;
+}
+
+.faq-item.open {
+  border-color: var(--color-antique-gold, #AE8A54);
+  box-shadow: 0 4px 15px rgba(42, 33, 29, 0.05);
+}
+
+.faq-question-btn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.35rem 1.75rem;
+  text-align: left;
+  background: transparent;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s ease;
+}
+
+.faq-question-btn:hover {
+  background-color: #FAF6EF;
+}
+
+.faq-question-text {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: 1.25rem;
+  color: var(--color-deep-wine, #6E1E2A);
+  font-weight: 600;
+  padding-right: 1rem;
+}
+
+.faq-toggle-icon {
+  color: var(--color-antique-gold, #AE8A54);
+  flex-shrink: 0;
+}
+
+.faq-answer-pane {
+  padding: 0 1.75rem 1.5rem 1.75rem;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: #4A3E39;
+  border-top: 1px solid rgba(174, 138, 84, 0.12);
+  background-color: #FDFBF8;
+}
+
+.faq-answer-pane p {
+  margin: 1.2rem 0 0 0;
+  font-weight: 300;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SECTION H: NEED HELP WITH YOUR PIECE?
+   ────────────────────────────────────────────────────────────────────────── */
+.care-contact-section {
+  padding: 6rem 0 7rem 0;
+  background: linear-gradient(180deg, #F8F2E7 0%, var(--color-warm-ivory, #FAF5EC) 100%);
+  border-top: 1px solid rgba(174, 138, 84, 0.2);
+}
+
+.care-contact-card {
+  max-width: 840px;
+  margin: 0 auto;
+  background: #FFFFFF;
+  border: 1px solid var(--color-antique-gold, #AE8A54);
+  border-radius: 6px;
+  padding: 3.5rem 3rem;
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(110, 30, 42, 0.08);
+}
+
+.contact-decor-icon {
+  color: var(--color-antique-gold, #AE8A54);
+  margin-bottom: 1.25rem;
+  display: inline-block;
+}
+
+.care-contact-title {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  color: var(--color-deep-wine, #6E1E2A);
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.care-contact-description {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #554841;
+  max-width: 600px;
+  margin: 0 auto 2.5rem auto;
+  font-weight: 300;
+}
+
+.care-contact-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.care-whatsapp-btn {
+  background-color: #2D5A43; /* Heritage forest green / emerald */
+  color: #FAF5EC;
+  border: 1px solid #2D5A43;
+  padding: 0.95rem 1.85rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.care-whatsapp-btn:hover {
+  background-color: #1F3F2F;
+  border-color: #1F3F2F;
+  transform: translateY(-2px);
+  color: #FFFFFF;
+}
+
+.care-email-btn {
+  border: 1px solid rgba(42, 33, 29, 0.4);
+  color: var(--color-dark-charcoal, #2A211D);
+  padding: 0.95rem 1.85rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.care-email-btn:hover {
+  border-color: var(--color-antique-gold, #AE8A54);
+  color: var(--color-antique-gold, #AE8A54);
+  background-color: #FFFFFF;
+}
+
+.care-shop-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-deep-wine, #6E1E2A);
+  font-weight: 600;
+  margin-left: 0.5rem;
+  padding: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.care-shop-link:hover {
+  color: var(--color-antique-gold, #AE8A54);
+  transform: translateX(3px);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   RESPONSIVE DESIGN BREAKPOINTS
+   ────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .principles-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .steps-sequence {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 860px) {
+  .care-hero-container {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    text-align: center;
+  }
+
+  .care-hero-content {
+    max-width: 100%;
+  }
+
+  .care-hero-cta {
+    justify-content: center;
+  }
+
+  .care-hero-media {
+    max-width: 380px;
+    margin: 0 auto;
+  }
+
+  .principles-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .fabric-detail-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .fabric-specs-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .craft-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dos-donts-grid {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+
+  .dos-card,
+  .donts-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .care-contact-card {
+    padding: 2.5rem 1.5rem;
+  }
+}
+
+@media (max-width: 580px) {
+  .care-hero {
+    padding: 3.5rem 0 3rem 0;
+  }
+
+  .principles-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .steps-sequence {
+    grid-template-columns: 1fr;
+  }
+
+  .fabric-selector-nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .fabric-tab-btn {
+    text-align: center;
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+  }
+
+  .care-hero-cta {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .care-hero-btn,
+  .care-hero-btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+
+  .care-contact-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .care-whatsapp-btn,
+  .care-email-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .care-shop-link {
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
+}
