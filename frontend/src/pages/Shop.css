@@ -347,6 +347,25 @@
   max-height: calc(100vh - 4rem);
   overflow-y: auto;
   padding-right: 1rem;
+  scrollbar-width: thin;
+  scrollbar-color: #E0D3C0 transparent;
+}
+
+.filters-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.filters-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.filters-sidebar::-webkit-scrollbar-thumb {
+  background: #E0D3C0;
+  border-radius: 4px;
+}
+
+.filters-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-antique-gold);
 }
 
 /* ── Clean Minimal Filter Header ── */
@@ -556,18 +575,24 @@
 }
 
 .custom-checkbox {
-  width: 14px;
-  height: 14px;
-  border: 1px solid #ccc;
+  width: 15px;
+  height: 15px;
+  border: 1.5px solid #CFC2B0;
+  border-radius: 2px;
+  background-color: #FFFFFF;
   display: inline-block;
   position: relative;
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
 
+.filter-checkbox-item:hover .custom-checkbox {
+  border-color: var(--color-antique-gold);
+}
+
 .checkbox-wrap input:checked + .custom-checkbox {
-  background-color: var(--color-dark-charcoal);
-  border-color: var(--color-dark-charcoal);
+  background-color: var(--color-deep-wine);
+  border-color: var(--color-deep-wine);
 }
 
 .checkbox-wrap input:checked + .custom-checkbox::after {
@@ -791,6 +816,32 @@
   max-width: 360px;
   margin: 0 auto 0.5rem;
   line-height: 1.6;
+}
+
+.couture-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #FFFFFF !important;
+  background-color: var(--color-deep-wine);
+  border: 1px solid var(--color-deep-wine);
+  padding: 0.8rem 2rem;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(110, 30, 42, 0.15);
+}
+
+.couture-clear-btn:hover {
+  background-color: #551620;
+  border-color: #551620;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(110, 30, 42, 0.22);
 }
 
 /* ── Mobile filter drawer ── */

@@ -1,98 +1,42 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { Link, useSearchParams, useLocation } from "react-router-dom";
+import { useSearchParams, useLocation } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
-import { useProducts, sortProductsByMode } from "../context/ProductContext";
-import { useCurrency } from "../context/CurrencyContext";
+import { useProducts } from "../context/ProductContext";
+import {
+  SORT_OPTIONS,
+  PRICE_RANGES,
+  SAREE_SUBCATEGORIES,
+  CRAFT_DISPLAY_ORDER,
+  FABRIC_DISPLAY_ORDER,
+  getEffectivePrice,
+  isProductAvailable,
+  matchesCategory,
+  matchesSubcategory,
+  matchesCategoryFilter,
+  matchesCraftFilter,
+  matchesFabricFilter,
+  matchesPriceFilter,
+  matchesAvailabilityFilter,
+  sortProducts,
+} from "../utils/filterUtils";
 import "./Shop.css";
 
-const SORT_OPTIONS = [
-  { value: "recommended", label: "Recommended" },
-  { value: "newest", label: "New Arrivals" },
-  { value: "price-desc", label: "Price: High to Low" },
-  { value: "price-asc", label: "Price: Low to High" },
-  { value: "name-asc", label: "Alphabetical: A → Z" },
-];
-
-const PRICE_RANGES = [
-  { id: "under-5k", min: 0, max: 4999, label: "Under ₹5,000" },
-  { id: "5k-10k", min: 5000, max: 10000, label: "₹5,000 – ₹10,000" },
-  { id: "10k-15k", min: 10000, max: 15000, label: "₹10,000 – ₹15,000" },
-  { id: "above-15k", min: 15001, max: Infinity, label: "₹15,000 & Above" },
-];
-
-const SAREE_SUBCATEGORIES = [
-  { id: "All", label: "All Sarees" },
-  { id: "Chikankari", label: "Chikankari" },
-  { id: "Zardozi", label: "Zardozi" },
-  { id: "One of One", label: "One of One" },
-];
-
-export function matchesCategory(productCategory, selectedCategory) {
-  if (!selectedCategory || selectedCategory === "All") return true;
-  if (!productCategory) return false;
-  const p = productCategory.toLowerCase().trim();
-  const s = selectedCategory.toLowerCase().trim();
-  if (p === s) return true;
-
-  // Normalized comparison (remove trailing 's' and non-alphanumeric chars)
-  const pNorm = p.replace(/s$/, "").replace(/[\s-_+]+/g, "");
-  const sNorm = s.replace(/s$/, "").replace(/[\s-_+]+/g, "");
-  if (pNorm === sNorm) return true;
-
-  // Handle dupatta / duppata / dupattas variants
-  const isPDupatta = pNorm.includes("dupat") || pNorm.includes("duppat");
-  const isSDupatta = sNorm.includes("dupat") || sNorm.includes("duppat");
-  if (isPDupatta && isSDupatta) return true;
-
-  // Handle kurta set / kurta variants
-  const isPKurta = pNorm.includes("kurta");
-  const isSKurta = sNorm.includes("kurta");
-  if (isPKurta && isSKurta) return true;
-
-  // Handle saree / sarees / sari
-  const isPSaree = pNorm.includes("saree") || pNorm.includes("sari");
-  const isSSaree = sNorm.includes("saree") || sNorm.includes("sari");
-  if (isPSaree && isSSaree) return true;
-
-  return p.includes(s) || s.includes(p);
-}
-
-function matchesSubcategory(product, subcategory) {
-  if (!subcategory || subcategory === "All") return true;
-
-  const target = subcategory.toLowerCase().trim();
-  const title = (product.title || "").toLowerCase();
-  const desc = (product.description || "").toLowerCase();
-  const craft = (product.craft || "").toLowerCase();
-  const subcat = (product.subcategory || "").toLowerCase();
-  const combined = `${title} ${desc} ${craft} ${subcat}`;
-
-  if (target === "zardozi") {
-    return (
-      subcat === "zardozi" ||
-      craft.includes("zardozi") ||
-      combined.includes("zardozi")
-    );
-  }
-
-  if (target === "chikankari") {
-    return (
-      subcat === "chikankari" ||
-      craft.includes("chikankari") ||
-      combined.includes("chikankari") ||
-      combined.includes("tepchi") ||
-      combined.includes("mukaish") ||
-      combined.includes("bakhiya") ||
-      craft === "lucknowi chikankari"
-    );
-  }
-
-  if (target === "one of one" || target === "one-of-one") {
-    return Boolean(product.isOneOfOne);
-  }
-
-  return subcat === target || combined.includes(target);
-}
+// Re-export for any consumers or tests
+export {
+  SORT_OPTIONS,
+  PRICE_RANGES,
+  SAREE_SUBCATEGORIES,
+  matchesCategory,
+  matchesSubcategory,
+  matchesCategoryFilter,
+  matchesCraftFilter,
+  matchesFabricFilter,
+  matchesPriceFilter,
+  matchesAvailabilityFilter,
+  getEffectivePrice,
+  isProductAvailable,
+  sortProducts,
+};
 
 /* ── Custom Luxury Sort Dropdown ── */
 function CustomSortDropdown({ value, onChange, options }) {
@@ -189,160 +133,148 @@ function CustomSortDropdown({ value, onChange, options }) {
 
 export default function Shop() {
   const { products, getAllCategories, shopSortSettings } = useProducts();
-  const { formatPrice } = useCurrency();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
+
   const isOneOfOneRoute =
     location.pathname.includes("one-of-one") ||
     (searchParams.get("category") || "").toLowerCase() === "one-of-one";
+  const isArchiveRoute = location.pathname.includes("archive");
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, []);
 
-  const urlSearch = searchParams.get("search") || "";
-  const urlCategory = searchParams.get("category") || "";
-  const urlSubcategory = searchParams.get("subcategory") || searchParams.get("sub") || "";
-  const urlCraft = searchParams.get("craft") || "";
-  const urlFabric = searchParams.get("fabric") || "";
-
   const categories = getAllCategories();
 
-  /* ── Filter state ── */
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [activeSubcategory, setActiveSubcategory] = useState("All");
-  const [activeCraft, setActiveCraft] = useState("All");
-  const [activeFabric, setActiveFabric] = useState("All");
-  const [activePriceRange, setActivePriceRange] = useState(null);
-  const [activeAvailability, setActiveAvailability] = useState("All"); // "All" | "in-stock" | "sold-out"
-  const [sortBy, setSortBy] = useState("recommended");
+  /* ── Filter state with full multi-select support ── */
+  const [selectedCrafts, setSelectedCrafts] = useState(() => {
+    const raw = searchParams.get("craft");
+    return raw ? raw.split(",").map((s) => s.trim()).filter(Boolean) : [];
+  });
+
+  const [selectedFabrics, setSelectedFabrics] = useState(() => {
+    const raw = searchParams.get("fabric");
+    return raw ? raw.split(",").map((s) => s.trim()).filter(Boolean) : [];
+  });
+
+  const [selectedPriceRanges, setSelectedPriceRanges] = useState(() => {
+    const raw = searchParams.get("price");
+    return raw ? raw.split(",").map((s) => s.trim()).filter(Boolean) : [];
+  });
+
+  const [activeAvailability, setActiveAvailability] = useState(() => {
+    return searchParams.get("availability") || (isArchiveRoute ? "sold-out" : "All");
+  });
+
+  const [activeCategory, setActiveCategory] = useState(() => {
+    return searchParams.get("category") || "All";
+  });
+
+  const [activeSubcategory, setActiveSubcategory] = useState(() => {
+    return searchParams.get("subcategory") || searchParams.get("sub") || "All";
+  });
+
+  const [sortBy, setSortBy] = useState(() => {
+    return searchParams.get("sort") || "recommended";
+  });
+
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  // Sync URL params to filter state
+  const urlSearch = searchParams.get("search") || "";
+
+  // Synchronize URL search params with component state on navigation changes
   useEffect(() => {
-    if (urlCategory) {
-      const matched = categories.find((c) => matchesCategory(c, urlCategory));
-      if (matched) {
-        setActiveCategory(matched);
-      } else {
-        setActiveCategory(urlCategory);
-      }
+    const urlCat = searchParams.get("category");
+    if (urlCat) {
+      const matched = categories.find((c) => matchesCategory(c, urlCat));
+      setActiveCategory(matched || urlCat);
     } else {
       setActiveCategory("All");
     }
 
-    if (urlSubcategory) {
+    const urlSub = searchParams.get("subcategory") || searchParams.get("sub");
+    if (urlSub) {
       const matchedSub = SAREE_SUBCATEGORIES.find(
-        (s) => s.id.toLowerCase() === urlSubcategory.toLowerCase()
+        (s) => s.id.toLowerCase() === urlSub.toLowerCase()
       );
-      setActiveSubcategory(matchedSub ? matchedSub.id : urlSubcategory);
+      setActiveSubcategory(matchedSub ? matchedSub.id : urlSub);
     } else {
       setActiveSubcategory("All");
     }
 
-    if (urlCraft) {
-      setActiveCraft(urlCraft);
+    const urlCr = searchParams.get("craft");
+    if (urlCr) {
+      setSelectedCrafts(urlCr.split(",").map((s) => s.trim()).filter(Boolean));
     } else {
-      setActiveCraft("All");
+      setSelectedCrafts([]);
     }
 
-    if (urlFabric) {
-      setActiveFabric(urlFabric);
+    const urlFab = searchParams.get("fabric");
+    if (urlFab) {
+      setSelectedFabrics(urlFab.split(",").map((s) => s.trim()).filter(Boolean));
     } else {
-      setActiveFabric("All");
+      setSelectedFabrics([]);
     }
-  }, [urlCategory, urlSubcategory, urlCraft, urlFabric, categories]);
 
-  /* ── Derived lists of crafts & fabrics ── */
-  const crafts = useMemo(
-    () => ["All", ...new Set(products.map((p) => p.craft).filter(Boolean))],
-    [products]
-  );
-  const fabrics = useMemo(
-    () => ["All", ...new Set(products.map((p) => p.fabric).filter(Boolean))],
-    [products]
-  );
+    const urlPr = searchParams.get("price");
+    if (urlPr) {
+      setSelectedPriceRanges(urlPr.split(",").map((s) => s.trim()).filter(Boolean));
+    } else {
+      setSelectedPriceRanges([]);
+    }
 
-  /* ── Real calculated counts (NO Math.random!) ── */
-  const categoryCounts = useMemo(() => {
-    const counts = {};
-    categories.forEach((cat) => {
-      if (cat === "All") {
-        counts[cat] = products.length;
-      } else {
-        counts[cat] = products.filter((p) => matchesCategory(p.category, cat)).length;
-      }
-    });
-    return counts;
-  }, [products, categories]);
+    const urlAv = searchParams.get("availability");
+    if (urlAv) {
+      setActiveAvailability(urlAv);
+    } else if (isArchiveRoute) {
+      setActiveAvailability("sold-out");
+    } else {
+      setActiveAvailability("All");
+    }
 
-  const craftCounts = useMemo(() => {
-    const counts = {};
+    const urlSort = searchParams.get("sort");
+    if (urlSort) {
+      setSortBy(urlSort);
+    }
+  }, [searchParams, isArchiveRoute, categories]);
+
+  /* ── Dynamic available crafts and fabrics derived from catalogue ── */
+  const availableCrafts = useMemo(() => {
+    const present = new Set();
     products.forEach((p) => {
-      if (p.craft) {
-        counts[p.craft] = (counts[p.craft] || 0) + 1;
-      }
+      if (p.craft && p.craft.trim()) present.add(p.craft.trim());
     });
-    return counts;
+    return Array.from(present).sort((a, b) => {
+      const idxA = CRAFT_DISPLAY_ORDER.indexOf(a);
+      const idxB = CRAFT_DISPLAY_ORDER.indexOf(b);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return a.localeCompare(b);
+    });
   }, [products]);
 
-  const fabricCounts = useMemo(() => {
-    const counts = {};
+  const availableFabrics = useMemo(() => {
+    const present = new Set();
     products.forEach((p) => {
-      if (p.fabric) {
-        counts[p.fabric] = (counts[p.fabric] || 0) + 1;
-      }
+      if (p.fabric && p.fabric.trim()) present.add(p.fabric.trim());
     });
-    return counts;
-  }, [products]);
-
-  const priceRangeCounts = useMemo(() => {
-    const counts = {};
-    PRICE_RANGES.forEach((range) => {
-      counts[range.id] = products.filter((p) => {
-        const price = p.salePrice ?? p.price;
-        return price >= range.min && price <= range.max;
-      }).length;
+    return Array.from(present).sort((a, b) => {
+      const idxA = FABRIC_DISPLAY_ORDER.indexOf(a);
+      const idxB = FABRIC_DISPLAY_ORDER.indexOf(b);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return a.localeCompare(b);
     });
-    return counts;
   }, [products]);
 
-  const isProductAvailable = (p) => {
-    const rawStatus = (p.stockStatus || "").toLowerCase();
-    if (rawStatus === "sold out" || rawStatus === "out of stock") return false;
-    if (p.stock !== undefined && p.stock !== null && Number(p.stock) <= 0 && (!p.productType || p.productType === "simple")) return false;
-    return true;
-  };
-
-  const stockCounts = useMemo(() => {
-    const inStock = products.filter(isProductAvailable).length;
-    const soldOut = products.length - inStock;
-    return { inStock, soldOut };
-  }, [products]);
-
-  const sareeSubcategoryCounts = useMemo(() => {
-    const sarees = products.filter(
-      (p) =>
-        (p.category || "").toLowerCase() === "sarees" ||
-        (p.category || "").toLowerCase().includes("saree")
-    );
-    return {
-      All: sarees.length,
-      Chikankari: sarees.filter((s) => matchesSubcategory(s, "Chikankari")).length,
-      Zardozi: sarees.filter((s) => matchesSubcategory(s, "Zardozi")).length,
-      "One of One": sarees.filter((s) => matchesSubcategory(s, "One of One")).length,
-    };
-  }, [products]);
-
-  const isSareeActive =
-    activeCategory === "Sarees" ||
-    activeCategory.toLowerCase().includes("saree");
-
-  /* ── Filtering + Sorting ── */
-  const filteredProducts = useMemo(() => {
+  /* ── Storefront Authoritative Eligible Collection ── */
+  const baseEligibleProducts = useMemo(() => {
     let list = products.filter((p) => !p.isArchived);
 
-    // Filter by search query
+    // Search query filter
     if (urlSearch.trim()) {
       const q = urlSearch.toLowerCase().trim();
       list = list.filter(
@@ -355,47 +287,170 @@ export default function Shop() {
       );
     }
 
-    // Dedicated One-of-One Collection Filter
+    // Dedicated One-of-One Collection Route
     if (isOneOfOneRoute) {
       list = list.filter((p) => Boolean(p.isOneOfOne));
     }
 
-    // Filter by Category
-    if (activeCategory !== "All") {
-      list = list.filter((p) => matchesCategory(p.category, activeCategory));
-    }
-
-    // Filter by Sub-Category
-    if (activeSubcategory !== "All") {
-      list = list.filter((p) => matchesSubcategory(p, activeSubcategory));
-    }
-
-    // Filter by Craft
-    if (activeCraft !== "All") {
-      list = list.filter((p) => p.craft === activeCraft);
-    }
-
-    // Filter by Fabric
-    if (activeFabric !== "All") {
-      list = list.filter((p) => p.fabric === activeFabric);
-    }
-
-    // Filter by Price Range
-    if (activePriceRange) {
-      list = list.filter((p) => {
-        const price = p.salePrice ?? p.price;
-        return price >= activePriceRange.min && price <= activePriceRange.max;
-      });
-    }
-
-    // Filter by Availability
-    if (activeAvailability === "in-stock") {
-      list = list.filter(isProductAvailable);
-    } else if (activeAvailability === "sold-out") {
+    // Archive Collection Route
+    if (isArchiveRoute) {
       list = list.filter((p) => !isProductAvailable(p));
     }
 
-    // Canonical deduplication guard: ensure unique products
+    return list;
+  }, [products, urlSearch, isOneOfOneRoute, isArchiveRoute]);
+
+  /* ── Dynamic Facet Counts (Context-aware excluding facet's own selection) ── */
+  const categoryCounts = useMemo(() => {
+    const subset = baseEligibleProducts.filter(
+      (p) =>
+        matchesCraftFilter(p, selectedCrafts) &&
+        matchesFabricFilter(p, selectedFabrics) &&
+        matchesPriceFilter(p, selectedPriceRanges) &&
+        matchesAvailabilityFilter(p, activeAvailability)
+    );
+    const counts = { All: subset.length };
+    categories.forEach((cat) => {
+      if (cat === "All") return;
+      counts[cat] = subset.filter((p) => matchesCategory(p.category, cat)).length;
+    });
+    return counts;
+  }, [
+    baseEligibleProducts,
+    selectedCrafts,
+    selectedFabrics,
+    selectedPriceRanges,
+    activeAvailability,
+    categories,
+  ]);
+
+  const craftCounts = useMemo(() => {
+    const subset = baseEligibleProducts.filter(
+      (p) =>
+        matchesCategoryFilter(p, activeCategory, activeSubcategory) &&
+        matchesFabricFilter(p, selectedFabrics) &&
+        matchesPriceFilter(p, selectedPriceRanges) &&
+        matchesAvailabilityFilter(p, activeAvailability)
+    );
+    const counts = {};
+    availableCrafts.forEach((craft) => {
+      counts[craft] = subset.filter((p) => matchesCraftFilter(p, [craft])).length;
+    });
+    return counts;
+  }, [
+    baseEligibleProducts,
+    activeCategory,
+    activeSubcategory,
+    selectedFabrics,
+    selectedPriceRanges,
+    activeAvailability,
+    availableCrafts,
+  ]);
+
+  const fabricCounts = useMemo(() => {
+    const subset = baseEligibleProducts.filter(
+      (p) =>
+        matchesCategoryFilter(p, activeCategory, activeSubcategory) &&
+        matchesCraftFilter(p, selectedCrafts) &&
+        matchesPriceFilter(p, selectedPriceRanges) &&
+        matchesAvailabilityFilter(p, activeAvailability)
+    );
+    const counts = {};
+    availableFabrics.forEach((fabric) => {
+      counts[fabric] = subset.filter((p) => matchesFabricFilter(p, [fabric])).length;
+    });
+    return counts;
+  }, [
+    baseEligibleProducts,
+    activeCategory,
+    activeSubcategory,
+    selectedCrafts,
+    selectedPriceRanges,
+    activeAvailability,
+    availableFabrics,
+  ]);
+
+  const priceRangeCounts = useMemo(() => {
+    const subset = baseEligibleProducts.filter(
+      (p) =>
+        matchesCategoryFilter(p, activeCategory, activeSubcategory) &&
+        matchesCraftFilter(p, selectedCrafts) &&
+        matchesFabricFilter(p, selectedFabrics) &&
+        matchesAvailabilityFilter(p, activeAvailability)
+    );
+    const counts = {};
+    PRICE_RANGES.forEach((range) => {
+      counts[range.id] = subset.filter((p) => matchesPriceFilter(p, [range.id])).length;
+    });
+    return counts;
+  }, [
+    baseEligibleProducts,
+    activeCategory,
+    activeSubcategory,
+    selectedCrafts,
+    selectedFabrics,
+    activeAvailability,
+  ]);
+
+  const stockCounts = useMemo(() => {
+    const subset = baseEligibleProducts.filter(
+      (p) =>
+        matchesCategoryFilter(p, activeCategory, activeSubcategory) &&
+        matchesCraftFilter(p, selectedCrafts) &&
+        matchesFabricFilter(p, selectedFabrics) &&
+        matchesPriceFilter(p, selectedPriceRanges)
+    );
+    const inStock = subset.filter(isProductAvailable).length;
+    const soldOut = subset.length - inStock;
+    return { inStock, soldOut, total: subset.length };
+  }, [
+    baseEligibleProducts,
+    activeCategory,
+    activeSubcategory,
+    selectedCrafts,
+    selectedFabrics,
+    selectedPriceRanges,
+  ]);
+
+  const sareeSubcategoryCounts = useMemo(() => {
+    const sarees = baseEligibleProducts.filter(
+      (p) =>
+        matchesCategory(p.category, "Sarees") &&
+        matchesCraftFilter(p, selectedCrafts) &&
+        matchesFabricFilter(p, selectedFabrics) &&
+        matchesPriceFilter(p, selectedPriceRanges) &&
+        matchesAvailabilityFilter(p, activeAvailability)
+    );
+    return {
+      All: sarees.length,
+      Chikankari: sarees.filter((s) => matchesSubcategory(s, "Chikankari")).length,
+      Zardozi: sarees.filter((s) => matchesSubcategory(s, "Zardozi")).length,
+      "One of One": sarees.filter((s) => matchesSubcategory(s, "One of One")).length,
+    };
+  }, [
+    baseEligibleProducts,
+    selectedCrafts,
+    selectedFabrics,
+    selectedPriceRanges,
+    activeAvailability,
+  ]);
+
+  const isSareeActive =
+    activeCategory === "Sarees" ||
+    activeCategory.toLowerCase().includes("saree");
+
+  /* ── Authoritative Unified Filtering Pipeline ── */
+  const filteredProducts = useMemo(() => {
+    let list = baseEligibleProducts.filter(
+      (p) =>
+        matchesCategoryFilter(p, activeCategory, activeSubcategory) &&
+        matchesCraftFilter(p, selectedCrafts) &&
+        matchesFabricFilter(p, selectedFabrics) &&
+        matchesPriceFilter(p, selectedPriceRanges) &&
+        matchesAvailabilityFilter(p, activeAvailability)
+    );
+
+    // Canonical deduplication guard
     const seenIds = new Set();
     list = list.filter((p) => {
       if (!p.id || seenIds.has(p.id)) return false;
@@ -403,54 +458,15 @@ export default function Shop() {
       return true;
     });
 
-    // Sorting
-    switch (sortBy) {
-      case "price-asc":
-        list.sort(
-          (a, b) => (a.salePrice ?? a.price) - (b.salePrice ?? b.price)
-        );
-        break;
-      case "price-desc":
-        list.sort(
-          (a, b) => (b.salePrice ?? b.price) - (a.salePrice ?? a.price)
-        );
-        break;
-      case "name-asc":
-        list.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
-        break;
-      case "newest":
-        list.sort((a, b) => {
-          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-          if (timeA !== timeB) return timeB - timeA;
-          return String(b.id || "").localeCompare(String(a.id || ""));
-        });
-        break;
-      case "recommended":
-      default:
-        list = sortProductsByMode(
-          list,
-          shopSortSettings?.sortMode || "category_first_manual",
-          shopSortSettings?.categoryOrder || [
-            "Sarees",
-            "Dupattas",
-            "Kurta Sets",
-            "Blouses",
-            "Others",
-          ]
-        );
-        break;
-    }
-
-    return list;
+    // Sorting operates strictly on the filtered set
+    return sortProducts(list, sortBy, shopSortSettings);
   }, [
-    products,
-    urlSearch,
+    baseEligibleProducts,
     activeCategory,
     activeSubcategory,
-    activeCraft,
-    activeFabric,
-    activePriceRange,
+    selectedCrafts,
+    selectedFabrics,
+    selectedPriceRanges,
     activeAvailability,
     sortBy,
     shopSortSettings,
@@ -461,68 +477,127 @@ export default function Shop() {
     if (urlSearch) count++;
     if (activeCategory !== "All") count++;
     if (activeSubcategory !== "All") count++;
-    if (activeCraft !== "All") count++;
-    if (activeFabric !== "All") count++;
-    if (activePriceRange) count++;
+    count += selectedCrafts.length;
+    count += selectedFabrics.length;
+    count += selectedPriceRanges.length;
     if (activeAvailability !== "All") count++;
     return count;
   }, [
     urlSearch,
     activeCategory,
     activeSubcategory,
-    activeCraft,
-    activeFabric,
-    activePriceRange,
+    selectedCrafts,
+    selectedFabrics,
+    selectedPriceRanges,
     activeAvailability,
   ]);
+
+  /* ── URL and State Helpers ── */
+  const updateParams = useCallback(
+    (updates) => {
+      setSearchParams(
+        (prevParams) => {
+          const next = new URLSearchParams(prevParams);
+          Object.entries(updates).forEach(([key, val]) => {
+            if (
+              val === null ||
+              val === undefined ||
+              val === "" ||
+              (Array.isArray(val) && val.length === 0)
+            ) {
+              next.delete(key);
+            } else if (Array.isArray(val)) {
+              next.set(key, val.join(","));
+            } else {
+              next.set(key, String(val));
+            }
+          });
+          return next;
+        },
+        { replace: true }
+      );
+    },
+    [setSearchParams]
+  );
 
   const handleCategoryChange = (cat) => {
     setActiveCategory(cat);
     setActiveSubcategory("All");
-    const newParams = new URLSearchParams(searchParams);
-    if (cat === "All") {
-      newParams.delete("category");
-    } else {
-      newParams.set("category", cat);
-    }
-    newParams.delete("subcategory");
-    newParams.delete("sub");
-    setSearchParams(newParams);
+    updateParams({
+      category: cat !== "All" ? cat : null,
+      subcategory: null,
+      sub: null,
+    });
   };
 
   const handleSubcategoryChange = (sub) => {
     setActiveSubcategory(sub);
-    const newParams = new URLSearchParams(searchParams);
-    if (sub === "All") {
-      newParams.delete("subcategory");
-      newParams.delete("sub");
-    } else {
-      newParams.set("subcategory", sub);
-    }
-    setSearchParams(newParams);
+    updateParams({
+      subcategory: sub !== "All" ? sub : null,
+      sub: null,
+    });
+  };
+
+  const toggleCraft = (craft) => {
+    const next = selectedCrafts.includes(craft)
+      ? selectedCrafts.filter((c) => c !== craft)
+      : [...selectedCrafts, craft];
+    setSelectedCrafts(next);
+    updateParams({ craft: next });
+  };
+
+  const toggleFabric = (fabric) => {
+    const next = selectedFabrics.includes(fabric)
+      ? selectedFabrics.filter((f) => f !== fabric)
+      : [...selectedFabrics, fabric];
+    setSelectedFabrics(next);
+    updateParams({ fabric: next });
+  };
+
+  const togglePriceRange = (rangeId) => {
+    const next = selectedPriceRanges.includes(rangeId)
+      ? selectedPriceRanges.filter((id) => id !== rangeId)
+      : [...selectedPriceRanges, rangeId];
+    setSelectedPriceRanges(next);
+    updateParams({ price: next });
+  };
+
+  const handleAvailabilityChange = (val) => {
+    setActiveAvailability(val);
+    updateParams({ availability: val !== "All" ? val : null });
+  };
+
+  const handleSortChange = (newSort) => {
+    setSortBy(newSort);
+    updateParams({ sort: newSort !== "recommended" ? newSort : null });
   };
 
   const clearAllFilters = useCallback(() => {
     setActiveCategory("All");
     setActiveSubcategory("All");
-    setActiveCraft("All");
-    setActiveFabric("All");
-    setActivePriceRange(null);
-    setActiveAvailability("All");
-    setSearchParams({});
-  }, [setSearchParams]);
+    setSelectedCrafts([]);
+    setSelectedFabrics([]);
+    setSelectedPriceRanges([]);
+    setActiveAvailability(isArchiveRoute ? "sold-out" : "All");
+    setSortBy("recommended");
+    setSearchParams({}, { replace: true });
+  }, [isArchiveRoute, setSearchParams]);
 
-  /* ── Couture Filter Sidebar ── */
+  /* ── Filter Sidebar Render Function ── */
   const renderFilters = () => (
     <>
-      {/* ── Clean Minimal Filter Header ── */}
+      {/* ── Filter Header ── */}
       <div className="filter-sidebar-top">
         <div className="filter-sidebar-title-wrap">
           <span className="filter-sidebar-title">FILTERS</span>
           <span className="filter-sidebar-gem">✦</span>
         </div>
         {activeFilterCount > 0 && (
-          <button className="filter-sidebar-reset" onClick={clearAllFilters} title="Reset all active filters">
+          <button
+            className="filter-sidebar-reset"
+            onClick={clearAllFilters}
+            title="Reset all active filters"
+          >
             RESET ALL ({activeFilterCount})
           </button>
         )}
@@ -536,6 +611,7 @@ export default function Shop() {
         </div>
         <div className="filter-chips">
           <button
+            type="button"
             className={`filter-chip ${activeCategory === "All" ? "active" : ""}`}
             onClick={() => handleCategoryChange("All")}
           >
@@ -547,6 +623,7 @@ export default function Shop() {
             return (
               <button
                 key={cat}
+                type="button"
                 className={`filter-chip ${activeCategory === cat ? "active" : ""}`}
                 onClick={() => handleCategoryChange(cat)}
               >
@@ -556,7 +633,8 @@ export default function Shop() {
             );
           })}
         </div>
-        {/* Nested Saree Edit: Appears ONLY when Saree is selected */}
+
+        {/* Nested Saree Edit: Quick filters when Saree is selected */}
         {isSareeActive && (
           <div className="category-sub-nested">
             <span className="nested-sub-label">Saree Edit:</span>
@@ -581,26 +659,23 @@ export default function Shop() {
         )}
       </div>
 
-      {/* ── 2. Artisanal Stitches (Craft) ── */}
+      {/* ── 2. Artisanal Craft (Multi-select OR logic) ── */}
       <div className="filter-group">
         <div className="filter-group-header">
           <h4>ARTISANAL CRAFT</h4>
           <span>—</span>
         </div>
         <div className="filter-checkbox-list">
-          {crafts.map((craft) => {
-            if (craft === "All") return null;
+          {availableCrafts.map((craft) => {
             const count = craftCounts[craft] || 0;
-            const isChecked = activeCraft === craft;
+            const isChecked = selectedCrafts.includes(craft);
             return (
               <label key={craft} className="filter-checkbox-item">
                 <div className="checkbox-wrap">
                   <input
                     type="checkbox"
                     checked={isChecked}
-                    onChange={() =>
-                      setActiveCraft(isChecked ? "All" : craft)
-                    }
+                    onChange={() => toggleCraft(craft)}
                   />
                   <span className="custom-checkbox" />
                   <span className="checkbox-label">{craft}</span>
@@ -612,26 +687,23 @@ export default function Shop() {
         </div>
       </div>
 
-      {/* ── 3. Luxury Fabric (Fabric Foundation) ── */}
+      {/* ── 3. Luxury Fabric (Multi-select OR logic) ── */}
       <div className="filter-group">
         <div className="filter-group-header">
           <h4>LUXURY FABRIC</h4>
           <span>—</span>
         </div>
         <div className="filter-checkbox-list">
-          {fabrics.map((fabric) => {
-            if (fabric === "All") return null;
+          {availableFabrics.map((fabric) => {
             const count = fabricCounts[fabric] || 0;
-            const isChecked = activeFabric === fabric;
+            const isChecked = selectedFabrics.includes(fabric);
             return (
               <label key={fabric} className="filter-checkbox-item">
                 <div className="checkbox-wrap">
                   <input
                     type="checkbox"
                     checked={isChecked}
-                    onChange={() =>
-                      setActiveFabric(isChecked ? "All" : fabric)
-                    }
+                    onChange={() => toggleFabric(fabric)}
                   />
                   <span className="custom-checkbox" />
                   <span className="checkbox-label">{fabric}</span>
@@ -643,7 +715,7 @@ export default function Shop() {
         </div>
       </div>
 
-      {/* ── 4. Investment / Price Range ── */}
+      {/* ── 4. Price Range (Multi-select non-overlapping tiers) ── */}
       <div className="filter-group">
         <div className="filter-group-header">
           <h4>PRICE RANGE</h4>
@@ -652,16 +724,14 @@ export default function Shop() {
         <div className="filter-checkbox-list">
           {PRICE_RANGES.map((range) => {
             const count = priceRangeCounts[range.id] || 0;
-            const isSelected = activePriceRange?.id === range.id;
+            const isChecked = selectedPriceRanges.includes(range.id);
             return (
               <label key={range.id} className="filter-checkbox-item">
                 <div className="checkbox-wrap">
                   <input
                     type="checkbox"
-                    checked={isSelected}
-                    onChange={() =>
-                      setActivePriceRange(isSelected ? null : range)
-                    }
+                    checked={isChecked}
+                    onChange={() => togglePriceRange(range.id)}
                   />
                   <span className="custom-checkbox" />
                   <span className="checkbox-label">{range.label}</span>
@@ -686,12 +756,12 @@ export default function Shop() {
                 type="radio"
                 name="availability"
                 checked={activeAvailability === "All"}
-                onChange={() => setActiveAvailability("All")}
+                onChange={() => handleAvailabilityChange("All")}
               />
               <span className="custom-radio" />
               <span className="checkbox-label">All Creations</span>
             </div>
-            <span className="checkbox-count">({products.length})</span>
+            <span className="checkbox-count">({stockCounts.total})</span>
           </label>
           <label className="filter-checkbox-item">
             <div className="checkbox-wrap">
@@ -700,7 +770,7 @@ export default function Shop() {
                 name="availability"
                 checked={activeAvailability === "in-stock"}
                 onChange={() =>
-                  setActiveAvailability(
+                  handleAvailabilityChange(
                     activeAvailability === "in-stock" ? "All" : "in-stock"
                   )
                 }
@@ -717,7 +787,7 @@ export default function Shop() {
                 name="availability"
                 checked={activeAvailability === "sold-out"}
                 onChange={() =>
-                  setActiveAvailability(
+                  handleAvailabilityChange(
                     activeAvailability === "sold-out" ? "All" : "sold-out"
                   )
                 }
@@ -734,7 +804,7 @@ export default function Shop() {
 
   return (
     <div className="shop-page">
-      {/* ── Active Filters Top Bar ── */}
+      {/* ── Active Filters Top Bar with Individual Dismiss Tags ── */}
       <div className="shop-top-bar container">
         <div className="active-filters">
           <span className="active-label">ACTIVE:</span>
@@ -763,12 +833,8 @@ export default function Shop() {
           {urlSearch && (
             <span
               className="active-tag"
-              onClick={() => {
-                const newParams = new URLSearchParams(searchParams);
-                newParams.delete("search");
-                setSearchParams(newParams);
-              }}
-              title="Remove search filter"
+              onClick={() => updateParams({ search: null })}
+              title="Remove search query"
             >
               SEARCH: &quot;{urlSearch.toUpperCase()}&quot; ✕
             </span>
@@ -794,50 +860,46 @@ export default function Shop() {
             </span>
           )}
 
-          {activeCraft !== "All" && (
+          {selectedCrafts.map((craft) => (
             <span
+              key={craft}
               className="active-tag"
-              onClick={() => {
-                setActiveCraft("All");
-                const newParams = new URLSearchParams(searchParams);
-                newParams.delete("craft");
-                setSearchParams(newParams);
-              }}
-              title="Remove craft filter"
+              onClick={() => toggleCraft(craft)}
+              title={`Remove craft: ${craft}`}
             >
-              CRAFT: {activeCraft.toUpperCase()} ✕
+              CRAFT: {craft.toUpperCase()} ✕
             </span>
-          )}
+          ))}
 
-          {activeFabric !== "All" && (
+          {selectedFabrics.map((fabric) => (
             <span
+              key={fabric}
               className="active-tag"
-              onClick={() => {
-                setActiveFabric("All");
-                const newParams = new URLSearchParams(searchParams);
-                newParams.delete("fabric");
-                setSearchParams(newParams);
-              }}
-              title="Remove fabric filter"
+              onClick={() => toggleFabric(fabric)}
+              title={`Remove fabric: ${fabric}`}
             >
-              FABRIC: {activeFabric.toUpperCase()} ✕
+              FABRIC: {fabric.toUpperCase()} ✕
             </span>
-          )}
+          ))}
 
-          {activePriceRange && (
-            <span
-              className="active-tag"
-              onClick={() => setActivePriceRange(null)}
-              title="Remove price range filter"
-            >
-              PRICE: {activePriceRange.label.toUpperCase()} ✕
-            </span>
-          )}
+          {selectedPriceRanges.map((rangeId) => {
+            const r = PRICE_RANGES.find((x) => x.id === rangeId);
+            return (
+              <span
+                key={rangeId}
+                className="active-tag"
+                onClick={() => togglePriceRange(rangeId)}
+                title={`Remove price filter: ${r?.label}`}
+              >
+                PRICE: {r ? r.label.toUpperCase() : rangeId.toUpperCase()} ✕
+              </span>
+            );
+          })}
 
           {activeAvailability !== "All" && (
             <span
               className="active-tag"
-              onClick={() => setActiveAvailability("All")}
+              onClick={() => handleAvailabilityChange("All")}
               title="Remove availability filter"
             >
               {activeAvailability === "in-stock"
@@ -849,7 +911,7 @@ export default function Shop() {
 
           {activeFilterCount > 0 && (
             <button className="reset-all-btn" onClick={clearAllFilters}>
-              RESET ALL ({activeFilterCount})
+              CLEAR ALL
             </button>
           )}
         </div>
@@ -862,7 +924,7 @@ export default function Shop() {
 
           <CustomSortDropdown
             value={sortBy}
-            onChange={setSortBy}
+            onChange={handleSortChange}
             options={SORT_OPTIONS}
           />
         </div>
@@ -945,7 +1007,7 @@ export default function Shop() {
               <div className="mobile-sort-wrap">
                 <CustomSortDropdown
                   value={sortBy}
-                  onChange={setSortBy}
+                  onChange={handleSortChange}
                   options={SORT_OPTIONS}
                 />
               </div>
@@ -987,8 +1049,8 @@ export default function Shop() {
               <div className="empty-state">
                 <div className="empty-icon-wrap">
                   <svg
-                    width="32"
-                    height="32"
+                    width="36"
+                    height="36"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -998,10 +1060,9 @@ export default function Shop() {
                     <line x1="21" y1="21" x2="16.65" y2="16.65" />
                   </svg>
                 </div>
-                <h3>No pieces found matching your criteria</h3>
+                <h3>No creations found</h3>
                 <p>
-                  Try clearing some filters or browse our complete collection of
-                  heirloom sarees and dupattas.
+                  Try adjusting your filters to discover more of the Safed Rang collection.
                 </p>
                 <button
                   className="couture-clear-btn"
@@ -1012,7 +1073,7 @@ export default function Shop() {
                   }}
                   onClick={clearAllFilters}
                 >
-                  CLEAR ALL FILTERS
+                  CLEAR FILTERS
                 </button>
               </div>
             )}
