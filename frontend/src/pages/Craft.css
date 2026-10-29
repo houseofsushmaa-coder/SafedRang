@@ -1,167 +1,704 @@
-/* Craft Page Styling */
+/* ==========================================================================
+   SAFED RANG — THE CRAFT (THE ART OF BECOMING)
+   Luxury Editorial Craft Page Styling
+   Brand Colors:
+   - Royal Wine:     #6E1E2A
+   - Antique Gold:   #AE8A54
+   - Warm Ivory:     #FAF5EC
+   - Deep Ivory:     #F5EEE2
+   - Soft Blush:     #E8DFD0
+   - Dark Charcoal:  #2A211D
+   - Warm Taupe:     #8B7863
+   ========================================================================== */
 
 .craft-page {
-  background-color: var(--color-warm-ivory);
+  background-color: var(--color-warm-ivory, #FAF5EC);
+  color: var(--color-dark-charcoal, #2A211D);
+  font-family: var(--font-body, "Manrope", sans-serif);
+  line-height: 1.7;
+  overflow-x: hidden;
 }
 
-/* 1. Hero */
+/* ──────────────────────────────────────────────────────────────────────────
+   1. HERO SECTION: THE ART OF BECOMING
+   ────────────────────────────────────────────────────────────────────────── */
 .craft-hero {
-  padding: 8rem 2rem;
-  background-color: #6e1e2a; /* Deep maroon/wine to match reference */
+  padding: 6.5rem 2rem 5rem 2rem;
+  background: linear-gradient(180deg, #621924 0%, #6E1E2A 85%, #591620 100%);
+  color: #FAF5EC;
+  position: relative;
   text-align: center;
-  color: var(--color-white);
+  border-bottom: 1px solid rgba(174, 138, 84, 0.35);
 }
 
-.craft-hero .section-title {
-  color: var(--color-white);
-  font-family:
-    "Times New Roman", Times, serif; /* To match user reference styling */
-  letter-spacing: 0.1em;
-  margin-bottom: 1rem;
-}
-
-.craft-hero .hero-subtitle {
-  font-family: var(--font-body);
-  color: rgba(255, 255, 255, 0.8);
-  letter-spacing: 0.15em;
-  text-align: center;
-  width: 100%;
-  margin: 0 auto;
-}
-
-/* 2. Intro */
-.craft-intro {
-  padding: 6rem 2rem;
-  text-align: center;
-}
-
-.intro-text {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.intro-text .overline {
-  font-family: var(--font-body);
-  font-size: 0.8rem;
-  letter-spacing: 0.2em;
-  color: var(--color-antique-gold);
-  display: block;
-  margin-bottom: 1.5rem;
-}
-
-.intro-text h2 {
-  font-family: "Times New Roman", Times, serif;
-  font-size: 2.4rem;
-  margin-bottom: 2rem;
-  color: #6e1e2a;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-}
-
-.intro-text p {
-  font-size: 1.05rem;
-  color: #4a4a4a;
-  line-height: 1.8;
-  margin-bottom: 1.5rem;
-  margin-left: auto;
-  margin-right: auto;
-  max-width: 650px;
-}
-
-/* 3. The Process */
-.craft-process {
-  padding: 4rem 2rem 8rem 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 8rem;
-}
-
-.process-step {
+.craft-hero-ornament {
   display: flex;
   align-items: center;
-  gap: 5rem;
-}
-
-.step-image {
-  flex: 1;
-}
-
-.step-image img {
-  width: 100%;
-  aspect-ratio: 4/5;
-  object-fit: cover;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-}
-
-.step-content {
-  flex: 1;
-  position: relative;
-}
-
-.step-number {
-  font-family: "Times New Roman", Times, serif;
-  font-size: 6rem;
-  color: rgba(174, 138, 84, 0.15); /* Faint antique gold */
-  position: absolute;
-  top: -4rem;
-  left: -2rem;
-  z-index: 0;
-  line-height: 1;
-}
-
-.step-content h3 {
-  position: relative;
-  z-index: 1;
-  font-size: 1.8rem;
-  margin-bottom: 1.5rem;
-  color: var(--color-dark-charcoal);
-}
-
-.step-content p {
-  position: relative;
-  z-index: 1;
-  font-size: 1rem;
-  color: var(--color-warm-taupe);
-  line-height: 1.8;
+  justify-content: center;
+  gap: 16px;
   margin-bottom: 1.5rem;
 }
 
-/* 4. Conclusion */
-.craft-conclusion {
-  padding: 8rem 2rem;
-  background-color: var(--color-dark-charcoal);
-  color: var(--color-white);
+.craft-ornament-line {
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(174, 138, 84, 0.6), transparent);
 }
 
-.craft-conclusion h2 {
-  color: var(--color-antique-gold);
+.craft-ornament-diamond {
+  color: var(--color-antique-gold, #AE8A54);
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.craft-eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  color: var(--color-antique-gold, #AE8A54);
+  text-transform: uppercase;
+  display: inline-block;
   margin-bottom: 1rem;
 }
 
-.craft-conclusion p {
-  color: var(--color-white);
-  font-size: 1.1rem;
-  margin: 0 auto;
+.craft-main-title {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: clamp(2.5rem, 5.5vw, 4.4rem);
+  font-weight: 400;
+  color: #FFFFFF;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
 }
 
-/* Responsive */
-@media (max-width: 900px) {
-  .craft-process {
-    gap: 5rem;
+.craft-hero-tagline {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: clamp(1.25rem, 2.5vw, 1.8rem);
+  font-style: italic;
+  font-weight: 400;
+  color: #EEDBBD;
+  letter-spacing: 0.02em;
+  margin-bottom: 2.5rem;
+}
+
+.craft-hero-narrative {
+  max-width: 760px;
+  margin: 0 auto 3rem auto;
+  font-size: 1.05rem;
+  color: rgba(250, 245, 236, 0.9);
+  line-height: 1.85;
+  font-weight: 300;
+}
+
+.craft-hero-narrative p {
+  margin-bottom: 1.25rem;
+}
+
+.craft-hero-lead {
+  font-size: 1.12rem;
+  color: #FFFFFF;
+  font-style: italic;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(174, 138, 84, 0.25);
+  display: inline-block;
+}
+
+.craft-hero-action {
+  display: flex;
+  justify-content: center;
+}
+
+.craft-scroll-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-antique-gold, #AE8A54);
+  font-size: 0.76rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 500;
+  padding: 0.6rem 1.4rem;
+  border: 1px solid rgba(174, 138, 84, 0.35);
+  border-radius: 30px;
+  background: rgba(42, 33, 29, 0.3);
+  transition: all 0.3s ease;
+}
+
+.craft-scroll-indicator:hover {
+  background: rgba(174, 138, 84, 0.2);
+  color: #FFFFFF;
+  border-color: var(--color-antique-gold, #AE8A54);
+  transform: translateY(2px);
+}
+
+.scroll-arrow {
+  animation: bounceSlow 2s infinite ease-in-out;
+}
+
+@keyframes bounceSlow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   2. STAGE PROGRESS QUICK BAR
+   ────────────────────────────────────────────────────────────────────────── */
+.craft-stage-nav {
+  background: #FAF7F2;
+  border-bottom: 1px solid rgba(174, 138, 84, 0.25);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: blur(10px);
+}
+
+.craft-stage-nav-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+}
+
+.craft-stage-nav-container::-webkit-scrollbar {
+  display: none;
+}
+
+.craft-nav-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-dark-charcoal, #2A211D);
+  transition: all 0.2s ease;
+  padding: 0.3rem 0.5rem;
+}
+
+.craft-nav-item .nav-num {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-antique-gold, #AE8A54);
+}
+
+.craft-nav-item .nav-title {
+  font-weight: 500;
+}
+
+.craft-nav-item:hover {
+  color: var(--color-deep-wine, #6E1E2A);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   3. THE SIX STAGES OF CREATION (ALTERNATING EDITORIAL ROWS)
+   ────────────────────────────────────────────────────────────────────────── */
+.craft-stages-container {
+  padding: 4rem 0 6rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6rem;
+}
+
+.craft-stage-row {
+  position: relative;
+  padding: 3rem 0;
+}
+
+.craft-stage-inner {
+  display: grid;
+  grid-template-columns: 1fr 1.08fr;
+  gap: 5rem;
+  align-items: center;
+}
+
+.craft-stage-row.reverse .craft-stage-inner {
+  grid-template-columns: 1.08fr 1fr;
+}
+
+.craft-stage-row.reverse .craft-stage-media {
+  order: 2;
+}
+
+.craft-stage-row.reverse .craft-stage-content {
+  order: 1;
+}
+
+/* Stage Media Frame */
+.craft-stage-media {
+  position: relative;
+}
+
+.craft-image-frame {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 20px 45px rgba(42, 33, 29, 0.1);
+  border: 1px solid rgba(174, 138, 84, 0.3);
+  background: #FFFFFF;
+}
+
+.craft-stage-img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s ease;
+}
+
+.craft-image-frame:hover .craft-stage-img {
+  transform: scale(1.03);
+}
+
+.craft-image-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(42, 33, 29, 0.88) 100%);
+  color: #FAF5EC;
+  padding: 2rem 1.5rem 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.craft-image-caption span {
+  color: var(--color-antique-gold, #AE8A54);
+}
+
+.craft-image-caption strong {
+  color: #FFFFFF;
+  font-weight: 500;
+}
+
+/* Stage Content */
+.craft-stage-content {
+  position: relative;
+}
+
+.stage-watermark-num {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: clamp(5.5rem, 11vw, 8.5rem);
+  font-weight: 700;
+  color: rgba(174, 138, 84, 0.14);
+  line-height: 1;
+  position: absolute;
+  top: -3.5rem;
+  left: -1rem;
+  z-index: 0;
+  user-select: none;
+  pointer-events: none;
+}
+
+.stage-header-group {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 1.75rem;
+}
+
+.stage-kicker {
+  font-size: 0.75rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-antique-gold, #AE8A54);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.stage-title {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: clamp(2rem, 3.2vw, 2.6rem);
+  color: var(--color-deep-wine, #6E1E2A);
+  letter-spacing: 0.04em;
+  margin-bottom: 0.4rem;
+  line-height: 1.15;
+}
+
+.stage-subtitle {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: 1.25rem;
+  font-style: italic;
+  color: var(--color-dark-charcoal, #2A211D);
+  font-weight: 400;
+  margin: 0;
+}
+
+.stage-paragraphs {
+  position: relative;
+  z-index: 1;
+  font-size: 0.96rem;
+  color: #4A3E39;
+  line-height: 1.85;
+  margin-bottom: 2rem;
+  font-weight: 300;
+}
+
+.stage-paragraphs p {
+  margin-bottom: 1.15rem;
+}
+
+/* Stage Callout Card */
+.stage-callout-card {
+  position: relative;
+  z-index: 1;
+  background: #FFFFFF;
+  border-left: 3px solid var(--color-antique-gold, #AE8A54);
+  border-top: 1px solid rgba(174, 138, 84, 0.2);
+  border-right: 1px solid rgba(174, 138, 84, 0.2);
+  border-bottom: 1px solid rgba(174, 138, 84, 0.2);
+  padding: 1.25rem 1.6rem;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 15px rgba(42, 33, 29, 0.03);
+}
+
+.callout-sparkle {
+  color: var(--color-antique-gold, #AE8A54);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.stage-callout-text {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: 1.15rem;
+  font-style: italic;
+  font-weight: 600;
+  color: var(--color-deep-wine, #6E1E2A);
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   4. THE HANDS BEHIND THE HERITAGE
+   ────────────────────────────────────────────────────────────────────────── */
+.craft-heritage-section {
+  padding: 6rem 0;
+  background: #F5EEE2;
+  border-top: 1px solid rgba(174, 138, 84, 0.25);
+  border-bottom: 1px solid rgba(174, 138, 84, 0.25);
+}
+
+.heritage-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(174, 138, 84, 0.3);
+  border-radius: 6px;
+  padding: 3.5rem;
+  box-shadow: 0 16px 40px rgba(42, 33, 29, 0.06);
+}
+
+.heritage-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.heritage-overline {
+  font-size: 0.75rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-antique-gold, #AE8A54);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.6rem;
+}
+
+.heritage-title {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: clamp(2rem, 3.2vw, 2.75rem);
+  color: var(--color-deep-wine, #6E1E2A);
+  letter-spacing: 0.03em;
+  margin-bottom: 0.5rem;
+  line-height: 1.15;
+}
+
+.heritage-subtitle {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: 1.25rem;
+  font-style: italic;
+  color: var(--color-dark-charcoal, #2A211D);
+  font-weight: 400;
+  margin-bottom: 1.75rem;
+}
+
+.heritage-text {
+  font-size: 0.95rem;
+  color: #4A3E39;
+  line-height: 1.8;
+  margin-bottom: 2.25rem;
+  font-weight: 300;
+}
+
+.heritage-text p {
+  margin-bottom: 1rem;
+}
+
+.heritage-highlight {
+  font-size: 1.05rem;
+  color: var(--color-deep-wine, #6E1E2A);
+  font-style: italic;
+  font-weight: 400;
+  padding-left: 1.2rem;
+  border-left: 2px solid var(--color-antique-gold, #AE8A54);
+}
+
+.heritage-pillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(174, 138, 84, 0.2);
+}
+
+.pillar-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.pillar-num {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--color-antique-gold, #AE8A54);
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+
+.pillar-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-dark-charcoal, #2A211D);
+  margin-bottom: 0.15rem;
+}
+
+.pillar-desc {
+  font-size: 0.78rem;
+  color: #7A6C63;
+}
+
+.heritage-image-frame {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(42, 33, 29, 0.12);
+  border: 1px solid rgba(174, 138, 84, 0.35);
+}
+
+.heritage-img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  display: block;
+}
+
+.heritage-badge {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 1.25rem;
+  right: 1.25rem;
+  background: rgba(42, 33, 29, 0.9);
+  backdrop-filter: blur(8px);
+  color: #FAF5EC;
+  padding: 0.65rem 1rem;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 1px solid rgba(174, 138, 84, 0.4);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   5. CONCLUSION: WEAR THE STORY. CARRY THE CRAFT.
+   ────────────────────────────────────────────────────────────────────────── */
+.craft-invitation-section {
+  padding: 7rem 2rem 8rem 2rem;
+  background: #2A211D; /* Dark charcoal luxury closing */
+  color: #FAF5EC;
+  position: relative;
+  text-align: center;
+}
+
+.invitation-ornament {
+  color: var(--color-antique-gold, #AE8A54);
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.85;
+}
+
+.invitation-heading {
+  font-family: var(--font-heading, "Cormorant Garamond", serif);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--color-antique-gold, #AE8A54);
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.invitation-subheading {
+  font-size: 1.05rem;
+  color: #EEDBBD;
+  font-style: italic;
+  max-width: 620px;
+  margin: 0 auto 0.75rem auto;
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+.invitation-lead {
+  font-size: 0.95rem;
+  color: rgba(250, 245, 236, 0.78);
+  max-width: 580px;
+  margin: 0 auto 2.75rem auto;
+  line-height: 1.7;
+  font-weight: 300;
+}
+
+.invitation-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.invitation-btn-primary {
+  background-color: var(--color-deep-wine, #6E1E2A);
+  color: #FAF5EC;
+  border: 1px solid var(--color-deep-wine, #6E1E2A);
+  padding: 1rem 2.25rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.invitation-btn-primary:hover {
+  background-color: transparent;
+  color: var(--color-antique-gold, #AE8A54);
+  border-color: var(--color-antique-gold, #AE8A54);
+  transform: translateY(-2px);
+}
+
+.invitation-btn-secondary {
+  border: 1px solid rgba(174, 138, 84, 0.5);
+  color: #FAF5EC;
+  padding: 1rem 2.25rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  background-color: transparent;
+}
+
+.invitation-btn-secondary:hover {
+  background-color: #FAF5EC;
+  color: #2A211D;
+  border-color: #FAF5EC;
+  transform: translateY(-2px);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   RESPONSIVE DESIGN BREAKPOINTS
+   ────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .craft-stage-inner {
+    gap: 3.5rem;
   }
 
-  .process-step {
-    flex-direction: column;
+  .heritage-grid {
+    grid-template-columns: 1fr;
     gap: 3rem;
   }
 
-  .process-step.left {
-    flex-direction: column-reverse;
+  .heritage-media {
+    max-width: 440px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 860px) {
+  .craft-stages-container {
+    gap: 4.5rem;
   }
 
-  .step-number {
-    top: -3rem;
-    left: 0;
-    font-size: 5rem;
+  .craft-stage-inner {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .craft-stage-row.reverse .craft-stage-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .craft-stage-row.reverse .craft-stage-media {
+    order: 1;
+  }
+
+  .craft-stage-row.reverse .craft-stage-content {
+    order: 2;
+  }
+
+  .craft-stage-media {
+    max-width: 480px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .heritage-card {
+    padding: 2.5rem 1.75rem;
+  }
+
+  .heritage-pillars {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .craft-hero {
+    padding: 4.5rem 1.25rem 3.5rem 1.25rem;
+  }
+
+  .craft-stage-nav-container {
+    gap: 1.25rem;
+    justify-content: flex-start;
+  }
+
+  .stage-watermark-num {
+    font-size: 4.5rem;
+    top: -2.5rem;
+  }
+
+  .stage-callout-card {
+    padding: 1rem 1.25rem;
+  }
+
+  .invitation-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .invitation-btn-primary,
+  .invitation-btn-secondary {
+    width: 100%;
+    text-align: center;
   }
 }
