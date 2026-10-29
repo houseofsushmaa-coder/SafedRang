@@ -1,7 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500&display=swap");
 
 .sf {
-  --sf-fill: #150803;            /* bottom colour of the banner */
+  --sf-fill: #150803;            /* Solid bottom fill matching the banner */
   --sf-gold: #d4ab63;
   --sf-cream: #f5e9d6;
   --sf-text: rgba(245, 233, 214, 0.72);
@@ -11,71 +11,117 @@
   isolation: isolate;
   width: 100%;
   overflow: hidden;
-  background: var(--sf-fill);
+  background-color: var(--sf-fill);
   color: var(--sf-text);
   font-family: "Inter", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  /* top space = the cream curve area of the banner, so content starts inside the dark part */
-  padding: clamp(110px, 12vw, 190px) clamp(20px, 5vw, 80px) 0;
+  /* Top padding calculated dynamically so the lowest dip of the curve has at least 56px (>48px) of clear space */
+  padding-top: calc(12.5vw + 56px);
+  padding-right: clamp(20px, 4vw, 56px);
+  padding-bottom: 0;
+  padding-left: clamp(20px, 4vw, 56px);
 }
-.sf *, .sf *::before, .sf *::after { box-sizing: border-box; }
-.sf ul { list-style: none; margin: 0; padding: 0; }
-.sf a { color: inherit; text-decoration: none; }
 
+.sf *, .sf *::before, .sf *::after {
+  box-sizing: border-box;
+}
+
+.sf ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sf a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Background image: 100% width, auto height, anchored to top center */
 .sf-bg {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: url("/footer-bg.png") center top / cover no-repeat;
+  background-image: url("/footer-bg.png");
+  background-position: center top;
+  background-size: 100% auto;
+  background-repeat: no-repeat;
 }
+
+/* Bottom fade into solid fill to prevent gaps on tall viewports */
 .sf-bg::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, transparent 55%, var(--sf-fill) 100%);
+  background: linear-gradient(to bottom, transparent 48%, var(--sf-fill) 94%);
+  pointer-events: none;
 }
 
-.sf-wrap { max-width: 1240px; margin: 0 auto; }
+.sf-wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+}
 
-/* ---------- grid ---------- */
+/* ---------- Grid with balanced column distribution ---------- */
 .sf-grid {
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr 1.2fr 0.9fr;
-  gap: clamp(24px, 4vw, 60px);
-  padding: 30px 0 56px;
+  grid-template-columns: 1.35fr 1fr 1fr 1fr 0.9fr;
+  gap: clamp(20px, 2.8vw, 44px);
+  padding: 0 0 52px;
+  align-items: start;
 }
 
+.sf-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Logo top edge aligned with column heading text */
 .sf-logo {
   display: inline-block;
-  width: 84px;
-  height: 84px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
   overflow: hidden;
   border: 1px solid var(--sf-gold);
-  background: #fff;
+  background: #ffffff;
+  margin-top: 2px;
+  flex-shrink: 0;
 }
-.sf-logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.sf-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 
 .sf-quote {
-  margin: 22px 0 0;
-  max-width: 300px;
+  margin: 18px 0 0;
+  max-width: 260px;
   font-family: "Cormorant Garamond", Georgia, serif;
-  font-size: 21px;
+  font-size: 19px;
   line-height: 1.5;
   font-weight: 500;
   color: var(--sf-cream);
 }
 
 .sf-h {
-  margin: 0 0 20px;
+  margin: 0 0 18px;
   font-family: "Cormorant Garamond", Georgia, serif;
   font-size: 20px;
   font-weight: 600;
+  line-height: 1.15;
   letter-spacing: 0.08em;
   color: var(--sf-gold);
 }
 
-.sf-col ul { display: grid; gap: 12px; }
+.sf-col ul {
+  display: grid;
+  gap: 12px;
+}
+
 .sf-col a {
   position: relative;
   display: inline-block;
@@ -83,6 +129,7 @@
   padding-bottom: 2px;
   transition: color 0.25s ease;
 }
+
 .sf-col a::after {
   content: "";
   position: absolute;
@@ -95,25 +142,59 @@
   transform-origin: right;
   transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.sf-col a:hover { color: var(--sf-cream); }
-.sf-col a:hover::after { transform: scaleX(1); transform-origin: left; }
 
-.sf-contact { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--sf-line); }
+.sf-col a:hover {
+  color: var(--sf-cream);
+}
 
-/* ---------- bottom bar ---------- */
+.sf-col a:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ---------- Bottom bar ---------- */
 .sf-bottom {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   padding: 22px 0 28px;
   border-top: 1px solid var(--sf-line);
   font-size: 12.5px;
 }
-.sf-legal { display: flex; flex-wrap: wrap; gap: 22px; }
-.sf-legal a { transition: color 0.25s ease; }
-.sf-legal a:hover { color: var(--sf-gold); }
+
+.sf-bottom-left {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--sf-text);
+}
+
+.sf-sep {
+  color: var(--sf-gold);
+  opacity: 0.5;
+  font-size: 10px;
+}
+
+.sf-credit {
+  color: var(--sf-text);
+}
+
+.sf-legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+}
+
+.sf-legal a {
+  transition: color 0.25s ease;
+}
+
+.sf-legal a:hover {
+  color: var(--sf-gold);
+}
 
 .sf a:focus-visible {
   outline: 2px solid var(--sf-gold);
@@ -121,18 +202,43 @@
   border-radius: 4px;
 }
 
-/* ---------- tablet ---------- */
+/* ---------- Tablet (max-width: 1024px) ---------- */
 @media (max-width: 1024px) {
-  .sf-grid { grid-template-columns: repeat(3, 1fr); }
-  .sf-brand { grid-column: 1 / -1; }
+  .sf-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 36px 28px;
+  }
+  .sf-brand {
+    grid-column: 1 / -1;
+  }
 }
 
-/* ---------- mobile ---------- */
+/* ---------- Mobile (max-width: 640px) ---------- */
 @media (max-width: 640px) {
-  .sf { padding-top: clamp(80px, 22vw, 110px); }
-  /* keeps the gold curve visible instead of squashing the banner */
-  .sf-bg { background-size: max(100%, 1000px) auto; }
-  .sf-grid { grid-template-columns: 1fr 1fr; gap: 32px 20px; }
-  .sf-brand { grid-column: 1 / -1; }
-  .sf-bottom { flex-direction: column; align-items: flex-start; padding-bottom: 96px; } /* room for the WhatsApp button */
+  .sf {
+    padding-top: calc(12.5vw + 56px);
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .sf-bg {
+    background-size: 100% auto;
+    background-position: center top;
+  }
+  .sf-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px 20px;
+  }
+  .sf-brand {
+    grid-column: 1 / -1;
+  }
+  .sf-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding-bottom: 96px; /* Room for WhatsApp floating button */
+  }
+  .sf-bottom-left {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
 }

@@ -4,9 +4,9 @@ import "./Footer.css";
 
 /*
   Safedrang footer
-  - Background: /footer-bg.png  (frontend/public/footer-bg.png)
-  - Logo:       /favicon.png    (frontend/public/favicon.png)
-  - Links below match the live footer routes using React Router Link.
+  - Background: /footer-bg.png
+  - Logo:       /favicon.png
+  - Links:      Matched to live router routes with React Router Link.
 */
 
 const COLUMNS = [
@@ -38,8 +38,6 @@ const COLUMNS = [
       { label: "Care Guide", to: "/care" },
       { label: "Returns & Exchange", to: "/returns" },
       { label: "FAQs", to: "/faq" },
-      { label: "Privacy Policy", to: "/privacy-policy" },
-      { label: "Terms & Conditions", to: "/terms" },
     ],
   },
 ];
@@ -77,16 +75,6 @@ export default function Footer() {
                   </li>
                 ))}
               </ul>
-              {col.title === "Customer Care" && (
-                <ul className="sf-contact">
-                  <li>
-                    <a href="tel:+919151566602">+91 91515 66602</a>
-                  </li>
-                  <li>
-                    <a href="mailto:contact@safedrang.com">contact@safedrang.com</a>
-                  </li>
-                </ul>
-              )}
             </nav>
           ))}
 
@@ -105,7 +93,12 @@ export default function Footer() {
         </div>
 
         <div className="sf-bottom">
-          <span>© {new Date().getFullYear()} Safedrang. All rights reserved.</span>
+          <div className="sf-bottom-left">
+            <span>© {new Date().getFullYear()} Safedrang. All rights reserved.</span>
+            <span className="sf-sep" aria-hidden="true">•</span>
+            <span className="sf-credit">Designed by websitewalae</span>
+          </div>
+
           <div className="sf-legal">
             <Link to="/privacy-policy">Privacy Policy</Link>
             <Link to="/terms">Terms &amp; Conditions</Link>
