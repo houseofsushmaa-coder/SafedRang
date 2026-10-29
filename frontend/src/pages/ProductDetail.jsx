@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   ChevronRight,
@@ -46,6 +46,30 @@ export default function ProductDetail() {
     ? basePrice + (selectedVariation.priceModifier || 0)
     : basePrice;
 
+  // Strict stock & availability calculation
+  const isOutOfStock = useMemo(() => {
+    if (!product) return false;
+    const rawStatus = (product.stockStatus || "").toLowerCase();
+    if (rawStatus === "out of stock" || rawStatus === "sold out") return true;
+
+    if (isVariable) {
+      if (selectedVariation) {
+        return (selectedVariation.stock ?? 0) <= 0;
+      }
+      return product.variations.every((v) => (v.stock ?? 0) <= 0);
+    }
+
+    return product.stock !== undefined && product.stock !== null && Number(product.stock) <= 0;
+  }, [product, isVariable, selectedVariation]);
+
+  const availableUnits = useMemo(() => {
+    if (!product) return 0;
+    if (isVariable && selectedVariation) {
+      return Math.max(0, selectedVariation.stock ?? 0);
+    }
+    return Math.max(0, product.stock ?? 0);
+  }, [product, isVariable, selectedVariation]);
+
   // Always reset scroll to top on product change
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
@@ -62,6 +86,10 @@ export default function ProductDetail() {
   }, [id, product]);
 
   const handleAddToCart = () => {
+    if (isOutOfStock) {
+      toast.error("This product is currently out of stock.");
+      return;
+    }
     if (isVariable && !selectedSize) {
       toast.error(`Please select a ${product.attributeName || 'Size'} first.`);
       return;
@@ -77,6 +105,10 @@ export default function ProductDetail() {
   };
 
   const handleBuyNow = () => {
+    if (isOutOfStock) {
+      toast.error("This product is currently out of stock.");
+      return;
+    }
     if (isVariable && !selectedSize) {
       toast.error(`Please select a ${product.attributeName || 'Size'} first.`);
       return;
@@ -276,6 +308,45 @@ export default function ProductDetail() {
             <span>(Customer Reviews)</span>
           </div>
 
+          {/* Availability Status */}
+          <div className="pdp-stock-status-wrap" style={{ marginTop: "10px", marginBottom: "14px" }}>
+            {isOutOfStock ? (
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontSize: "0.82rem",
+                  fontWeight: 600,
+                  color: "#dc2626",
+                  background: "#fee2e2",
+                  padding: "4px 10px",
+                  borderRadius: "6px",
+                }}
+              >
+                <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#dc2626" }} />
+                Out of Stock
+              </span>
+            ) : (
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontSize: "0.82rem",
+                  fontWeight: 600,
+                  color: "#16a34a",
+                  background: "#dcfce7",
+                  padding: "4px 10px",
+                  borderRadius: "6px",
+                }}
+              >
+                <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#16a34a" }} />
+                In Stock {availableUnits > 0 && `(${availableUnits} available)`}
+              </span>
+            )}
+          </div>
+
           {/* Size / Variation Selector */}
           {isVariable && (
             <div className="pdp-variation-section">
@@ -310,17 +381,23 @@ export default function ProductDetail() {
           <div className="product-actions">
             <button
               className="btn-primary btn-add-to-cart"
-              disabled={product.stockStatus === "Sold Out" || (isVariable && !selectedSize)}
+              disabled={isOutOfStock || (isVariable && !selectedSize)}
               onClick={handleAddToCart}
             >
-              {product.stockStatus === "Sold Out"
-                ? "SOLD OUT"
+              {isOutOfStock
+                ? (product.stockStatus === "Sold Out" ? "SOLD OUT" : "OUT OF STOCK")
                 : isVariable && !selectedSize
                 ? `SELECT ${(product.attributeName || "SIZE").toUpperCase()}`
                 : "ADD TO CART"}
             </button>
-            {product.stockStatus !== "Sold Out" && (
-              <button className="btn-secondary btn-buy-now" onClick={handleBuyNow}>BUY IT NOW</button>
+            {!isOutOfStock && (
+              <button
+                className="btn-secondary btn-buy-now"
+                disabled={isVariable && !selectedSize}
+                onClick={handleBuyNow}
+              >
+                BUY IT NOW
+              </button>
             )}
           </div>
 

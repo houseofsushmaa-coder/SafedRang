@@ -14,12 +14,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2023/03/green-dupatta6.webp"
     ],
     "sku": "",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Chanderi Silk",
     "description": "Enhance your look with this green Chanderi Chikankari dupatta, delicately handcrafted with intricate thread embroidery.\r\\n\r\\nProduct Details:\r\\nFabric : Chanderi Cotton\r\\nSize : Free Size\r\\nColor : Green",
     "weight": ".400 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "33c35jrwc",
@@ -42,7 +43,8 @@ export const products = [
     "fabric": "Silk",
     "description": "A breathtaking red Chikankari saree, beautifully handcrafted with intricate white thread embroidery and shimmering Mukaish work. This elegant masterpiece blends traditional artistry with a touch of glamour, making it perfect for festive and celebratory occasions.\r\\n\r\\nPRODUCT : TFM11044\r\\n\r\\nProduct...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "yn8s4rlt6",
@@ -68,7 +70,8 @@ export const products = [
     "fabric": "Silk",
     "description": "A striking red Chikankari saree in luxurious silk, intricately embroidered with red thread for a stunning monochromatic effect.\r\\n\r\\nProduct Details:\r\\n\r\\n \tFabric: Tusser Silk (lightweight, soft drape, slightly sheer)\r\\n \tColor: Classic  Red\r\\n \tLength: 5.5 meters (saree)\r\\n \tBlouse Fabric: 0.8 met...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "oak9u36tj",
@@ -84,12 +87,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2023/04/W.Un_.K.-Mukaish-6.webp"
     ],
     "sku": "SRK02",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Cotton",
     "description": "Elegant White Chikankari Unstitched Fabric\r\\n\r\\n\r\\nCrafted in soft and breathable Muk cotton, this unstitched white Chikankari fabric is adorned with intricate hand embroidery, enhanced by the delicate shimmer of Mukaish work.\r\\n\r\\nFabric : Mul Cotton\r\\nType : Kurta with dupatta\r\\nColor : White\r\\n\r\\...",
     "weight": ".800 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "wh57x3vle",
@@ -110,7 +114,8 @@ export const products = [
     "fabric": "Chanderi Silk",
     "description": "White Chikankari Dupatta\r\\nProduct Details:\r\\nFabric : Chanderi\r\\nSize : Free Size\r\\nColour : White",
     "weight": ".400 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "djhwme2ku",
@@ -131,28 +136,28 @@ export const products = [
     "description": "Elevate your ethnic wardrobe with this stunning Rusty Red Chanderi Silk Blouse. Crafted from premium Chanderi silk, this ready-to-wear blouse pairs beautifully with sarees and lehengas for festive and formal occasions.\n\nProduct Details:\nFabric: Chanderi Silk\nColor: Rusty Red\nOccasion: Festive, Wedding, Party",
     "weight": "0.5 kg",
     "dimensions": "30 × 25 × 5 cm",
-    "stock": 4,
+    "stock": 8,
     "productType": "variable",
     "attributeName": "Size",
     "variations": [
       {
         "size": "S",
-        "stock": 1,
+        "stock": 2,
         "priceModifier": 0
       },
       {
         "size": "M",
-        "stock": 1,
+        "stock": 2,
         "priceModifier": 0
       },
       {
         "size": "L",
-        "stock": 1,
+        "stock": 2,
         "priceModifier": 0
       },
       {
         "size": "XL",
-        "stock": 1,
+        "stock": 2,
         "priceModifier": 0
       }
     ]
@@ -178,7 +183,8 @@ export const products = [
     "fabric": "Kota",
     "description": "Embrace timeless elegance with this delicate peach Kota Doria saree, adorned with intricate Tepchi Chikankari embroidery. The lightweight and breathable fabric ensures comfort, while the subtle white threadwork adds a touch of sophistication. Perfect for both daytime gatherings and evening occasions...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "ry95eqsqh",
@@ -202,7 +208,8 @@ export const products = [
     "fabric": "Kota",
     "description": "Grace meets elegance in this ethereal light green Kota saree, delicately hand-embroidered with Tepchi work – a classic stitch of Lucknowi Chikankari known for its subtle beauty and linear charm. Woven from the airy and translucent Kota fabric, this saree drapes like a whisper, making it perfect for ...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "s0nnlkoih",
@@ -224,7 +231,8 @@ export const products = [
     "fabric": "Georgette",
     "description": "\\nElegant Grey Chikankari Georgette Saree\r\\n\r\\nA timeless blend of grace and craftsmanship, this grey Chikankari saree is adorned with intricate teaching work, adding depth and artistry to its delicate embroidery. Crafted from lightweight georgette fabric, it drapes beautifully, offering a flowy and...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "yxtpsl7qm",
@@ -248,7 +256,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "Graceful, feminine, and full of festive charm — Manorama is a saree that speaks the language of tradition with a contemporary heart. Crafted in fluid, soft viscose fabric, this saree drapes like a dream, enhanced with intricate Gota Patti work that adds just the right amount of festive sparkle.\r\\nTh...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "ln2uxktdq",
@@ -266,12 +275,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/PAKEEZAH-2-scaled.jpg"
     ],
     "sku": "TFM110039",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Georgette",
     "description": "\\n\r\\n\r\\nWhite Mul Cotton Chikankari Saree\r\\n\r\\nSoft, breathable, and timeless, this white Mul cotton Chikankari saree is a perfect blend of comfort and tradition. Adorned with delicate hand-embroidered motifs and highlighted with silver zari work, it exudes subtle elegance with a touch of shimmer. L...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "h3hzpn3ly",
@@ -293,7 +303,8 @@ export const products = [
     "fabric": "Silk",
     "description": "\\nRegal Purple Chikankari Saree in Chanderi Silk\r\\n\r\\nThis exquisite purple Chikankari saree is a blend of tradition and elegance, crafted on luxurious Chanderi silk. Adorned with intricate hand-embroidered Chikankari, the saree features delicate moti (pearl) work, fine zari detailing, and intricate...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "34q662h7z",
@@ -314,7 +325,8 @@ export const products = [
     "fabric": "Kota",
     "description": "\\nThis elegant green Kota saree 💚💚 combines the lightness of Kota fabric with the timeless charm of chikankari embroidery embellished with delicate mukaish work , the saree shimmer with a graceful glow , creating a sophisticated look that's perfect for both day and evening occasions.\r\\n\r\\n\r\\nPRODU...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "y2thzzuf8",
@@ -337,7 +349,8 @@ export const products = [
     "fabric": "Silk",
     "description": "\\nDrape yourself in the timeless elegance of this mehndi green Chikankari saree, exquisitely adorned with moti, pearls, cutdana, and silver zari work. The intricate handcrafted embroidery shimmers delicately against the rich green fabric, blending heritage craftsmanship with a touch of opulence. Eac...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "v8yifgkoz",
@@ -360,7 +373,8 @@ export const products = [
     "fabric": "Silk",
     "description": "\\nWrap yourself in the sunlit elegance of Noor-e-Amaltas, a stunning yellow Chanderi silk saree that radiates understated opulence and handcrafted finesse. The gentle sheen of Chanderi fabric paired with intricate embellishments makes this saree a celebration of light, heritage, and contemporary.Han...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "om0rtppw2",
@@ -382,7 +396,8 @@ export const products = [
     "fabric": "Silk",
     "description": "\\n\r\\nThis stunning red Chikankari saree features intricate hand-embroidered designs, showcasing delicate motifs in traditional chikankari artistry. The saree is beautifully adorned with embellishments of moti (pearls), cutdana, and sequins, adding a touch of elegance and sparkle. Perfect for festive...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "1d3hns384",
@@ -406,7 +421,8 @@ export const products = [
     "fabric": "Silk",
     "description": "\\nElevate your elegance with this exquisite brick red Chikankari saree, intricately handcrafted with resham thread embroidery in a stunning tone-on-tone monochrome style. The delicate Lucknowi Chikankari work seamlessly blends with the rich brick red fabric, creating a timeless piece that embodies g...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "7za0uh2my",
@@ -429,7 +445,8 @@ export const products = [
     "fabric": "Silk",
     "description": "\\nPista Green Chikankari Saree – A Timeless Elegance\r\\n\r\\nDrape yourself in elegance with this pista green Chikankari saree, intricately hand-embroidered with delicate floral patterns. Adorned with lustrous moti (pearls) and shimmering cutdana work, this saree beautifully blends tradition with subtl...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "fdpx9dr9z",
@@ -455,7 +472,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Ice-Blue Organza Unstitched Suit Set with Cutdana Motifs & Dupatta\r\\nDescription:\r\\n\r\\nDelicate, luminous, and timeless — a celebration of elegance in its purest form. Crafted in ethereal white organza, this unstitched suit set is adorned with intricate cutdana motifs, adding a refined sparkle that ...",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "psne0dwwz",
@@ -472,12 +490,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/chandni-aura-2-scaled.jpg"
     ],
     "sku": "TFN110022",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Georgette",
     "description": "\\nThis elegant white Chikankari saree, crafted from soft georgette fabric, is beautifully enhanced with intricate mukaish work. The subtle shimmer of the mukaish complements the delicate Chikankari embroidery, creating a timeless and sophisticated look. Perfect for weddings or special occasions, thi...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "h51o2ylmh",
@@ -499,7 +518,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "fd6xy1l1a",
@@ -521,7 +541,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "Statement Elegance | Natural Energy | Handcrafted Beauty\r\\nTurn heads with the deep charm and mystical allure of our Blue Agate 2-Layer Necklace—a piece that blends the raw elegance of nature with the grace of refined craftsmanship.\r\\n\r\\nProduct Features:\r\\n\r\\n \t\r\\nStone Type: Blue Agate\r\\n\r\\n \t\r\\nD...",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "7ouj3pum8",
@@ -543,7 +564,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "1ocnohhj3",
@@ -565,7 +587,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "0t1nwh8si",
@@ -588,7 +611,8 @@ export const products = [
     "fabric": "Georgette",
     "description": "\\nA graceful white Chikankari saree in lightweight georgette, beautifully adorned with intricate embroidery and shimmering Gotta Patti work. This elegant blend of delicate craftsmanship and subtle shimmer makes it a perfect choice for festive celebrations and special occasions.\r\\n\r\\nPRODUCT : TFN110...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "96g9w59t3",
@@ -610,7 +634,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "qtiubtpyv",
@@ -632,7 +657,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "6xtpqkwji",
@@ -654,7 +680,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "l5szz0qfa",
@@ -676,7 +703,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "6adom5e53",
@@ -697,7 +725,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "xlujc2lem",
@@ -718,7 +747,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "yxu9gt28p",
@@ -739,7 +769,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "jfgxrapqr",
@@ -763,7 +794,8 @@ export const products = [
     "fabric": "Silk",
     "description": "This sky-blue chikankari saree features delicate hand-embroidered motifs that showcase the timeless beauty of traditional craftsmanship. 💙💙Accentuated with intricate zari work , this saree adds a subtle shimmer , creating a perfect blend of elegance and tradition.\r\\nIdeal for festive occasions and...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "ci7hwykp7",
@@ -785,7 +817,8 @@ export const products = [
     "fabric": "Silk",
     "description": "\\nThis beautiful peach color 💮💮 chikankari saree radiates elegance with its intricate embroidery and soft, double shaded hues. Adorned with delicate mukaish work, , it adds a touch of sparkle to the classic chikankari design.\r\\nThe dual shades of peach bring depth and dimension of the fabric , gra...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "yprtgfm39",
@@ -802,12 +835,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/y-pink-kurta-4-scaled.jpg"
     ],
     "sku": "",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Cotton",
     "description": "\\nWhite Mul Cotton Unstitched Kurta Set with Pink & Yellow Thread Embroidery and Cutdana Work\r\\nBright, breezy, and beautifully handcrafted—this white-based unstitched mul cotton kurta set with dupatta is a breath of fresh air in your wardrobe. Made from pure mulmul cotton, known for its lightweight...",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "5ys520fin",
@@ -825,12 +859,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/green-bird-5-scaled.jpg"
     ],
     "sku": "SK1",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Chanderi Silk",
     "description": "\\nThis elegant Chikankari kurta with dupatta is a beautiful blend of traditional craftsmanship and contemporary charm. The intricate Chikan work on the fabric is enhanced with delicate embellishments of moti (pearls), cutdana, and sequins, adding a touch of sophistication and shimmer. Perfect for fe...",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "wiyg9na8d",
@@ -852,7 +887,8 @@ export const products = [
     "fabric": "Cotton",
     "description": "\\nEthereal in its simplicity, this white mul cotton suit set is a timeless blend of comfort and quiet elegance. Crafted from the softest mulmul (mul) cotton, the fabric feels like a gentle whisper against the skin, making it a perfect choice for long summer days and serene evenings alike.\r\\nThe stra...",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "4tmwe92by",
@@ -877,7 +913,8 @@ export const products = [
     "fabric": "Cotton",
     "description": "Exquisite White Chikankari Mul Cotton Fabric\r\\n\r\\nDelicately handcrafted on soft and breathable mul cotton, this white Chikankari fabric features intricate embroidery, beautifully enhanced with moti (pearl) work. The fine detailing adds a touch of elegance and sophistication, making it perfect for c...",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "9qtfi07dt",
@@ -901,7 +938,8 @@ export const products = [
     "fabric": "Cotton",
     "description": "Elevate your elegance with our Mul Cotton Kurta Set, adorned with delicate white thread embroidery and shimmering cutdana and zari, kasb  work. Lightweight and breathable, this ensemble effortlessly blends tradition with grace. Paired with a matching dupatta, it’s perfect for any occasion, exuding t...",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "ibjxv8oau",
@@ -924,7 +962,8 @@ export const products = [
     "fabric": "Cotton",
     "description": "Unstitched Mul Cotton Chikankari Kurta Set with Dupatta | Colored Thread Work & Defined Neckline\r\\nDescription:\r\\n\r\\nA canvas of comfort and craft, unstitched Mul Cotton Chikankari kurta set, perfect for those who love custom tailoring without compromising on elegance. Made from the softest mulmul c...",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "6e94cmzlc",
@@ -946,7 +985,8 @@ export const products = [
     "fabric": "Cotton",
     "description": "Elegant, breathable this three-piece suit set, crafted in the finest mul cotton, brings together everyday comfort with subtle festive sparkle. The rich royal purple hue is both timeless and contemporary, making it perfect for intimate gatherings, festive brunches, or serene evenings under the stars....",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "82h7x1k25",
@@ -964,12 +1004,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/all-moti-5-scaled.jpg"
     ],
     "sku": "",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Chanderi Silk",
     "description": "Unstitched Mul Chanderi  Chikankari Kurta Set with Dupatta | White Thread Work & Defined Neckline\r\\nDescription:\r\\n\r\\nA beautiful unstitched Mul Chanderi Chikankari kurta set, perfect for those who love custom tailoring without compromising on elegance. Made from the softest mul chanderi, this set f...",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "1v4cqd60v",
@@ -993,7 +1034,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Elevate your ethnic wardrobe with this elegant Organza Chikankari Kurta Set, intricately hand-embroidered with delicate tone-on-tone threadwork and adorned with shimmering Cutdana embellishments. Crafted on soft, sheer organza, the set blends traditional Lucknowi artistry with a subtle contemporary ...",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "mj8epvnmh",
@@ -1016,7 +1058,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Flamingo Pink Organza Unstitched Suit Set with Cutdana, Sequin & Pink Thread Embroidery\r\\nDelicate, dreamy, and effortlessly festive—this flamingo pink organza suit set is a perfect canvas for your custom style. Presented in an unstitched format, the set includes fabric for the kurta, dupatta, and p...",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "m9v6clwmp",
@@ -1035,12 +1078,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/pink-moti-1-scaled.jpg"
     ],
     "sku": "",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Handcrafted",
     "fabric": "Cotton",
     "description": "Soft Mul Cotton Suit Set with Pearl, Zari, Sequin & Pink Thread Work\r\\nDelicate, dreamy, and rooted in timeless elegance—this mul cotton suit set is a celebration of fine craftsmanship and graceful design. The set features a hand-embroidered kurta and a matching dupatta, both brought to life with in...",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "ib4vf9l9j",
@@ -1059,12 +1103,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/G-PEACH-5-scaled.jpg"
     ],
     "sku": "",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Cotton",
     "description": "Unstitched Mul Cotton Chikankari Kurta Set with Dupatta | Colored Thread Work & Defined Neckline\r\\nDescription:\r\\n\r\\nA beautiful unstitched Mul Cotton Chikankari kurta set, perfect for those who love custom tailoring without compromising on elegance. Made from the softest mulmul cotton, this set fea...",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "8kr1c312v",
@@ -1079,12 +1124,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2023/04/WhatsApp-Image-2025-02-16-at-10.40.21_07c0ba5c.webp"
     ],
     "sku": "TFN110018",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Silk",
     "description": "\\n\"Gul bahar\" saree\r\\n\r\\nThis elegant brown chikankari saree is beautifully adorned with intricate mukaish work , adding a touch of sparkle to the classic hand- embroidered patterns.This brown Chanderi silk saree is a timeless piece that radiates quiet sophistication, adorned with the intricate fine...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "smiotwm3i",
@@ -1104,7 +1150,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Chanderi Silk Basic Blouse – Dyeable\r\\n. Fabric: Premium quality Chanderi Silk, known for its lightweight feel and subtle natural sheen.\r\\n. Design: Classic basic blouse design, perfect to pair with any saree style.\r\\n. Dyeable Fabric: The blouse can be dyed in any colour of your choice, making it v...",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "ibt1y7idj",
@@ -1127,7 +1174,8 @@ export const products = [
     "fabric": "Silk",
     "description": "A breathtaking red Chikankari saree, beautifully handcrafted with intricate white thread embroidery and shimmering Mukaish work. This elegant masterpiece blends traditional artistry with a touch of glamour, making it perfect for festive and celebratory occasions.\r\\nPRODUCT : TFM11042\r\\n\r\\nProduct De...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "tt89ag88h",
@@ -1145,12 +1193,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/red-moti-5-1-scaled.jpg"
     ],
     "sku": "",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Handcrafted",
     "fabric": "Cotton",
     "description": "Radiant Red Mul Cotton Suit Set with Tone-on-Tone Thread & White Moti Work\r\\nBold, elegant, and deeply rooted in tradition—this red mul cotton suit set is a statement in timeless beauty. Made from soft, breathable mulmul cotton, the set features a hand-embroidered kurta and dupatta, designed to flow...",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "egyvk38ms",
@@ -1169,12 +1218,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/sunflower-22-1-scaled.jpg"
     ],
     "sku": "",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Organza",
     "description": "Grace meets elegance in this stunning white Mul Cotton Chikankari suit set, handcrafted to perfection. The soft, breathable mul fabric drapes effortlessly, offering comfort without compromising on style. Adorned with intricate hand-embroidered Lucknowi Chikankari, the suit is further elevated with d...",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "rfpwo4fl5",
@@ -1198,7 +1248,8 @@ export const products = [
     "fabric": "Georgette",
     "description": "White Chikankari Saree🤍🤍\r\\n\r\\nGrace meets tradition in this stunning white Chikankari saree, crafted with timeless elegance. Delicately hand-embroidered with intricate motifs and shimmering cutdana work, this masterpiece exudes sophistication and charm. Perfect for celebrations and special occasio...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "b9ynlkhd1",
@@ -1218,7 +1269,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "m9q6bfujh",
@@ -1239,7 +1291,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "nnkhn52iu",
@@ -1260,7 +1313,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "pofokolxs",
@@ -1282,7 +1336,8 @@ export const products = [
     "fabric": "Cotton",
     "description": "White Dyeable Chikankari Pant Fabric – Soft Mul Cotton\r\\nDescription:Experience the perfect blend of comfort, craftsmanship, and versatility with our Chikankari Pant Fabric, meticulously handcrafted on soft mul cotton. This breathable, feather-light fabric is ideal for summer wear and gentle on the ...",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "pcqqijz6h",
@@ -1304,7 +1359,8 @@ export const products = [
     "fabric": "Kota",
     "description": "Light Yellow Kota Unstitched Kurta Fabric with Chikankari Embroidery\r\\nDescription:Bask in the beauty of heritage handwork and airy elegance with our unstitched Kota kurta fabric, graced with delicate Chikankari thread embroidery. Crafted on authentic Kota fabric, known for its fine checkered weave ...",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "l8e793ql5",
@@ -1325,7 +1381,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "",
     "weight": ".400 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "2lcmowf3x",
@@ -1346,7 +1403,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "",
     "weight": ".500 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "725rgengo",
@@ -1367,7 +1425,8 @@ export const products = [
     "fabric": "Kota",
     "description": "Kota Dupatta Tepchi work",
     "weight": ".400 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "1123eds9j",
@@ -1389,28 +1448,28 @@ export const products = [
     "description": "Our blouses come with extra margin, allowing you to easily size up for a perfect fit. Handcrafted from pure Chanderi silk with a radiant sheen.",
     "weight": ".100 kg",
     "dimensions": "30 × 25 × 5 cm",
-    "stock": 4,
+    "stock": 8,
     "productType": "variable",
     "attributeName": "Size",
     "variations": [
       {
         "size": "S",
-        "stock": 1,
+        "stock": 2,
         "priceModifier": 0
       },
       {
         "size": "M",
-        "stock": 1,
+        "stock": 2,
         "priceModifier": 0
       },
       {
         "size": "L",
-        "stock": 1,
+        "stock": 2,
         "priceModifier": 0
       },
       {
         "size": "XL",
-        "stock": 1,
+        "stock": 2,
         "priceModifier": 0
       }
     ]
@@ -1433,7 +1492,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Chanderi Silk Basic Blouse – Dyeable\r\\n. Fabric: Premium quality Chanderi Silk, known for its lightweight feel and subtle natural sheen.\r\\n. Design: Classic basic blouse design, perfect to pair with any saree style.\r\\n. Dyeable Fabric: The blouse can be dyed in any colour of your choice, making it v...",
     "weight": ".150 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "wgcodqvbi",
@@ -1455,7 +1515,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "",
     "weight": ".400 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "1wbs1r5e6",
@@ -1475,7 +1536,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "",
     "weight": ".300 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "6r0eg13ie",
@@ -1496,7 +1558,8 @@ export const products = [
     "fabric": "Cotton",
     "description": "Sunlit Yellow Mul Cotton Unstitched Kurta Set with Chikankari & Mukaish Work\r\\nProduct Details:\r\\n\r\\n \tFabric:\r\\n_ Kurta – 100% Mul Cotton (Unstitched)\r\\n_ Dupatta – Mul Cotton with embroidered detailing\r\\n \tColor: Vibrant Marigold\r\\n \tEmbroidery Details:\r\\n_ Handcrafted Chikankari work in tonal or ...",
     "weight": ".400 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "fvpb307ft",
@@ -1511,12 +1574,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/blue-kurta-set-1-scaled.jpg"
     ],
     "sku": "",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Cotton",
     "description": "Handcrafted Elegance | Chikankari Heritage | Classic Charm\r\\nGraceful, breezy, and steeped in timeless Indian craftsmanship, this Royal Blue Mul Cotton Anarkali Kurta Set with Dupatta is an ode to elegance and comfort. Adorned with intricate white thread Chikankari embroidery, this set seamlessly me...",
     "weight": ".500 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "jcfcjkh7v",
@@ -1531,12 +1595,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/yellow-anarkali-1-scaled.jpg"
     ],
     "sku": "",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Cotton",
     "description": "Handcrafted in White Thread Chikankari | Elegant & Breathable | A SafedRang Classic\r\\nBright, breezy, and beautiful — this Golden Yellow Mul Cotton Anarkali Kurta Set with Dupatta is a perfect blend of handcrafted artistry and effortless grace. Designed in a flattering Anarkali silhouette, the kurta...",
     "weight": ".500 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "dda88irnd",
@@ -1551,12 +1616,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/w-zari-3-scaled.jpg"
     ],
     "sku": "",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Cotton",
     "description": "\\nWhite Semi-Stitched Mul Cotton Chikankari Kurta Set\r\\nElegance in Every Thread | Free Size | Dry Clean Only\r\\nGracefully timeless and delicately handcrafted, this white semi-stitched Chikankari kurta set is an ode to heritage craft and understated elegance. Made from the softest mul cotton, known ...",
     "weight": ".500 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "ozh5o5qgu",
@@ -1571,12 +1637,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/W.MOTI_.K.-2-scaled.jpg"
     ],
     "sku": "",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Cotton",
     "description": "\\nWhite Semi-Stitched Mul Cotton Chikankari Kurta Set\r\\nElegance in Every Thread | Free Size | Dry Clean Only\r\\nGracefully timeless and delicately handcrafted, this white semi-stitched Chikankari kurta set is an ode to heritage craft and understated elegance. Made from the softest mul cotton, known ...",
     "weight": ".500 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "cuqoxzyso",
@@ -1599,7 +1666,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "Elegant White Chikankari Unstitched Fabric\r\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\n",
     "weight": ".500 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "xo9mlyv86",
@@ -1614,12 +1682,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/GULABI-NOOR-01-scaled.jpg"
     ],
     "sku": "TFN110011",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Chanderi Silk",
     "description": "\\n\r\\nGulabi noor saree is luxurious pink chanderi cotton saree, elegant adored with delicate Lucknowi Chikankari work. The soft pink color hue enhances it's feminine appeal.\r\\n\r\\nPRODUCT ; TFN110011\r\\n\r\\nProduct Details:\r\\n\r\\n \tFabric: Mul Cotton (lightweight, soft drape, slightly sheer)\r\\n \tColor: ...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "uk0cef90v",
@@ -1638,12 +1707,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/NEEL-KAMAL-5-scaled.jpeg"
     ],
     "sku": "TFJ110055",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Cotton",
     "description": "\\n\r\\n\r\\nSafedRang Exclusive – White Mul Cotton Chikankari Saree with Mukaish Work\r\\nOne-of-a-Kind | Handcrafted Elegance | Floral-Inspired Grace\r\\nExperience the timeless beauty of handcrafted heritage with this exclusive white Chikankari saree from SafedRang—a poetic blend of subtle luxury, traditi...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "kcsegv5zh",
@@ -1658,12 +1728,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/mogra-1-scaled.jpg"
     ],
     "sku": "TFJ110054",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Cotton",
     "description": "\\n\r\\n\r\\nSafedRang Exclusive – White Mul Cotton Chikankari Saree with Zari Border\r\\nOne-of-a-Kind | Handcrafted Heritage | Woven Grace\r\\nDelicate, ethereal, and crafted with soulful artistry—this white mul cotton Chikankari saree from SafedRang is a tribute to timeless Indian elegance. A blend of han...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "zns6ol0tt",
@@ -1689,7 +1760,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "\\n\r\\n\r\\nSafedRang Exclusive – 3- Shaded Chiffon Chikankari Saree\r\\nFeaturing Handcrafted Lotus Motifs in Ulti Bakhiya | One-of-a-Kind Designer Piece\r\\nStep into the world of artistic elegance with this exquisite 3-shaded chiffon Chikankari saree, a one-of-one designer masterpiece from SafedRang. Han...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "zape55v9k",
@@ -1709,7 +1781,8 @@ export const products = [
     "fabric": "Georgette",
     "description": "\\n\r\\n\r\\n\r\\nThis exquisite white mul cotton Chikankari saree is crafted from the softest, premium mul cotton fabric, offering both comfort and elegance. The saree is delicately hand-embroidered with intricate Chikankari patterns, accentuated by shimmering mukaish work that adds a subtle sparkle. Idea...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "1iaszc4de",
@@ -1724,12 +1797,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/29-scaled.jpg"
     ],
     "sku": "TFN110025",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Silk",
     "description": "\\n\r\\n\r\\n\r\\n\r\\n\" Shwetambari\" saree\r\\n\r\\nA white chikankari saree is a timeless piece of elegance , featuring intricate hand- embroidery patterns created using traditional chikankari techniques.\r\\n\r\\nPRODUCT : TFN110025\r\\n\r\\nProduct Details:\r\\n\r\\n \tFabric: Premium Chiffon (lightweight, soft drape, sl...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "i3qoygosl",
@@ -1749,7 +1823,8 @@ export const products = [
     "fabric": "Georgette",
     "description": "\\n\r\\n\r\\n\r\\n\r\\n\r\\nThis exquisite light pink Chikankari saree, crafted from luxurious georgette fabric, features delicate Tepchi embroidery that adds a graceful touch to the overall design. The soft, airy texture of the fabric perfectly complements the intricate hand-stitched motifs, making it an idea...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "d4cytwd2s",
@@ -1764,12 +1839,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2023/03/SURMAI-ROSHNI-Tusser-Silk-Chikankari-Saree.webp"
     ],
     "sku": "TFM110043",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Silk",
     "description": "An exquisite black Chikankari saree crafted from luxurious silk, adorned with intricate white thread embroidery.\r\\n\r\\nProduct Details:\r\\n\r\\n \tFabric:  Tusser Silk (lightweight, soft drape)\r\\n \tColor: Classic Black\r\\n \tLength: 5.5 meters (saree)\r\\n \tBlouse Fabric: 0.8 meters – unstitched (same color,...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "r6lj2euay",
@@ -1799,7 +1875,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "\"Zaitoon Aura\" – The Epitome of Grace in Chikankari\r\\nExperience timeless elegance with our Zaitoon Aura – a masterpiece in authentic Lucknowi Chikankari, crafted to be as unique as you are. Woven from the finest muslin fabric, this saree offers a very soft, feather-light touch with a subtle natural...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "3bnj7kkd8",
@@ -1823,7 +1900,8 @@ export const products = [
     "fabric": "Cotton",
     "description": "\\n\r\\n\r\\n\r\\nInfused with the radiance of sunshine and the charm of heritage handwork, this raspberry colored semi-stitched mul cotton kurta set with dupatta is a celebration of soft elegance and timeless craft. Made from pure mulmul cotton, this fabric is known for its feather-light texture and breat...",
     "weight": ".400 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "tcseqrro2",
@@ -1843,12 +1921,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/08/khadi-cotton-6-1-scaled.jpeg"
     ],
     "sku": "TFA110058",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Cotton",
     "description": "Product Description – White Khadi Cotton Chikankari Saree\r\\nStep into timeless elegance with this exquisite White Khadi Cotton Chikankari Saree, a masterpiece that blends traditional artistry with understated sophistication. Handcrafted on pure Khadi Cotton, the saree is adorned with intricate white...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "1nz1tpdm8",
@@ -1869,7 +1948,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Product Description – Off-White Chanderi Silk Blouse\r\\nElevate your ethnic ensembles with this elegant Off-White Chanderi Silk Blouse, designed to blend traditional charm with contemporary styling. Crafted from luxurious Chanderi Silk, this blouse carries a subtle sheen and refined texture, making i...",
     "weight": ".250 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "64nd47ue1",
@@ -1889,7 +1969,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Product Description – Light Peach Chanderi Silk Blouse\r\\nAdd a soft touch of elegance to your ethnic collection with this Light Peach Chanderi Silk Blouse, beautifully tailored to complement both traditional and contemporary sarees. Made from luxurious Chanderi Silk, the blouse carries a subtle shee...",
     "weight": ".250 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "xd7qt6cpp",
@@ -1910,7 +1991,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "Product Description – Natural Garnet Necklace\r\\nGrace your neckline with the timeless allure of the Natural Garnet Necklace, a statement piece that radiates elegance and strength. Handcrafted with precision, this necklace features authentic natural garnet gemstones, known for their deep, rich red hu...",
     "weight": ".100 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "oka097lli",
@@ -1931,7 +2013,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "Product Description – Natural Mookaite Stone Necklace\r\\nEmbrace earthy elegance with this exquisite Natural Mookaite Stone Necklace, a handcrafted piece that showcases the raw beauty and grounding energy of natural gemstones. Known for its warm, multi-tonal hues ranging from mustard yellow and brick...",
     "weight": ".100 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "urium9ghp",
@@ -1952,7 +2035,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "Product Description – Natural Blue Agate Necklace\r\\nDiscover the serene beauty of the Natural Blue Agate Necklace, a handcrafted piece designed to embody calmness, balance, and elegance. Made with authentic Blue Agate gemstones, this necklace features naturally occurring patterns and soothing shades...",
     "weight": ".100 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "wz3sy6n08",
@@ -1973,7 +2057,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "Product Description – Buddha Turquoise Stone Necklace\r\\nRadiating peace and timeless charm, the Buddha Turquoise Stone Necklace is a beautifully handcrafted piece that combines natural elegance with spiritual symbolism. Made with authentic Turquoise stones, this necklace showcases soothing shades of...",
     "weight": ".100 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "p9t7edk4b",
@@ -1993,7 +2078,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "Product Description – Olive Green Natural Agate Necklace\r\\nCelebrate nature’s grace with the Olive Green Natural Agate Necklace, a handcrafted piece that reflects balance, grounding, and timeless style. Made from authentic Natural Agate gemstones, this necklace features soothing olive green hues wit...",
     "weight": ".100 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "gcg7e1p2y",
@@ -2013,7 +2099,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "Product Description – Natural Charoite Crystal Necklace\r\\nUnveil mystical elegance with the Natural Charoite Crystal Necklace, a handcrafted gemstone piece that embodies rarity and spiritual depth. Known for its striking shades of lavender to deep violet with natural swirling patterns, Charoite is a...",
     "weight": ".100 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "rd9bl22y5",
@@ -2034,7 +2121,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "Product Description – Natural Carnelian Stone Necklace\r\\nInfuse your look with vibrant energy and timeless charm with the Natural Carnelian Stone Necklace, a handcrafted piece that captures the fiery essence of this captivating gemstone. Known for its warm shades of sunset orange to deep red, Carnel...",
     "weight": ".100 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "lh3mp6i4a",
@@ -2054,7 +2142,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Product Description – Off-White Chanderi Silk Blouse\r\\nRefined and versatile, the Off-White Chanderi Silk Blouse is a timeless addition to your ethnic wardrobe. Crafted from luxurious Chanderi Silk, this blouse carries a natural sheen and soft texture, making it the perfect match for sarees of every...",
     "weight": ".250 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "znyh4mekx",
@@ -2075,28 +2164,28 @@ export const products = [
     "description": "Product Description: Elevate your ethnic look with this Basic Green Chanderi Silk Blouse, crafted to combine elegance with comfort. Made from premium Chanderi silk fabric, this blouse radiates a subtle sheen and sophistication, making it a perfect pairing for sarees of various fabrics and designs.",
     "weight": ".400 kg",
     "dimensions": "30 × 25 × 5 cm",
-    "stock": 4,
+    "stock": 8,
     "productType": "variable",
     "attributeName": "Size",
     "variations": [
       {
         "size": "38",
-        "stock": 1,
+        "stock": 2,
         "priceModifier": 0
       },
       {
         "size": "40",
-        "stock": 1,
+        "stock": 2,
         "priceModifier": 0
       },
       {
         "size": "42",
-        "stock": 1,
+        "stock": 2,
         "priceModifier": 0
       },
       {
         "size": "44",
-        "stock": 1,
+        "stock": 2,
         "priceModifier": 0
       }
     ]
@@ -2119,7 +2208,8 @@ export const products = [
     "fabric": "Silk",
     "description": "Product Description\r\\nStep into elegance with this Brown Chanderi Silk Blouse, designed to strike the perfect balance between tradition and contemporary style. Crafted from luxurious Chanderi silk, the blouse carries a natural sheen and lightweight texture, making it both comfortable and effortlessl...",
     "weight": ".250 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "bh1ze27me",
@@ -2140,7 +2230,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Product Description\r\\nBring timeless elegance to your wardrobe with this Solid Green Chanderi Silk Blouse, designed for those who appreciate both tradition and comfort. Made from luxurious Chanderi silk, the fabric has a subtle sheen and a lightweight, breathable texture that makes it perfect for lo...",
     "weight": ".400 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "wgsyoq9q0",
@@ -2158,12 +2249,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/09/sindoori-5.jpeg"
     ],
     "sku": "TFN110013",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Silk",
     "description": "Elevate your wardrobe with the timeless grace of our Sindoori Red Chanderi Silk Saree, a masterpiece of elegance and tradition. Crafted in the finest chanderi silk fabric, this saree embodies sophistication with its lightweight, soft, and fine texture, making it an ideal choice for both festive occa...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "d6m4xvz6u",
@@ -2187,7 +2279,8 @@ export const products = [
     "fabric": "Silk",
     "description": "Product Description\r\\nDrape yourself in timeless elegance with this Maroon Chanderi Silk Chikankari Saree, a perfect blend of traditional artistry and regal charm. Crafted from the finest Chanderi silk, the fabric carries a natural sheen, making it effortlessly graceful and luxurious.\r\\nThe saree is...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "3jhcgxtsf",
@@ -2211,7 +2304,8 @@ export const products = [
     "fabric": "Silk",
     "description": "Surkh Red Chanderi Silk Chikankari Saree\r\\nImmerse yourself in the timeless grace of Chanderi silk with this stunning Surkh Red monotone saree, handcrafted to perfection with the delicate artistry of Lucknowi Chikankari embroidery. The deep, regal red shade—synonymous with elegance and confidence—is...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "bl0hktgzu",
@@ -2234,7 +2328,8 @@ export const products = [
     "fabric": "Cotton",
     "description": "Product Description – Red Multicolour Thread Work Chikankari Saree\r\\nEmbrace the timeless beauty of handcrafted elegance with our Red Chikankari Saree, intricately worked with multicoloured thread embroidery that brings a vibrant twist to the classic craft.\r\\nThis saree is made from fine cotton fabr...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "ev5j2qzvu",
@@ -2258,7 +2353,8 @@ export const products = [
     "fabric": "Silk",
     "description": "Detailed Description:\r\\nGrace meets subtlety in this Grey-Blue Chikankari Chanderi Silk Saree, a perfect blend of timeless craftsmanship and modern sophistication. Drenched in a serene light greyish-blue hue, this saree reflects understated elegance, ideal for both day and evening occasions.\r\\nHandc...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "nx9uv1iys",
@@ -2279,12 +2375,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/12/WhatsApp-Image-2026-03-02-at-9.07.33-AM-1-1.jpeg"
     ],
     "sku": "TFN110067",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Organza",
     "description": "PRODUCT Description\r\\nThis Baby Pink Organza Chikankari Saree is a perfect blend of elegance and tradition. Crafted from premium organza, it features delicate hand-embroidered chikankari that beautifully complements the airy fabric. The saree is adorned with pearls and cutting beads, adding just the...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "mnia4lr04",
@@ -2310,7 +2407,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Product Description\r\\nThis Peach Organza Chikankari Saree is a stunning blend of elegance and delicacy. Crafted from premium organza, it drapes beautifully and feels incredibly light on the skin. The saree features intricate hand-embroidered chikankari, further highlighted with the shimmer of pearls...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "miksdlmuf",
@@ -2332,7 +2430,8 @@ export const products = [
     "fabric": "Organza",
     "description": "PRODUCT Description\r\\nThis Violet Organza Chikankari Saree is a true expression of graceful beauty and delicate craftsmanship. The premium organza fabric drapes effortlessly, offering a lightweight and luxurious feel. Intricate chikankari embroidery blends beautifully with subtle pearl accents and s...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "uruwcy6jr",
@@ -2352,12 +2451,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/11/safed-dhaara-3-1-scaled.jpg"
     ],
     "sku": "TFN110071",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Cotton",
     "description": "PRODUCT Description\r\\nThis White MUL Cotton Chikankari Saree is a beautiful celebration of simplicity, elegance, and traditional artistry. Made from lightweight, breathable cotton, it drapes softly and keeps you comfortable throughout the day. The saree features exquisite hand-embroidered chikankari...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "5jmcv4wsd",
@@ -2381,7 +2481,8 @@ export const products = [
     "fabric": "Cotton",
     "description": "Description\r\\nThis Red Mul Cotton Chikankari Saree beautifully blends traditional charm with everyday comfort. Crafted from breathable mul cotton, it feels incredibly soft and lightweight, making it perfect for long hours of wear. The saree features delicate hand-embroidered chikankari patterns that...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "dh745joyj",
@@ -2404,7 +2505,8 @@ export const products = [
     "fabric": "Silk",
     "description": "Description\r\\nThis Golden Yellow Chanderi Silk Chikankari Saree is a masterpiece crafted for the festive season. The luxurious Chanderi silk fabric brings a natural sheen and lightweight comfort, making it perfect for long celebrations. The saree is beautifully adorned with hand-embroidered chikanka...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "4yaq3em38",
@@ -2429,7 +2531,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Maroon Organza Silk Zardozi Saree\r\\n\r\\nThis Maroon Organza Zardozi Border Saree is a perfect blend of elegance and tradition. Crafted in premium organza silk, it features a rich maroon hue beautifully highlighted with handcrafted golden zardozi work along the border. The minimal, sheer body enhances...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "jnpwvxuyf",
@@ -2451,7 +2554,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "Muslin Sleeveless Chikankari Kurti – Detailed Description\r\\n. Crafted in premium-quality muslin fabric, known for its ultra-soft texture, breathability, and graceful fall\r\\n. Adorned with authentic handmade Chikankari embroidery, reflecting the timeless craftsmanship of Lucknow\r\\n. Sleeveless silhou...",
     "weight": ".250 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "nvmtyaqbj",
@@ -2476,7 +2580,8 @@ export const products = [
     "fabric": "Silk",
     "description": "White Gajji Silk Saree with Golden Boota & Border\r\\nRooted in timeless elegance, this white Gajji silk saree by SafedRang is a celebration of purity and refined craftsmanship. Woven in luxurious Gajji silk, the saree carries a rich, smooth texture with a graceful drape that flows effortlessly, makin...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "7wclnv8g8",
@@ -2500,7 +2605,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Golden Yellow Organza Zardozi Saree – Detailed Description\r\\nRadiating warmth, grace, and timeless luxury, this Golden Yellow Organza Saree is a true expression of refined elegance. Crafted in premium organza fabric, the saree features a delicate sheer texture with a soft natural sheen that enhances...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "qvwwgp6pw",
@@ -2521,12 +2627,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2026/02/udaan-7.jpeg"
     ],
     "sku": "TSJ110076",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Mixed",
     "description": "Muslin Saree with Cutting Beads & Bird Booti – Detailed Description\r\\nSoft, airy, and timelessly elegant, this Muslin Saree is a beautiful tribute to delicate craftsmanship and effortless grace. Crafted from premium-quality muslin, the saree feels feather-light on the skin, offering exceptional comf...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "6j6pb6ok6",
@@ -2545,12 +2652,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2026/02/geo-m-6-scaled.jpg"
     ],
     "sku": "TSF110081",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Georgette",
     "description": "Green Georgette Chikankari Saree with Mukaish Work\r\\nExperience timeless grace with our Green Georgette Chikankari Saree, a beautiful blend of Lucknow’s traditional artistry and effortless elegance. Handcrafted by skilled artisans, this saree reflects the delicate beauty of authentic Chikankari embr...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "g334ufqnb",
@@ -2570,12 +2678,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2026/02/chamk-7.jpeg"
     ],
     "sku": "TSF110080",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Organza",
     "description": "Lemon Yellow Chikankari Saree with Mukaish Work\r\\nRadiating freshness and subtle elegance, our Lemon Yellow Chikankari Saree is a celebration of delicate craftsmanship and timeless Lucknowi artistry. Handcrafted by skilled artisans, this saree beautifully combines traditional Chikankari embroidery w...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "diwqz5x7d",
@@ -2599,7 +2708,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\nMUSLIN CHIKANKARI KURTA SET – DETAILED DESCRIPTION\r\\n• Fabric: Premium quality Muslin fabric, known for its soft texture, lightweight feel, and breathable comfort. Perfect for all-day wear and summer-friendly styling.\r\\n• Craft: Handcrafted Lucknowi Chikankari embroidery created ...",
     "weight": ".400 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "1ulfroq50",
@@ -2622,7 +2732,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\nRAYON CHIKANKARI SHORT KURTI — DETAILED DESCRIPTION\r\\n• Fabric: Premium quality rayon fabric known for its soft texture, smooth fall, and breathable comfort. Perfect for all-day wear in every season.\r\\n• Work: Beautifully adorned with authentic white thread Chikankari embroidery ...",
     "weight": ".300 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "jm9c50rsd",
@@ -2641,12 +2752,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2026/03/WhatsApp-Image-2026-03-02-at-9.06.49-AM-1.jpeg"
     ],
     "sku": "TSJ110073",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Cotton",
     "description": "Peach Chikankari Cotton Saree with Mukaish Work \r\\nElegant peach-colored saree crafted in soft, breathable fabric that drapes beautifully and enhances natural grace. The soothing peach tone reflects subtle femininity and timeless sophistication, making it suitable for both day and evening occasions....",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "qd8q6kcvl",
@@ -2665,12 +2777,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2026/03/WhatsApp-Image-2026-03-02-at-9.05.38-AM-4.jpeg"
     ],
     "sku": "TSF110082",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Handcrafted",
     "fabric": "Mixed",
     "description": "Product Description\r\\nThis red crepe saree is a beautiful blend of subtle luxury and timeless craftsmanship. Designed in lightweight crepe fabric, the saree carries a delicate transparency and natural sheen that adds effortless grace to every movement. The highlight of this piece is its hand-embroid...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "566xs24w8",
@@ -2693,7 +2806,8 @@ export const products = [
     "fabric": "Cotton",
     "description": "Product Description:A perfect blend of comfort and traditional craftsmanship, this cotton Chikankari pant is beautifully adorned with delicate Gass Patti hand embroidery. Made from breathable cotton, it is designed to keep you comfortable throughout the day while adding a touch of Lucknow’s timeless...",
     "weight": ".250 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "zao5usvyc",
@@ -2713,7 +2827,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Chanderi Silk Basic Blouse – Dyeable\r\\n. Fabric: Premium quality Chanderi Silk, known for its lightweight feel and subtle natural sheen.\r\\n. Design: Classic basic blouse design, perfect to pair with any saree style.\r\\n. Dyeable Fabric: The blouse can be dyed in any colour of your choice, making it v...",
     "weight": "0.399 kg",
-    "dimensions": "20 × 15 × 2 cm"
+    "dimensions": "20 × 15 × 2 cm",
+    "stock": 2
   },
   {
     "id": "q3wqrub4i",
@@ -2734,33 +2849,33 @@ export const products = [
     "description": "Refined and versatile, this Light Purple Chanderi Silk Blouse is a timeless addition to your ethnic wardrobe. Crafted from luxurious Chanderi Silk, this blouse carries a natural sheen and soft texture.",
     "weight": "0.5 kg",
     "dimensions": "30 × 25 × 5 cm",
-    "stock": 5,
+    "stock": 10,
     "productType": "variable",
     "attributeName": "Size",
     "variations": [
       {
         "size": "36",
-        "stock": 1,
+        "stock": 2,
         "priceModifier": 0
       },
       {
         "size": "38",
-        "stock": 1,
+        "stock": 2,
         "priceModifier": 0
       },
       {
         "size": "40",
-        "stock": 1,
+        "stock": 2,
         "priceModifier": 0
       },
       {
         "size": "42",
-        "stock": 1,
+        "stock": 2,
         "priceModifier": 0
       },
       {
         "size": "44",
-        "stock": 1,
+        "stock": 2,
         "priceModifier": 0
       }
     ]
@@ -2827,33 +2942,33 @@ export const products = [
     "description": "Elegant Viscose Georgette Chikankari Kurti, intricately hand-embroidered with Lucknowi stitches. Fluid drape with a feather-light feel.",
     "weight": "0.250 kg",
     "dimensions": "44 × 25 × 5 cm",
-    "stock": 15,
+    "stock": 10,
     "productType": "variable",
     "attributeName": "Size",
     "variations": [
       {
         "size": "38",
-        "stock": 3,
+        "stock": 2,
         "priceModifier": 0
       },
       {
         "size": "40",
-        "stock": 3,
+        "stock": 2,
         "priceModifier": 0
       },
       {
         "size": "42",
-        "stock": 3,
+        "stock": 2,
         "priceModifier": 0
       },
       {
         "size": "44",
-        "stock": 3,
+        "stock": 2,
         "priceModifier": 0
       },
       {
         "size": "46",
-        "stock": 3,
+        "stock": 2,
         "priceModifier": 0
       }
     ]
@@ -2880,7 +2995,8 @@ export const products = [
     "fabric": "Kota",
     "description": "Description:This light baby pink Kota cotton chikankari saree is a summer essential—graceful, breathable, and effortlessly elegant. Designed for comfort and crafted with delicate hand embroidery, it brings together timeless Lucknowi artistry with everyday wearability.\r\\nProduct Description: Kota Cot...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "ucpieh4tp",
@@ -2905,7 +3021,8 @@ export const products = [
     "fabric": "Kota",
     "description": "Description 🌿\r\\nSoft as sunshine and light as air, this light yellow Kota cotton saree is a true summer essential. Adorned with delicate Chikankari embroidery, it carries the charm of simplicity with a touch of timeless elegance. The breathable fabric keeps you cool and comfortable, while the subtl...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "73t6bkhbx",
@@ -2930,7 +3047,8 @@ export const products = [
     "fabric": "Georgette",
     "description": "Mint Green Georgette Tepchi Chikankari Saree\r\\nSoft, serene, and effortlessly graceful — this mint green georgette saree is a perfect expression of minimal elegance. Crafted in lightweight georgette, it drapes beautifully while keeping you comfortable through warm summer days.\r\\nAdorned with delicat...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "38dziobyw",
@@ -2954,7 +3072,8 @@ export const products = [
     "fabric": "Georgette",
     "description": "\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\nProduct Name: Nazakat Chikankari Saree\r\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\nProduct Description:\r\\nSoft, graceful, and effortlessly elegant — this purple georgette Chikankari saree is a perfect blend of comfort and tradition. Crafted in lightweight georgette, it drapes beautifully and feels...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "4ty1grxao",
@@ -2983,7 +3102,8 @@ export const products = [
     "fabric": "Silk",
     "description": "Detailed Description:Crafted in the timeless elegance of Chanderi silk, this brick orange saree is a celebration of traditional craftsmanship and modern sophistication. The highlight of the saree lies in its exquisite hand Zardozi work, where finely detailed flying bird boota motifs are intricately ...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "0vs5wadnb",
@@ -3012,7 +3132,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "Detailed Description:\r\\nDraped in the richness of maroon and adorned with intricate hand zardozi work, this saree is a true celebration of timeless elegance. The luxurious crepe fabric flows effortlessly, creating a graceful silhouette that enhances every movement. The highlight of the saree lies in...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "yxallf749",
@@ -3034,12 +3155,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2026/03/peacock7-scaled.jpeg"
     ],
     "sku": "TSM110092",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Handcrafted",
     "fabric": "Mixed",
     "description": "\\n\r\\n\r\\n\r\\n\r\\n\r\\nDetailed Description:Draped in a serene teal/turquoise hue, this semi-tissue saree captures the essence of understated luxury. The fabric’s natural sheen enhances the richness of the color, while the lightweight texture ensures effortless grace with every movement. Adorned with fine...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "93ycry10t",
@@ -3068,7 +3190,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "🖤 Black Crepe Zardozi Saree – Detailed Description\r\\nProduct Description:A timeless expression of elegance, this black crepe saree is a perfect blend of subtle glamour and handcrafted artistry. Designed for effortless sophistication, the fluid drape of crepe paired with intricate zardozi detailing ...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "g42uzh79l",
@@ -3096,7 +3219,8 @@ export const products = [
     "fabric": "Organza",
     "description": "🌼 Detailed Description\r\\nDrenched in a glowing golden-yellow hue, this organza saree reflects the warmth of sunlight and the richness of tradition. The delicate transparency of organza paired with its glossy finish creates an ethereal drape that feels both modern and regal.\r\\nEach zardozi booti is ...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "2akmq504n",
@@ -3128,7 +3252,8 @@ export const products = [
     "fabric": "Chanderi Silk",
     "description": "🌸 Essence Description:\r\\nA poetic blend of tradition and lightness, this white Mul Chanderi saree reflects the delicate artistry of Lucknowi craftsmanship. The softness of Chikankari meets the sparkle of Mukaish, creating a look that feels both graceful and effortlessly radiant—like moonlight woven...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "64xr7hx0s",
@@ -3157,7 +3282,8 @@ export const products = [
     "fabric": "Chanderi Silk",
     "description": "\\nProduct Description\r\\nWhite Mul Chanderi Chikankari Saree with White Thread & Zari Border Work\r\\nGrace meets timeless elegance in this beautifully handcrafted White Mul Chanderi Chikankari Saree, designed for women who love understated luxury. Crafted in soft and airy Mul Chanderi fabric, this sar...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "mzdmpzq81",
@@ -3182,7 +3308,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "Muslin Sleeveless Chikankari Kurta Set with Palazzo\r\\nElevate your summer wardrobe with this graceful Muslin Sleeveless Chikankari Kurta Set, thoughtfully designed for effortless elegance and all-day comfort. Crafted in a soft, lightweight, and subtly shiny muslin fabric, this set brings together tr...",
     "weight": ".300 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "vugavwclm",
@@ -3205,12 +3332,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2026/04/MUL-MUKAISH-10-scaled.jpeg"
     ],
     "sku": "",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Chanderi Silk",
     "description": "Mul Chanderi Chikankari Semi-Stitched Kurta Set with Dupatta – Mukaish Work\r\\nGrace meets timeless elegance in this beautifully handcrafted Mul Chanderi Chikankari semi-stitched kurta set with dupatta. Designed for effortless summer sophistication, this ensemble is a perfect blend of traditional art...",
     "weight": ".400 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "8nqidd4dd",
@@ -3236,7 +3364,8 @@ export const products = [
     "fabric": "Chanderi Silk",
     "description": "Yellow Mul Chanderi Chikankari Unstitched Kurta Set with Dupatta\r\\nGrace meets comfort in this beautifully handcrafted Yellow Mul Chanderi Chikankari unstitched kurta set, designed to bring effortless elegance to your summer wardrobe. Crafted in soft and airy Mul Chanderi fabric, this set feels feat...",
     "weight": ".400 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "tc5u8frwr",
@@ -3261,7 +3390,8 @@ export const products = [
     "fabric": "Chanderi Silk",
     "description": "Blue Mul Chanderi Chikankari Unstitched Kurta Set with Dupatta\r\\nTimeless elegance meets everyday comfort in this beautifully handcrafted Blue Mul Chanderi Chikankari unstitched kurta set, thoughtfully designed for effortless summer dressing. Made from luxurious Mul Chanderi fabric, this ensemble is...",
     "weight": ".400 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "scumfns6q",
@@ -3287,7 +3417,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\nBlue Viscose Chikankari Unstitched Kurta Set with Dupatta\r\\nGraceful, versatile, and effortlessly elegant — this blue viscose Chikankari unstitched kurta set is a perfect blend of tradition and modern comfort. Designed for those who appreciate subtle craftsmanship, it features de...",
     "weight": ".400 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "so5ghn3ex",
@@ -3313,7 +3444,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\nTeal Green Viscose Chikankari Unstitched Kurta Set with Dupatta\r\\nElegant, refreshing, and timeless — this teal green viscose Chikankari unstitched kurta set is a beautiful expression of classic Lucknowi craftsmanship blended with modern comfort. The rich teal green hue adds a gr...",
     "weight": ".600 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "q9kawgsf8",
@@ -3337,12 +3469,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2026/04/KASTURI-13-scaled.jpeg"
     ],
     "sku": "TSA110097",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Organza",
     "description": "Brown Organza Silk Mukaish Saree – Timeless Festive Elegance\r\\nGrace your special moments with this exquisitely crafted brown organza silk saree, a perfect blend of elegance and tradition. Designed for women who appreciate subtle luxury, this saree is beautifully adorned with delicate handcrafted mu...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "xrg3r68wf",
@@ -3369,7 +3502,8 @@ export const products = [
     "fabric": "Chanderi Silk",
     "description": "Description:\r\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\nSoft, graceful, and effortlessly elegant, this light pink Mul Chanderi Chikankari saree is a timeless addition to your wardrobe. Crafted from premium Mul Chanderi fabric, it is lightweight, breathable, and exceptionally comfortable, making it a perfect choice f...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "omch6e0nd",
@@ -3397,7 +3531,8 @@ export const products = [
     "fabric": "Silk",
     "description": "Maroon Chanderi Silk Saree – Detailed Description\r\\nThe Maroon Chanderi Silk Saree is a timeless blend of elegance and traditional craftsmanship, designed to make every occasion feel special. Crafted from premium Chanderi silk fabric, this saree is exceptionally soft, lightweight, and beautifully sh...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "pjueqvg0w",
@@ -3420,12 +3555,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2026/05/KESARIYA-5-scaled.jpeg"
     ],
     "sku": "TSM110100",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Organza",
     "description": "Orange Organza Silk Chikankari Saree\r\\nDraped in the warmth of sunset hues, this orange organza silk saree is a graceful blend of elegance and tradition. Adorned with delicate hand-done Chikankari work, the saree reflects the timeless artistry of skilled karigars while maintaining a modern and light...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "ac50fj4fx",
@@ -3452,7 +3588,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Black Organza Silk Chikankari Saree\r\\nElegant, timeless, and effortlessly graceful, this black organza silk saree is a perfect blend of sophistication and traditional craftsmanship. Adorned with intricate Chikankari work, the saree beautifully showcases the delicate artistry of skilled karigars on a...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "2fj4xl2xi",
@@ -3477,7 +3614,8 @@ export const products = [
     "fabric": "Organza",
     "description": "\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\nMango Yellow Organza Silk Chikankari Saree\r\\nBright, cheerful, and gracefully elegant, this mango yellow organza silk saree is a perfect expression of timeless beauty and festive charm. Adorned with delicate Chikankari work, the saree beautifully reflects the ri...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "egucs2ori",
@@ -3504,7 +3642,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Maroon Organza Silk Chikankari Saree\r\\nRich, graceful, and timelessly elegant, this maroon organza silk saree is a beautiful celebration of traditional craftsmanship and modern sophistication. Adorned with delicate Chikankari work, the saree showcases the fine artistry of skilled karigars on a deep ...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "veyfole5n",
@@ -3531,7 +3670,8 @@ export const products = [
     "fabric": "Chanderi Silk",
     "description": "Mehak – Pure Mul Chanderi Handcrafted Chikankari Saree\r\\nGraceful, breathable, and timelessly elegant, Mehak is a celebration of the rich heritage of Lucknowi craftsmanship. Crafted on luxurious Pure Mul Chanderi fabric, this saree is adorned with intricate handcrafted Chikankari embroidery enhanced...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "txd9azlmy",
@@ -3556,7 +3696,8 @@ export const products = [
     "fabric": "Chanderi Silk",
     "description": "Pure Mul Chanderi Handcrafted Chikankari Saree\r\\nDelicate, graceful, and effortlessly elegant, Noor is a masterpiece that celebrates the beauty of traditional Lucknowi craftsmanship. Crafted from Pure Mul Chanderi fabric, this saree is adorned with exquisite handcrafted Chikankari embroidery, beauti...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "jv5r9wewd",
@@ -3583,7 +3724,8 @@ export const products = [
     "fabric": "Chanderi Silk",
     "description": "Neelambari – Teal Blue Mul Chanderi Chikankari Saree\r\\nGrace meets comfort in our Neelambari Teal Blue Mul Chanderi Chikankari Saree, a timeless piece handcrafted by skilled artisans of Lucknow. Adorned with intricate white thread hand Chikankari embroidery, this saree beautifully showcases the eleg...",
     "weight": "0.800 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "0l9p5vlvt",
@@ -3607,12 +3749,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2026/06/FIZA-9-scaled.jpeg"
     ],
     "sku": "TSJ110108",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Organza",
     "description": "FIZA – Pale Yellow Organza Silk Chikankari Saree\r\\nRadiating elegance and subtle charm, our Kanakpriya Pale Yellow Organza Silk Chikankari Saree is a beautiful blend of traditional artistry and contemporary grace. Handcrafted by skilled artisans, this exquisite saree features intricate hand Chikanka...",
     "weight": ".400 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "7xtr504w4",
@@ -3638,7 +3781,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Neerja – Powder Blue Organza Silk Chikankari Saree\r\\nDelicate, graceful, and timeless, our Neerja Powder Blue Organza Silk Chikankari Saree is a true reflection of Lucknow's rich handcraft heritage. Designed for women who appreciate elegance with comfort, this exquisite saree features intricate all-...",
     "weight": ".600 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "x8q5ngse1",
@@ -3660,12 +3804,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2026/06/tamsa-2-scaled.jpeg"
     ],
     "sku": "TSJ110109",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Organza",
     "description": "Tamsa – Mauve Organza Silk Chikankari Saree\r\\nSoft, graceful, and effortlessly elegant, our Gulnaar Mauve Organza Silk Chikankari Saree is a beautiful expression of timeless craftsmanship. Delicately handcrafted by skilled artisans, this saree features exquisite hand Chikankari embroidery that celeb...",
     "weight": ".500 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "rg27w93po",
@@ -3692,7 +3837,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Palash – Rusty Orange Organza Silk Chikankari Saree\r\\nVibrant, elegant, and handcrafted to perfection, our Kesariya Rusty Orange Organza Silk Chikankari Saree is a celebration of timeless artistry and festive charm. Adorned with intricate hand Chikankari embroidery, enhanced by delicate cutting bead...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "0xp6hpvhj",
@@ -3721,7 +3867,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Gulrang – Magenta Organza Silk Chikankari Saree\r\\nCelebrate timeless elegance with our Gulrang Magenta Organza Silk Chikankari Saree, a beautiful blend of traditional craftsmanship and contemporary sophistication. Handcrafted by skilled artisans, this saree showcases exquisite hand Chikankari embroi...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "tkp6x4yr6",
@@ -3746,7 +3893,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Haritima – Bottle Green Organza Silk Chikankari Saree\r\\nElegant, regal, and timeless, our Haritima Bottle Green Organza Silk Chikankari Saree is a beautiful tribute to the artistry of traditional hand embroidery. Crafted by skilled artisans, this exquisite saree is adorned with delicate hand Chikank...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "vs5rw7gxy",
@@ -3771,7 +3919,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Kaner ka phool – Red Organza Silk Chikankari Saree\r\\nBold, graceful, and timelessly elegant, our Raktima Red Organza Silk Chikankari Saree is a celebration of heritage craftsmanship and feminine beauty. Handcrafted by skilled artisans, this exquisite saree features delicate hand Chikankari embroider...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   },
   {
     "id": "ekyl0o5xe",
@@ -3793,12 +3942,13 @@ export const products = [
       "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2026/07/NILAYA-22-scaled.jpeg"
     ],
     "sku": "TSJ110202",
-    "stockStatus": "Out of Stock",
+    "stockStatus": "In Stock",
     "craft": "Lucknowi Chikankari",
     "fabric": "Organza",
     "description": "Nilaya Deep Blue Organza Silk Saree with Mukaish Work\r\\nStep into timeless elegance with our Nilaya Organza Silk Saree, a stunning expression of traditional craftsmanship and contemporary sophistication. Draped in a rich and captivating deep blue hue, this saree is beautifully adorned with delicate ...",
     "weight": "0.800 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "43u0etoan",
@@ -3825,7 +3975,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Saanjh – Deep Chocolate Organza Silk Chikankari Saree\r\\nIntroducing Saanjh, a timeless expression of traditional craftsmanship and contemporary elegance. Draped in a rich and luxurious deep chocolate colour, this exquisite Organza Silk Saree is beautifully adorned with intricate handcrafted Chikanka...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "wnymunz52",
@@ -3848,7 +3999,8 @@ export const products = [
     "fabric": "Chanderi Silk",
     "description": "Shwet Swarna – White Mul Chanderi Chikankari Saree\r\\nProduct Description:Embrace the timeless beauty of Indian craftsmanship with Shwet Swarna, an exquisite Mul Chanderi Chikankari saree designed for women who appreciate understated luxury. The pristine white base reflects purity and grace, while th...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "coct7e4aj",
@@ -3873,7 +4025,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "Titli Noor – Flamingo Pink Muslin Chikankari Saree\r\\n \r\\nProduct Description\r\\nStep into a world of timeless elegance with Titli Noor, a stunning Flamingo Pink Muslin Chikankari Saree that beautifully blends delicate craftsmanship with festive glamour. Crafted in soft and graceful muslin, this saree...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "72yr6uowa",
@@ -3898,7 +4051,8 @@ export const products = [
     "fabric": "Organza",
     "description": "\"Vasudha\" – Metallic Pink Handcrafted Zardozi Organza Silk Saree\r\\nProduct Description\r\\nStep into effortless elegance with \"vasudha\", a stunning Metallic Pink Organza Silk Saree that beautifully combines the charm of traditional craftsmanship with a contemporary sense of luxury. Crafted from a ligh...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "bacqtmth1",
@@ -3926,7 +4080,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Chestnut Glow – Handcrafted Zardozi Organza Silk Saree\r\\nProduct Description\r\\nDiscover understated luxury with this exquisite Chestnut Brown Organza Silk Saree, beautifully adorned with intricate handcrafted Zardozi work. Designed for the modern woman who appreciates timeless Indian craftsmanship, ...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "wivc75pc8",
@@ -3952,7 +4107,8 @@ export const products = [
     "fabric": "Cotton",
     "description": "Mehndi Green Linen Cotton Embroidered Saree\r\\nElevate your everyday elegance with our beautiful Mehndi Green Linen Cotton Embroidered Saree, thoughtfully designed for women who love effortless sophistication with a touch of traditional charm. Crafted in a soft and comfortable linen cotton fabric, th...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "qx9vmet33",
@@ -3977,7 +4133,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Powder Blue Organza Silk Cutting Beads Saree\r\\n\r\\n\r\\n\r\\n\r\\n\r\\n\r\\nAdd a touch of effortless elegance to your wardrobe with our exquisite Powder Blue Organza Silk Saree, beautifully adorned with delicate cutting bead embellishments. Designed for the modern woman who loves a graceful blend of sophistic...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "i82eymp4n",
@@ -4002,7 +4159,8 @@ export const products = [
     "fabric": "Organza",
     "description": "Lavender Organza Silk Cutting Beads Saree\r\\nStep into effortless elegance with our enchanting Lavender Organza Silk Saree, beautifully adorned with delicate cutting bead work. Designed for women who love a perfect balance of sophistication, comfort, and subtle glamour, this saree is a versatile addi...",
     "weight": "0.8 kg",
-    "dimensions": "30 × 30 × 7 cm"
+    "dimensions": "30 × 30 × 7 cm",
+    "stock": 2
   },
   {
     "id": "zz32ew75k",
@@ -4023,7 +4181,8 @@ export const products = [
     "fabric": "Mixed",
     "description": "",
     "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm"
+    "dimensions": "30 × 25 × 5 cm",
+    "stock": 2
   }
 ];
 

@@ -285,10 +285,15 @@ export default function Shop() {
     return counts;
   }, [products]);
 
+  const isProductAvailable = (p) => {
+    const rawStatus = (p.stockStatus || "").toLowerCase();
+    if (rawStatus === "sold out" || rawStatus === "out of stock") return false;
+    if (p.stock !== undefined && p.stock !== null && Number(p.stock) <= 0 && (!p.productType || p.productType === "simple")) return false;
+    return true;
+  };
+
   const stockCounts = useMemo(() => {
-    const inStock = products.filter(
-      (p) => p.stockStatus !== "Sold Out" && p.stockStatus !== "Out of Stock"
-    ).length;
+    const inStock = products.filter(isProductAvailable).length;
     const soldOut = products.length - inStock;
     return { inStock, soldOut };
   }, [products]);
@@ -358,13 +363,9 @@ export default function Shop() {
 
     // Filter by Availability
     if (activeAvailability === "in-stock") {
-      list = list.filter(
-        (p) => p.stockStatus !== "Sold Out" && p.stockStatus !== "Out of Stock"
-      );
+      list = list.filter(isProductAvailable);
     } else if (activeAvailability === "sold-out") {
-      list = list.filter(
-        (p) => p.stockStatus === "Sold Out" || p.stockStatus === "Out of Stock"
-      );
+      list = list.filter((p) => !isProductAvailable(p));
     }
 
     // Sorting

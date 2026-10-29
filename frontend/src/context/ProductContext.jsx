@@ -5,36 +5,42 @@ import { products as staticProducts } from "../data/products";
 const ProductContext = createContext();
 
 // Helper to normalize a raw Supabase product row into the frontend shape
-const formatProduct = (p) => ({
-  id: p.id,
-  title: p.name || p.title || "",
-  category: p.category?.name || p.category_name || p.category || "Uncategorized",
-  price: Number(p.price || 0),
-  salePrice: p.sale_price ? Number(p.sale_price) : p.salePrice ? Number(p.salePrice) : null,
-  description: p.description || "",
-  subcategory: p.subcategory || p.sub_category || "",
-  craft: p.craft || "",
-  fabric: p.fabric || p.material || "",
-  // Images can come from a joined table or a direct column
-  image:
-    p.images?.[0]?.url ||
-    p.images?.[0] ||
-    p.image_url ||
-    p.image ||
-    "https://via.placeholder.com/450x572?text=No+Image",
-  images:
-    Array.isArray(p.images)
-      ? p.images.map((img) => (typeof img === "string" ? img : img.url))
-      : p.image_url
-      ? [p.image_url]
-      : [],
-  stockStatus: (p.stock > 0 || p.in_stock) ? "In Stock" : "Out of Stock",
-  stock: p.stock ?? 0,
-  // Variation support
-  productType: p.productType || p.product_type || "simple",
-  attributeName: p.attributeName || p.attribute_name || "Size",
-  variations: Array.isArray(p.variations) ? p.variations : [],
-});
+const formatProduct = (p) => {
+  const stock = p.stock !== undefined && p.stock !== null ? Number(p.stock) : 2;
+  const rawStatus = (p.stock_status || p.stockStatus || "").toLowerCase();
+  const isOut = rawStatus === "out of stock" || rawStatus === "sold out" || stock <= 0;
+
+  return {
+    id: p.id,
+    title: p.name || p.title || "",
+    category: p.category?.name || p.category_name || p.category || "Uncategorized",
+    price: Number(p.price || 0),
+    salePrice: p.sale_price ? Number(p.sale_price) : p.salePrice ? Number(p.salePrice) : null,
+    description: p.description || "",
+    subcategory: p.subcategory || p.sub_category || "",
+    craft: p.craft || "",
+    fabric: p.fabric || p.material || "",
+    // Images can come from a joined table or a direct column
+    image:
+      p.images?.[0]?.url ||
+      p.images?.[0] ||
+      p.image_url ||
+      p.image ||
+      "https://via.placeholder.com/450x572?text=No+Image",
+    images:
+      Array.isArray(p.images)
+        ? p.images.map((img) => (typeof img === "string" ? img : img.url))
+        : p.image_url
+        ? [p.image_url]
+        : [],
+    stockStatus: isOut ? "Out of Stock" : "In Stock",
+    stock,
+    // Variation support
+    productType: p.productType || p.product_type || "simple",
+    attributeName: p.attributeName || p.attribute_name || "Size",
+    variations: Array.isArray(p.variations) ? p.variations : [],
+  };
+};
 
 export const ProductProvider = ({ children }) => {
   const [products, setProducts] = useState([]);

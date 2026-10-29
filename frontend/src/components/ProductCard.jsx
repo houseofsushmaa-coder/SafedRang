@@ -9,7 +9,11 @@ export default function ProductCard({ product }) {
   const { formatPrice } = useCurrency();
   const { toggleWishlist, isInWishlist } = useCart();
 
-  const isSold = product.stockStatus === "Sold Out";
+  const rawStatus = (product.stockStatus || "").toLowerCase();
+  const isSold =
+    rawStatus === "sold out" ||
+    rawStatus === "out of stock" ||
+    (product.stock !== undefined && product.stock !== null && Number(product.stock) <= 0 && (!product.productType || product.productType === "simple"));
   const hasSale = product.salePrice && product.salePrice < product.price;
   const isWishlisted = isInWishlist ? isInWishlist(product.id) : false;
 
@@ -83,9 +87,15 @@ export default function ProductCard({ product }) {
             </div>
           )}
 
-          <div className="editorial-badge">
-            <span className="badge-line-1">ONE OF ONE</span>
-          </div>
+          {isSold ? (
+            <div className="editorial-badge sold-out-badge" style={{ background: "rgba(0,0,0,0.8)", color: "#fff" }}>
+              <span className="badge-line-1">OUT OF STOCK</span>
+            </div>
+          ) : (
+            <div className="editorial-badge">
+              <span className="badge-line-1">ONE OF ONE</span>
+            </div>
+          )}
 
           <button
             className={`wishlist-icon ${isWishlisted ? "is-active" : ""}`}
