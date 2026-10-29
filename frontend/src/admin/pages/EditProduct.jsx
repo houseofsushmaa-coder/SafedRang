@@ -90,6 +90,17 @@ const EditProduct = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === "image") {
+      setFormData((prev) => {
+        const remaining = (prev.images || []).filter((img) => img !== prev.image && img !== value);
+        return {
+          ...prev,
+          image: value,
+          images: value ? [value, ...remaining] : remaining,
+        };
+      });
+      return;
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -118,11 +129,14 @@ const EditProduct = () => {
     setUploading(true);
     try {
       const url = await uploadToStorage(file);
-      setFormData((prev) => ({
-        ...prev,
-        image: url,
-        images: prev.images.length === 0 ? [url] : [url, ...prev.images.slice(1)],
-      }));
+      setFormData((prev) => {
+        const remaining = (prev.images || []).filter((img) => img !== prev.image && img !== url);
+        return {
+          ...prev,
+          image: url,
+          images: [url, ...remaining],
+        };
+      });
     } catch (err) {
       console.error("Image upload failed:", err);
       alert("Image upload failed: " + err.message);
@@ -226,8 +240,20 @@ const EditProduct = () => {
     }
 
     setSaving(true);
+    const rawImages = Array.isArray(formData.images)
+      ? formData.images.filter(Boolean)
+      : formData.image
+      ? [formData.image]
+      : [];
+    const primaryImage = formData.image || rawImages[0] || "";
+    const syncedImages = primaryImage
+      ? [primaryImage, ...rawImages.filter((x) => x !== primaryImage)]
+      : rawImages;
+
     const payload = {
       ...formData,
+      image: primaryImage,
+      images: syncedImages,
       price: parseFloat(formData.price) || 0,
       salePrice: formData.salePrice ? parseFloat(formData.salePrice) : null,
       stock:

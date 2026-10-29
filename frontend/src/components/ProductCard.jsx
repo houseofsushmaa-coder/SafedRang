@@ -17,13 +17,15 @@ export default function ProductCard({ product }) {
   const hasSale = product.salePrice && product.salePrice < product.price;
   const isWishlisted = isInWishlist ? isInWishlist(product.id) : false;
 
-  // Extract all available product images
+  // Extract all available product images — ensuring primary image is always at index 0
   const imagesList = useMemo(() => {
-    if (Array.isArray(product.images) && product.images.length > 0) {
-      return product.images.filter(Boolean);
-    }
+    const rawImages = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
     if (product.image) {
-      return [product.image];
+      const rest = rawImages.filter((img) => img !== product.image);
+      return [product.image, ...rest];
+    }
+    if (rawImages.length > 0) {
+      return rawImages;
     }
     return ["https://via.placeholder.com/450x572?text=No+Image"];
   }, [product.images, product.image]);

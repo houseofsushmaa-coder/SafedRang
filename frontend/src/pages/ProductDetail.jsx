@@ -32,7 +32,7 @@ export default function ProductDetail() {
   );
 
   const [activeImage, setActiveImage] = useState(
-    product?.images?.[0] || product?.image,
+    product?.image || product?.images?.[0],
   );
   const [activeTab, setActiveTab] = useState("details");
   const [pincode, setPincode] = useState("");
@@ -74,7 +74,7 @@ export default function ProductDetail() {
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     if (product) {
-      setActiveImage(product.images?.[0] || product.image);
+      setActiveImage(product.image || product.images?.[0]);
       setPincodeStatus(null);
       setSelectedSize(null);
       trackEvent("view_item", {
@@ -172,7 +172,14 @@ export default function ProductDetail() {
     );
   }
 
-  const imagesList = product.images?.length > 0 ? product.images : (product.image ? [product.image] : []);
+  const imagesList = (() => {
+    const raw = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
+    if (product.image) {
+      const rest = raw.filter((img) => img !== product.image);
+      return [product.image, ...rest];
+    }
+    return raw.length > 0 ? raw : ["https://via.placeholder.com/450x572?text=No+Image"];
+  })();
 
   return (
     <div className="pdp-container">
