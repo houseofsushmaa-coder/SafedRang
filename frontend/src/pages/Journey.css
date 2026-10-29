@@ -1,0 +1,940 @@
+/* ==========================================================================
+   SAFED RANG — OUR JOURNEY (HOUSE OF SUSHMA)
+   Luxury Brand Heritage, Founder Story & Animated Embroidery Narrative
+   Brand Colors:
+   - Royal Wine:      #6E1E2A
+   - Antique Gold:    #AE8A54
+   - Champagne Gold:  #C9A876
+   - Light Gold:      #E8D4B4
+   - Warm Ivory:      #FAF5EC
+   - Deep Ivory:      #F5EEE2
+   - Dark Charcoal:   #2A211D
+   - Muted Taupe:     #7D7065
+   ========================================================================== */
+
+:root {
+  --journey-wine: #6E1E2A;
+  --journey-wine-dark: #52151F;
+  --journey-wine-deep: #3B0E16;
+  --journey-gold: #AE8A54;
+  --journey-gold-light: #C9A876;
+  --journey-gold-pale: #E8D4B4;
+  --journey-gold-glow: rgba(174, 138, 84, 0.4);
+  --journey-ivory: #FAF5EC;
+  --journey-ivory-deep: #F5EEE2;
+  --journey-charcoal: #2A211D;
+  --journey-charcoal-dark: #1D1614;
+  --journey-taupe: #7D7065;
+  --journey-font-serif: var(--font-heading, "Cormorant Garamond", Georgia, serif);
+  --journey-font-sans: var(--font-body, "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+}
+
+.journey-page {
+  background-color: var(--journey-ivory);
+  color: var(--journey-charcoal);
+  font-family: var(--journey-font-sans);
+  line-height: 1.75;
+  overflow-x: hidden;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   1. HERO SECTION: THE OPENING
+   ────────────────────────────────────────────────────────────────────────── */
+.journey-hero {
+  position: relative;
+  min-height: 85vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7rem 2rem 6rem;
+  background-color: var(--journey-wine-deep);
+  color: #FAF5EC;
+  overflow: hidden;
+  text-align: center;
+}
+
+.journey-hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+.hero-backdrop-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  filter: brightness(0.62) saturate(1.15);
+  transform: scale(1.03);
+  transition: transform 1.2s ease-out;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(29, 10, 14, 0.72) 0%,
+    rgba(110, 30, 42, 0.82) 45%,
+    rgba(42, 33, 29, 0.95) 100%
+  );
+}
+
+.journey-hero-container {
+  position: relative;
+  z-index: 2;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.journey-hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.journey-eyebrow {
+  font-family: var(--journey-font-sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  color: var(--journey-gold-light);
+  text-transform: uppercase;
+  margin-bottom: 1.4rem;
+  display: inline-block;
+  position: relative;
+}
+
+.journey-eyebrow::after {
+  content: "";
+  display: block;
+  width: 36px;
+  height: 1px;
+  background-color: var(--journey-gold);
+  margin: 0.6rem auto 0;
+  opacity: 0.7;
+}
+
+.journey-hero-title {
+  font-family: var(--journey-font-serif);
+  font-size: clamp(2.4rem, 5.2vw, 4.2rem);
+  font-weight: 400;
+  line-height: 1.16;
+  letter-spacing: 0.02em;
+  color: #FFFFFF;
+  margin-bottom: 2rem;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+}
+
+.journey-hero-title-italic {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--journey-gold-pale);
+  letter-spacing: 0.01em;
+}
+
+.journey-hero-narrative {
+  max-width: 680px;
+  margin: 0 auto 2.5rem;
+}
+
+.journey-hero-narrative p {
+  font-size: clamp(1.02rem, 1.3vw, 1.15rem);
+  line-height: 1.85;
+  color: #F3EBDD;
+  margin-bottom: 1.25rem;
+  font-weight: 300;
+}
+
+.journey-hero-narrative .journey-hero-lead {
+  font-size: clamp(1.08rem, 1.4vw, 1.22rem);
+  color: #FFFFFF;
+  font-weight: 400;
+  margin-top: 1.5rem;
+  border-left: 2px solid var(--journey-gold);
+  padding-left: 1.2rem;
+  text-align: left;
+  background: rgba(174, 138, 84, 0.08);
+  padding: 0.9rem 1.2rem;
+  border-radius: 0 4px 4px 0;
+}
+
+.journey-hero-action {
+  margin-top: 1.5rem;
+}
+
+.journey-thread-prompt {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.85rem 1.8rem;
+  background: rgba(174, 138, 84, 0.15);
+  border: 1px solid var(--journey-gold);
+  color: var(--journey-gold-pale);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 40px;
+  backdrop-filter: blur(8px);
+  transition: all 0.35s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.journey-thread-prompt:hover {
+  background: var(--journey-gold);
+  color: var(--journey-charcoal-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px var(--journey-gold-glow);
+}
+
+.thread-needle-icon {
+  font-size: 1rem;
+}
+
+.prompt-arrow {
+  transition: transform 0.3s ease;
+}
+
+.journey-thread-prompt:hover .prompt-arrow {
+  transform: translateY(3px);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   2. CONTINUOUS EMBROIDERY THREAD & TIMELINE SYSTEM
+   ────────────────────────────────────────────────────────────────────────── */
+.journey-timeline-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* The vertical embroidery thread that guides the reader down the page */
+.journey-thread-column {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.thread-track {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.thread-guide-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(174, 138, 84, 0.18) 0px,
+    rgba(174, 138, 84, 0.18) 8px,
+    transparent 8px,
+    transparent 14px
+  );
+}
+
+.thread-drawn-line {
+  position: absolute;
+  top: 0;
+  left: -0.5px;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    rgba(174, 138, 84, 0.6) 0%,
+    var(--journey-gold) 70%,
+    #F3E2C4 100%
+  );
+  box-shadow: 0 0 10px rgba(201, 168, 118, 0.45);
+  transition: height 0.15s ease-out;
+}
+
+.thread-needle-tip {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.needle-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #FFF5E1;
+  border: 1.5px solid var(--journey-gold);
+  box-shadow: 0 0 12px #FFF0D0, 0 0 6px var(--journey-gold);
+  animation: threadNeedleGlow 2.5s infinite ease-in-out;
+}
+
+@keyframes threadNeedleGlow {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 8px #FFF0D0, 0 0 4px var(--journey-gold);
+  }
+  50% {
+    transform: scale(1.3);
+    box-shadow: 0 0 16px #FFFDF5, 0 0 8px var(--journey-gold-light);
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   3. CHAPTER SECTIONS: EDITORIAL TILES & THEMES
+   ────────────────────────────────────────────────────────────────────────── */
+.journey-chapters-stream {
+  position: relative;
+  z-index: 3;
+}
+
+.journey-chapter-section {
+  padding: 6.5rem 2rem;
+  position: relative;
+  border-bottom: 1px solid rgba(174, 138, 84, 0.15);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0.88;
+}
+
+.journey-chapter-section.revealed {
+  opacity: 1;
+}
+
+/* Theme 1: Warm Ivory (Chapter 01, 03, 06) */
+.journey-chapter-section.theme-light {
+  background-color: var(--journey-ivory);
+  color: var(--journey-charcoal);
+}
+
+/* Theme 2: Deep Ivory (Chapter 02, 04) */
+.journey-chapter-section.theme-ivory {
+  background-color: var(--journey-ivory-deep);
+  color: var(--journey-charcoal);
+}
+
+/* Theme 3: Royal Wine (Chapter 05 — The One-of-One Edit) */
+.journey-chapter-section.theme-wine {
+  background: linear-gradient(180deg, #621924 0%, #6E1E2A 85%, #591620 100%);
+  color: #FAF5EC;
+  border-color: rgba(201, 168, 118, 0.3);
+}
+
+.theme-wine .chapter-kicker {
+  color: var(--journey-gold-pale);
+}
+
+.theme-wine .chapter-headline {
+  color: #FFFFFF;
+}
+
+.theme-wine .chapter-body p {
+  color: #F5EAE0;
+}
+
+.theme-wine .chapter-closing-box {
+  background: rgba(0, 0, 0, 0.22);
+  border-color: var(--journey-gold);
+}
+
+.theme-wine .chapter-closing-quote {
+  color: var(--journey-gold-pale);
+}
+
+.theme-wine .chapter-watermark {
+  color: rgba(255, 255, 255, 0.05);
+}
+
+/* Chapter Container & Marker */
+.journey-chapter-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.chapter-timeline-marker {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 3.5rem;
+  position: relative;
+  z-index: 4;
+}
+
+.marker-node {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--journey-ivory);
+  border: 1.5px solid var(--journey-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s ease;
+}
+
+.theme-wine .marker-node {
+  background: var(--journey-wine-dark);
+  border-color: var(--journey-gold-light);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.marker-node.active {
+  border-color: var(--journey-gold-light);
+  background: var(--journey-gold);
+  transform: scale(1.1);
+  box-shadow: 0 0 20px var(--journey-gold-glow);
+}
+
+.marker-inner {
+  font-family: var(--journey-font-serif);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--journey-gold);
+  letter-spacing: 0.08em;
+  transition: color 0.3s ease;
+}
+
+.marker-node.active .marker-inner {
+  color: #FFFFFF;
+}
+
+.theme-wine .marker-node:not(.active) .marker-inner {
+  color: var(--journey-gold-pale);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   4. TWO-COLUMN EDITORIAL GRID (ALTERNATING)
+   ────────────────────────────────────────────────────────────────────────── */
+.chapter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4.5rem;
+  align-items: center;
+  position: relative;
+}
+
+.layout-reverse .chapter-grid {
+  direction: rtl;
+}
+
+.layout-reverse .chapter-media-col,
+.layout-reverse .chapter-content-col {
+  direction: ltr;
+}
+
+/* Media Column & Luxury Photo Frame */
+.chapter-media-col {
+  position: relative;
+}
+
+.chapter-image-frame {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(42, 33, 29, 0.12);
+  border: 1px solid rgba(174, 138, 84, 0.35);
+  background: #111111;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+}
+
+.theme-wine .chapter-image-frame {
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+  border-color: rgba(201, 168, 118, 0.45);
+}
+
+.chapter-image-frame:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 50px rgba(42, 33, 29, 0.2);
+}
+
+.chapter-photo {
+  width: 100%;
+  height: 520px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.chapter-image-frame:hover .chapter-photo {
+  transform: scale(1.03);
+}
+
+.chapter-image-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.9rem 1.4rem;
+  background: linear-gradient(180deg, transparent 0%, rgba(20, 15, 14, 0.88) 100%);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--journey-gold-pale);
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  font-weight: 500;
+  text-transform: uppercase;
+  border-top: 1px solid rgba(174, 138, 84, 0.2);
+}
+
+/* Content Column & Typography */
+.chapter-content-col {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.chapter-watermark {
+  position: absolute;
+  top: -4.5rem;
+  right: -1rem;
+  font-family: var(--journey-font-serif);
+  font-size: clamp(6rem, 9vw, 9.5rem);
+  font-weight: 300;
+  color: rgba(174, 138, 84, 0.08);
+  line-height: 1;
+  pointer-events: none;
+  z-index: 0;
+  user-select: none;
+}
+
+.layout-reverse .chapter-watermark {
+  right: auto;
+  left: -1rem;
+}
+
+.chapter-header {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 1.8rem;
+}
+
+.chapter-kicker {
+  font-family: var(--journey-font-sans);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  color: var(--journey-gold);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.65rem;
+}
+
+.chapter-headline {
+  font-family: var(--journey-font-serif);
+  font-size: clamp(2rem, 3.2vw, 2.75rem);
+  font-weight: 400;
+  line-height: 1.22;
+  color: var(--journey-charcoal);
+  letter-spacing: 0.01em;
+}
+
+.chapter-body {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 2rem;
+}
+
+.chapter-body p {
+  font-size: 1.02rem;
+  line-height: 1.88;
+  color: #4A3E36;
+  margin-bottom: 1.15rem;
+  font-weight: 400;
+}
+
+.chapter-body p:last-child {
+  margin-bottom: 0;
+}
+
+.chapter-closing-box {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 1.15rem 1.4rem;
+  background: rgba(174, 138, 84, 0.08);
+  border-left: 2px solid var(--journey-gold);
+  border-radius: 0 4px 4px 0;
+  margin-bottom: 1.8rem;
+}
+
+.closing-gem {
+  color: var(--journey-gold);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.chapter-closing-quote {
+  font-family: var(--journey-font-serif);
+  font-size: 1.14rem;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--journey-charcoal);
+  margin: 0;
+}
+
+.chapter-cta-wrap {
+  position: relative;
+  z-index: 1;
+  margin-top: 0.8rem;
+}
+
+.chapter-light-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.85rem 1.8rem;
+  background: transparent;
+  color: var(--journey-charcoal);
+  border: 1px solid var(--journey-charcoal);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.chapter-light-cta:hover {
+  background: var(--journey-charcoal);
+  color: #FFFFFF;
+  transform: translateX(4px);
+}
+
+.chapter-wine-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.85rem 1.8rem;
+  background: var(--journey-gold);
+  color: var(--journey-charcoal-dark);
+  border: 1px solid var(--journey-gold);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.chapter-wine-cta:hover {
+  background: #FFFFFF;
+  border-color: #FFFFFF;
+  color: var(--journey-wine-dark);
+  transform: translateX(4px);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   5. SECTION 08 — THE STORY CONTINUES (FINALE)
+   ────────────────────────────────────────────────────────────────────────── */
+.journey-finale-section {
+  padding: 7rem 2rem 6.5rem;
+  background-color: var(--journey-charcoal-dark);
+  color: #FAF5EC;
+  position: relative;
+  text-align: center;
+  overflow: hidden;
+  border-top: 1px solid rgba(174, 138, 84, 0.3);
+}
+
+.journey-finale-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(110, 30, 42, 0.45) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.finale-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 1.8rem;
+}
+
+.ornament-stitch {
+  width: 50px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--journey-gold), transparent);
+}
+
+.ornament-diamond {
+  color: var(--journey-gold);
+  font-size: 0.9rem;
+}
+
+.finale-eyebrow {
+  font-family: var(--journey-font-sans);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  color: var(--journey-gold);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.finale-title {
+  font-family: var(--journey-font-serif);
+  font-size: clamp(2.3rem, 4.8vw, 3.8rem);
+  font-weight: 400;
+  color: #FFFFFF;
+  line-height: 1.2;
+  margin-bottom: 2.2rem;
+  letter-spacing: 0.02em;
+}
+
+.finale-narrative {
+  max-width: 680px;
+  margin: 0 auto 3rem;
+}
+
+.finale-narrative p {
+  font-size: 1.08rem;
+  line-height: 1.9;
+  color: #E2D7CC;
+  margin-bottom: 1.25rem;
+  font-weight: 300;
+}
+
+.finale-narrative .finale-emphasis {
+  font-size: 1.15rem;
+  color: var(--journey-gold-pale);
+  font-weight: 400;
+  font-style: italic;
+  font-family: var(--journey-font-serif);
+  margin: 1.6rem 0;
+}
+
+.finale-narrative .finale-waiting {
+  font-size: 1.12rem;
+  color: #FFFFFF;
+  font-weight: 500;
+}
+
+.finale-signature-wrap {
+  margin-top: 2rem;
+}
+
+.finale-invitation {
+  font-family: var(--journey-font-serif);
+  font-size: 1.45rem;
+  font-weight: 400;
+  color: var(--journey-gold-light);
+  letter-spacing: 0.04em;
+  margin-bottom: 2rem;
+}
+
+.finale-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 3.5rem;
+}
+
+.finale-btn-primary {
+  padding: 0.95rem 2.4rem;
+  background-color: var(--journey-wine);
+  color: #FFFFFF;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid var(--journey-wine);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(110, 30, 42, 0.4);
+}
+
+.finale-btn-primary:hover {
+  background-color: #8C2736;
+  border-color: #8C2736;
+  color: #FFFFFF;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(110, 30, 42, 0.6);
+}
+
+.finale-btn-secondary {
+  padding: 0.95rem 2.4rem;
+  background: transparent;
+  color: var(--journey-gold-pale);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid var(--journey-gold);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.finale-btn-secondary:hover {
+  background: var(--journey-gold);
+  color: var(--journey-charcoal-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px var(--journey-gold-glow);
+}
+
+.finale-brandmark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(174, 138, 84, 0.2);
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.brand-house {
+  font-family: var(--journey-font-sans);
+  font-size: 0.68rem;
+  letter-spacing: 0.32em;
+  color: var(--journey-gold);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.brand-name {
+  font-family: var(--journey-font-serif);
+  font-size: 1.4rem;
+  letter-spacing: 0.18em;
+  color: #FFFFFF;
+  font-weight: 500;
+}
+
+.brand-city {
+  font-family: var(--journey-font-sans);
+  font-size: 0.66rem;
+  letter-spacing: 0.28em;
+  color: var(--journey-taupe);
+  text-transform: uppercase;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   6. RESPONSIVE ADAPTATIONS
+   ────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .chapter-grid {
+    gap: 3rem;
+  }
+  .chapter-photo {
+    height: 440px;
+  }
+}
+
+@media (max-width: 860px) {
+  .journey-thread-column {
+    display: none; /* Hide center thread on tablet/mobile to prevent overlapping content */
+  }
+
+  .chapter-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .layout-reverse .chapter-grid {
+    direction: ltr;
+  }
+
+  .chapter-photo {
+    height: 380px;
+  }
+
+  .chapter-timeline-marker {
+    margin-bottom: 2rem;
+  }
+
+  .chapter-watermark {
+    top: -2.5rem;
+    font-size: 5rem;
+  }
+
+  .journey-hero {
+    padding: 6rem 1.5rem 4.5rem;
+  }
+
+  .journey-chapter-section {
+    padding: 4.5rem 1.5rem;
+  }
+
+  .journey-finale-section {
+    padding: 5rem 1.5rem 4.5rem;
+  }
+}
+
+@media (max-width: 580px) {
+  .chapter-photo {
+    height: 300px;
+  }
+
+  .chapter-headline {
+    font-size: 1.85rem;
+  }
+
+  .chapter-closing-quote {
+    font-size: 1.02rem;
+  }
+
+  .finale-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .finale-btn-primary,
+  .finale-btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   7. ACCESSIBILITY: PREFERS-REDUCED-MOTION
+   ────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .journey-chapter-section,
+  .chapter-image-frame,
+  .chapter-photo,
+  .needle-dot,
+  .hero-backdrop-img {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+  .journey-chapter-section {
+    opacity: 1 !important;
+  }
+}

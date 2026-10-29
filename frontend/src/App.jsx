@@ -12,6 +12,7 @@ import Home from "./pages/Home";
 import Shop from "./pages/Shop";
 import About from "./pages/About";
 import Craft from "./pages/Craft";
+import Journey from "./pages/Journey";
 import CareGuide from "./pages/CareGuide";
 import ProductDetail from "./pages/ProductDetail";
 import Checkout from "./pages/Checkout";
@@ -207,7 +208,8 @@ function App() {
                 <Route path="payment/verify" element={<PaymentVerify />} />
                 <Route path="order-success" element={<OrderSuccess />} />
                 <Route path="one-of-one" element={<Shop />} />
-                <Route path="journal" element={<Craft />} />
+                <Route path="journey" element={<Journey />} />
+                <Route path="journal" element={<Journey />} />
                 <Route path="story" element={<About />} />
                 <Route path="artisans" element={<Craft />} />
                 <Route path="care" element={<CareGuide />} />

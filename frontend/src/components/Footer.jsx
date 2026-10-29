@@ -126,7 +126,7 @@ export default function Footer() {
                 <Link to="/artisans">Artisans</Link>
               </li>
               <li>
-                <Link to="/journal">Journal</Link>
+                <Link to="/journey">Journey</Link>
               </li>
               <li>
                 <Link to="/archive">Archive</Link>

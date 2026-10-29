@@ -170,7 +170,7 @@ export default function Header() {
                   <Link to="/about">ABOUT US</Link>
                 </li>
                 <li>
-                  <Link to="/journal">JOURNAL</Link>
+                  <Link to="/journey">JOURNEY</Link>
                 </li>
               </ul>
             </nav>
@@ -628,8 +628,8 @@ export default function Header() {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/journal" onClick={() => setIsMobileMenuOpen(false)}>
-                    JOURNAL
+                  <Link to="/journey" onClick={() => setIsMobileMenuOpen(false)}>
+                    JOURNEY
                   </Link>
                 </li>
               </ul>
