@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useProducts } from "../../context/ProductContext";
 import { adminService } from "../adminService";
 import {
@@ -92,12 +92,20 @@ function downloadTemplate() {
 const Products = () => {
   const { products, deleteProduct, addProduct, loading } = useProducts();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   // ── Filter state ───────────────────────────────────────────────────
   const [searchTerm, setSearchTerm]         = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState(searchParams.get("category") || "all");
   const [statusFilter, setStatusFilter]     = useState("all");
   const [categories, setCategories]         = useState([]);
+
+  useEffect(() => {
+    const urlCat = searchParams.get("category");
+    if (urlCat) {
+      setCategoryFilter(urlCat);
+    }
+  }, [searchParams]);
 
   // ── Bulk import state ──────────────────────────────────────────────
   const [showImportModal, setShowImportModal] = useState(false);
@@ -141,7 +149,14 @@ const Products = () => {
     const matchSearch =
       (p.title || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchCat    = categoryFilter === "all" || p.category === categoryFilter;
+
+    let matchCat = categoryFilter === "all";
+    if (!matchCat) {
+      const pCat = (p.category || "").toLowerCase().trim();
+      const fCat = categoryFilter.toLowerCase().trim();
+      matchCat = pCat === fCat || pCat.replace(/s$/, "") === fCat.replace(/s$/, "");
+    }
+
     const matchStatus = statusFilter === "all" ||
       (p.stockStatus || "").toLowerCase() === statusFilter.toLowerCase();
     return matchSearch && matchCat && matchStatus;

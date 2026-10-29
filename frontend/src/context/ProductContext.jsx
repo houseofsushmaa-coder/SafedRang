@@ -4,6 +4,19 @@ import { products as staticProducts } from "../data/products";
 
 const ProductContext = createContext();
 
+// Helper to normalize category names across CSV imports, database, and UI
+export const normalizeCategoryName = (rawCat) => {
+  if (!rawCat) return "Others";
+  const c = rawCat.trim();
+  const lower = c.toLowerCase();
+  if (lower === "dupatta" || lower === "dupattas" || lower === "duppata" || lower === "duppatta") return "Dupattas";
+  if (lower === "saree" || lower === "sarees" || lower === "sari") return "Sarees";
+  if (lower === "kurta set" || lower === "kurta sets" || lower === "kurta" || lower === "kurtas") return "Kurta Sets";
+  if (lower === "blouse" || lower === "blouses") return "Blouses";
+  if (lower === "bottom" || lower === "bottoms" || lower === "jewellery" || lower === "jewelry") return "Others";
+  return c;
+};
+
 // Helper to normalize a raw Supabase product row into the frontend shape
 const formatProduct = (p) => {
   const stock = p.stock !== undefined && p.stock !== null ? Number(p.stock) : 2;
@@ -13,7 +26,7 @@ const formatProduct = (p) => {
   return {
     id: p.id,
     title: p.name || p.title || "",
-    category: p.category?.name || p.category_name || p.category || "Uncategorized",
+    category: normalizeCategoryName(p.category?.name || p.category_name || p.category),
     price: Number(p.price || 0),
     salePrice: p.sale_price ? Number(p.sale_price) : p.salePrice ? Number(p.salePrice) : null,
     description: p.description || "",
@@ -96,7 +109,7 @@ export const ProductProvider = ({ children }) => {
     const formatted = {
       id: product.id || `prod_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
       title: product.title || product.name || "",
-      category: product.category || "Uncategorized",
+      category: normalizeCategoryName(product.category),
       price: Number(product.price || 0),
       salePrice: product.salePrice ? Number(product.salePrice) : null,
       description: product.description || "",

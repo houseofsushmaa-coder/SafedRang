@@ -1,16 +1,20 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Plus, Search, Edit2, Trash2, Tags, ChevronRight,
-  Loader2, FolderOpen, AlertCircle,
+  Loader2, FolderOpen, AlertCircle, Package,
 } from "lucide-react";
 import "./AdminPages.css";
 import "./Settings.css";
 
 import { adminService } from "../adminService";
+import { useProducts } from "../../context/ProductContext";
 
 const EMPTY_FORM = { name: "", description: "", parentId: "", sortOrder: 0, status: "ACTIVE" };
 
 const Categories = () => {
+  const navigate = useNavigate();
+  const { products } = useProducts();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -21,6 +25,23 @@ const Categories = () => {
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
+
+  // Helper to count products matching a category name (handles singular/plural and spelling variants)
+  const getCategoryProductCount = (catName) => {
+    if (!catName || !products) return 0;
+    const target = catName.toLowerCase().trim();
+    const targetNorm = target.replace(/s$/, "");
+    return products.filter((p) => {
+      const pCat = (p.category || "").toLowerCase().trim();
+      const pCatNorm = pCat.replace(/s$/, "");
+      if (pCat === target || pCatNorm === targetNorm) return true;
+      if (targetNorm.includes("dupat") && (pCatNorm.includes("dupat") || pCatNorm.includes("duppat"))) return true;
+      if (targetNorm.includes("saree") && pCatNorm.includes("saree")) return true;
+      if (targetNorm.includes("kurta") && pCatNorm.includes("kurta")) return true;
+      if (targetNorm.includes("blouse") && pCatNorm.includes("blouse")) return true;
+      return false;
+    }).length;
+  };
 
   const showToast = (msg) => {
     setToast(msg);
@@ -136,9 +157,23 @@ const Categories = () => {
               id="category-search"
             />
           </div>
-          <span style={{ fontSize: "0.85rem", color: "var(--admin-text-muted)" }}>
-            {filtered.length} categor{filtered.length !== 1 ? "ies" : "y"}
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <span style={{ fontSize: "0.85rem", color: "var(--admin-text-muted)" }}>
+              {filtered.length} categor{filtered.length !== 1 ? "ies" : "y"}
+            </span>
+            <span
+              style={{
+                fontSize: "0.78rem",
+                color: "var(--admin-primary-hover)",
+                background: "rgba(174,138,84,0.12)",
+                padding: "2px 8px",
+                borderRadius: "99px",
+                fontWeight: 600,
+              }}
+            >
+              {products.length} products synced
+            </span>
+          </div>
         </div>
 
         {loading ? (
@@ -161,7 +196,8 @@ const Categories = () => {
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Name</th>
+                <th>Category Name</th>
+                <th>Products</th>
                 <th>Parent</th>
                 <th>Sub-categories</th>
                 <th>Sort</th>
@@ -170,29 +206,62 @@ const Categories = () => {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((cat) => (
-                <tr key={cat.id}>
-                  <td>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      {cat.parentName && <ChevronRight size={14} color="var(--admin-text-muted)" />}
-                      <div className="cat-icon-wrap">
-                        <Tags size={16} />
+              {filtered.map((cat) => {
+                const prodCount = getCategoryProductCount(cat.name);
+                return (
+                  <tr key={cat.id}>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        {cat.parentName && <ChevronRight size={14} color="var(--admin-text-muted)" />}
+                        <div className="cat-icon-wrap">
+                          <Tags size={16} />
+                        </div>
+                        <div>
+                          <span className="font-medium" style={{ display: "block" }}>{cat.name}</span>
+                          {cat.description && (
+                            <span style={{ fontSize: "0.75rem", color: "var(--admin-text-muted)" }}>
+                              {cat.description}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <span className="font-medium">{cat.name}</span>
-                    </div>
-                  </td>
-                  <td style={{ color: "var(--admin-text-muted)", fontSize: "0.85rem" }}>
-                    {cat.parentName ?? <span style={{ color: "var(--admin-text-light)" }}>—</span>}
-                  </td>
-                  <td style={{ color: "var(--admin-text-muted)", fontSize: "0.85rem" }}>
-                    {cat.children?.length > 0 ? `${cat.children.length} sub-categories` : "—"}
-                  </td>
-                  <td style={{ color: "var(--admin-text-muted)", fontSize: "0.85rem" }}>{cat.sortOrder}</td>
-                  <td>
-                    <span className={`status-badge ${cat.status === "ACTIVE" ? "status-delivered" : "status-cancelled"}`}>
-                      {cat.status}
-                    </span>
-                  </td>
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/admin/products?category=${encodeURIComponent(cat.name)}`)}
+                        title={`View ${prodCount} product(s) in ${cat.name}`}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          padding: "4px 10px",
+                          borderRadius: "99px",
+                          fontSize: "0.78rem",
+                          fontWeight: 700,
+                          cursor: "pointer",
+                          border: "1px solid var(--admin-border)",
+                          background: prodCount > 0 ? "rgba(174,138,84,0.12)" : "var(--ivory-deep)",
+                          color: prodCount > 0 ? "#7A5C2E" : "var(--admin-text-muted)",
+                          transition: "all 0.18s ease",
+                        }}
+                      >
+                        <Package size={13} />
+                        <span>{prodCount} {prodCount === 1 ? "product" : "products"}</span>
+                      </button>
+                    </td>
+                    <td style={{ color: "var(--admin-text-muted)", fontSize: "0.85rem" }}>
+                      {cat.parentName ?? <span style={{ color: "var(--admin-text-light)" }}>—</span>}
+                    </td>
+                    <td style={{ color: "var(--admin-text-muted)", fontSize: "0.85rem" }}>
+                      {cat.children?.length > 0 ? `${cat.children.length} sub-categories` : "—"}
+                    </td>
+                    <td style={{ color: "var(--admin-text-muted)", fontSize: "0.85rem" }}>{cat.sortOrder}</td>
+                    <td>
+                      <span className={`status-badge ${cat.status === "ACTIVE" ? "status-delivered" : "status-cancelled"}`}>
+                        {cat.status}
+                      </span>
+                    </td>
                   <td>
                     <div className="action-buttons">
                       <button className="action-btn" onClick={() => openEdit(cat)} title="Edit" id={`edit-cat-${cat.id}`}>
@@ -210,7 +279,8 @@ const Categories = () => {
                     </div>
                   </td>
                 </tr>
-              ))}
+              );
+            })}
             </tbody>
           </table>
         )}

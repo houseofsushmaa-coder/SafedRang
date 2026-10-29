@@ -26,6 +26,36 @@ const SAREE_SUBCATEGORIES = [
   { id: "One of One", label: "One of One" },
 ];
 
+export function matchesCategory(productCategory, selectedCategory) {
+  if (!selectedCategory || selectedCategory === "All") return true;
+  if (!productCategory) return false;
+  const p = productCategory.toLowerCase().trim();
+  const s = selectedCategory.toLowerCase().trim();
+  if (p === s) return true;
+
+  // Normalized comparison (remove trailing 's' and non-alphanumeric chars)
+  const pNorm = p.replace(/s$/, "").replace(/[\s-_+]+/g, "");
+  const sNorm = s.replace(/s$/, "").replace(/[\s-_+]+/g, "");
+  if (pNorm === sNorm) return true;
+
+  // Handle dupatta / duppata / dupattas variants
+  const isPDupatta = pNorm.includes("dupat") || pNorm.includes("duppat");
+  const isSDupatta = sNorm.includes("dupat") || sNorm.includes("duppat");
+  if (isPDupatta && isSDupatta) return true;
+
+  // Handle kurta set / kurta variants
+  const isPKurta = pNorm.includes("kurta");
+  const isSKurta = sNorm.includes("kurta");
+  if (isPKurta && isSKurta) return true;
+
+  // Handle saree / sarees / sari
+  const isPSaree = pNorm.includes("saree") || pNorm.includes("sari");
+  const isSSaree = sNorm.includes("saree") || sNorm.includes("sari");
+  if (isPSaree && isSSaree) return true;
+
+  return p.includes(s) || s.includes(p);
+}
+
 function matchesSubcategory(product, subcategory) {
   if (!subcategory || subcategory === "All") return true;
 
@@ -195,14 +225,7 @@ export default function Shop() {
   // Sync URL params to filter state
   useEffect(() => {
     if (urlCategory) {
-      const cleanUrlCat = urlCategory.toLowerCase().replace(/[\s-_+]+/g, "");
-      const matched = categories.find(
-        (c) =>
-          c.toLowerCase() === urlCategory.toLowerCase() ||
-          c.toLowerCase().replace(/[\s-_+]+/g, "") === cleanUrlCat ||
-          c.toLowerCase().includes(urlCategory.toLowerCase()) ||
-          urlCategory.toLowerCase().includes(c.toLowerCase())
-      );
+      const matched = categories.find((c) => matchesCategory(c, urlCategory));
       if (matched) {
         setActiveCategory(matched);
       } else {
@@ -247,12 +270,15 @@ export default function Shop() {
   /* ── Real calculated counts (NO Math.random!) ── */
   const categoryCounts = useMemo(() => {
     const counts = {};
-    products.forEach((p) => {
-      const cat = p.category || "Uncategorized";
-      counts[cat] = (counts[cat] || 0) + 1;
+    categories.forEach((cat) => {
+      if (cat === "All") {
+        counts[cat] = products.length;
+      } else {
+        counts[cat] = products.filter((p) => matchesCategory(p.category, cat)).length;
+      }
     });
     return counts;
-  }, [products]);
+  }, [products, categories]);
 
   const craftCounts = useMemo(() => {
     const counts = {};
@@ -335,7 +361,7 @@ export default function Shop() {
 
     // Filter by Category
     if (activeCategory !== "All") {
-      list = list.filter((p) => p.category === activeCategory);
+      list = list.filter((p) => matchesCategory(p.category, activeCategory));
     }
 
     // Filter by Sub-Category
