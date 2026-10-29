@@ -1,0 +1,292 @@
+================================================================================
+SAFED RANG — COMPREHENSIVE PROJECT ARCHITECTURE & PROMPT-ENGINEERING GUIDE
+================================================================================
+Document Type : Complete Project Details & AI Prompting Reference
+Generated For : Pairing AI / External AI Prompt Generator
+Project Name  : Safed Rang (House of Sushma)
+Repository    : https://github.com/houseofsushmaa-coder/SafedRang.git
+Branch        : main
+Target Stack  : React 19 + Vite 8 + Vanilla CSS Custom Tokens + Supabase + Cashfree
+================================================================================
+
+--------------------------------------------------------------------------------
+1. EXECUTIVE SUMMARY & BRAND IDENTITY
+--------------------------------------------------------------------------------
+Safed Rang is a direct-to-consumer (D2C) luxury handloom and couture e-commerce brand
+specializing in authentic Awadh Chikankari, Royal Zardozi, Mukaish, Kamdani, and Tepchi
+artistry from Lucknow, Uttar Pradesh, India.
+
+Core Brand Pillars:
+- "The One-of-One Edit": Rare, mastercrafted individual sarees where each piece
+  features a unique combination of fabric, dye, embroidery, and embellishment. Once
+  sold, the design is retired permanently and archived.
+- Repeatable Luxury Lines: Handcrafted Kurta Sets, Viscose/Chanderi Dupattas, and
+  Custom-fit Blouses with variable sizing (36 to 44 / XS to XXL).
+- Slow Fashion & Heritage: Bypassing industrial machine embroidery; every creation
+  is hand-stitched by generational karigars in the historic lanes of Chowk, Lucknow.
+
+Visual & Design Aesthetics:
+- Deep Royal Wine / Crimson: #6E1E2A (featured boxes, accents, primary emphasis)
+- Antique Champagne Gold: #AE8A54, #C9A876 (buttons, borders, icons, highlights)
+- Warm Studio Beige / Ivory: #FAF5EC, #F5EFEB, #ECDCCF (warm editorial background)
+- Deep Charcoal / Black: #2A211D, #1A1412 (typography, luxury headers)
+- Pure White: #FFFFFF (cards, clean surfaces)
+- Typography:
+  - Headings: Editorial serif ("Playfair Display", "Cormorant Garamond", "Cinzel")
+  - Body & UI: Modern legible sans-serif ("Manrope", "Inter", -apple-system)
+  - Style: Subtle uppercase letter-spacing, elegant borders (1px gold tinted),
+    zero generic "drop shadows", high-contrast editorial photography.
+
+--------------------------------------------------------------------------------
+2. TECHNICAL STACK & LIBRARIES
+--------------------------------------------------------------------------------
+Frontend:
+- Runtime / Engine : Node.js (Windows PowerShell shell environment)
+- Core Framework   : React 19.2.8 (`react`, `react-dom`)
+- Bundler / Tool   : Vite 8.3.5 (`@vitejs/plugin-react: ^6.1.1`)
+- Client Routing   : React Router DOM 7.18.4 (`react-router-dom`)
+- Iconography      : Lucide React 1.48.0 (`lucide-react`)
+- Notifications    : React Hot Toast 2.6.1 (`react-hot-toast`)
+- Data Viz/Charts  : Recharts 3.10.1 (`recharts`)
+- CSV Parsing      : PapaParse 5.7.0 (`papaparse`) & `file-saver`
+- HTTP / REST      : Axios 1.20.0 (`axios`)
+- Styling          : Modular Custom Vanilla CSS with CSS custom variables (App.css,
+                     Home.css, Shop.css, ProductDetail.css, AdminPages.css, etc.)
+
+Backend & Infrastructure:
+- BaaS / Database  : Supabase (`@supabase/supabase-js: ^2.117.3`)
+  - Authentication : Supabase Auth (Email/Password, Customer & Admin sessions)
+  - Tables         : `products`, `orders`, `profiles` / `customers`, `categories`,
+                     `coupons`, `abandoned_carts`, `tracking_settings`
+  - Edge Functions : `cashfree-order`, `cashfree-verify`, `cashfree-webhook`,
+                     `provision-customer`
+- Payment Gateway  : Cashfree Payment Gateway (`@cashfreepayments/cashfree-js: ^1.0.7`)
+  - Supports UPI, Credit/Debit cards, Net Banking, and COD (Cash on Delivery)
+- Local State      : React Context API (`ProductContext`, `AuthContext`,
+                     `CartContext`, `CurrencyContext`) with persistent LocalStorage fallback.
+
+--------------------------------------------------------------------------------
+3. DIRECTORY TREE & KEY FILE RESPONSIBILITIES
+--------------------------------------------------------------------------------
+SafedRang/
+├── package.json                         # Root scripts delegating to frontend
+├── scripts/
+│   └── set-role.mjs                     # CLI tool to promote users to admin role in Supabase
+├── supabase/
+│   ├── customer_dashboard_migration.sql # Customer addresses, orders, profile schema
+│   ├── orders_migration.sql             # Orders and line items schema
+│   ├── schema_roles.sql                 # Admin vs customer role enforcement
+│   ├── tracking_settings_migration.sql  # Pixel / GA4 / GTM integrations schema
+│   └── functions/                       # Deno edge functions for Cashfree checkout
+├── safedrang-backend/
+│   └── .env                             # Backend environment variables
+└── frontend/
+    ├── package.json                     # Frontend dependencies & Vite configuration
+    ├── index.html                       # HTML template with Google Fonts & meta
+    ├── public/                          # Static assets, logos, and high-res imagery
+    │   ├── one-of-one-banner-4k.jpg     # 3840x2160 4K ultra-sharp master banner
+    │   ├── one-of-one-banner-4k.webp    # 4K WebP version
+    │   ├── one-of-one-banner.jpg        # 2560x1440 QHD sharp master banner
+    │   ├── one-of-one-banner.webp       # QHD WebP version
+    │   ├── pdp-1.jpg, pdp-2.jpg ...     # Product detail display assets
+    │   └── safedrang-product-template.csv # Generated CSV import template
+    └── src/
+        ├── App.jsx                      # App root, Route hierarchy, Layouts, Route guards
+        ├── App.css                      # Global styles, variables, typography, reset
+        ├── index.css                    # Base root styles
+        ├── main.jsx                     # Vite DOM mount point
+        │
+        ├── admin/                       # Custom Admin Management Dashboard (/admin)
+        │   ├── AdminLayout.jsx          # Admin shell, sidebar, topbar, responsive nav
+        │   ├── AdminLayout.css          # Admin styling, dark charcoal & gold accents
+        │   ├── adminService.js          # API helpers for CRUD on products, orders, users
+        │   ├── components/
+        │   │   └── AdminErrorBoundary.jsx # Crash recovery for admin views
+        │   └── pages/
+        │       ├── Dashboard.jsx        # Revenue metrics, orders chart, quick stats
+        │       ├── Products.jsx         # Product catalog, search, filter, bulk CSV modal
+        │       ├── EditProduct.jsx      # Add/edit product, category dropdown, variations
+        │       ├── Categories.jsx       # Category CRUD with synced live product counts
+        │       ├── Orders.jsx           # Order status management, courier tracking
+        │       ├── Users.jsx            # Customer list, roles, order history
+        │       ├── Inventory.jsx        # Low stock alerts and quantity updates
+        │       ├── Analytics.jsx        # Recharts store traffic and conversion data
+        │       ├── SalesAnalytics.jsx   # Financial breakdown and SKU-level performance
+        │       ├── Payments.jsx         # Cashfree settlement logs and payment status
+        │       ├── Coupons.jsx          # Discount code generator and rules
+        │       ├── AbandonedCarts.jsx   # Carts left before checkout completion
+        │       ├── Settings.jsx         # Store config, currency, tax rates
+        │       ├── TrackingIntegrations.jsx # Facebook Pixel, GA4, TikTok Pixel inputs
+        │       └── AdminLogin.jsx       # Admin-specific authentication view
+        │
+        ├── components/                  # Customer-facing reusable components
+        │   ├── Header.jsx               # Sticky luxury header, currency switcher, bag count
+        │   ├── Footer.jsx               # Editorial footer, sitemap, newsletter signup
+        │   ├── ProductCard.jsx          # Grid item, price calculation, out-of-stock badge
+        │   ├── WhatsAppButton.jsx       # Floating customer concierge WhatsApp widget
+        │   ├── GoogleAnalytics.jsx      # Dynamic GA4 script injection
+        │   └── ScrollToTop.jsx          # Route transition scroll reset
+        │
+        ├── context/                     # Application State Providers
+        │   ├── ProductContext.jsx       # Catalog state, category sync, CSV import, stock updates
+        │   ├── AuthContext.jsx          # Session state, customer & admin role checks
+        │   ├── CartContext.jsx          # Slide-out drawer bag, item totals, size selections
+        │   └── CurrencyContext.jsx      # Multi-currency converter (INR, USD, GBP, EUR)
+        │
+        ├── data/
+        │   ├── products.js              # 165+ curated master products seed data
+        │   └── countries.js             # International shipping country list
+        │
+        ├── lib/
+        │   ├── supabase.js              # Initialized Supabase client
+        │   ├── customerService.js       # Customer address & order fetchers
+        │   ├── queries.js               # SQL / Supabase query utilities
+        │   └── tracking.js              # GA4 / Meta pixel event dispatchers
+        │
+        └── pages/                       # Storefront Views
+            ├── Home.jsx                 # Homepage with hero, One-of-One 4K banner, craft story
+            ├── Shop.jsx                 # Collection listing with category/price/craft filters
+            ├── ProductDetail.jsx        # Multi-image gallery, size selector, disabled when 0 stock
+            ├── Checkout.jsx             # Address collection, Cashfree modal, COD option
+            ├── PaymentVerify.jsx        # Cashfree redirect verification callback
+            ├── OrderSuccess.jsx         # Order receipt & confirmation display
+            ├── About.jsx                # Heritage of Awadh, brand story, karigar atelier
+            ├── Craft.jsx                # 32 classical stitches of Lucknow Chikankari
+            ├── Login.jsx                # Customer login and registration modal
+            ├── PrivacyPolicy.jsx        # Privacy and shipping policies
+            ├── TermsConditions.jsx      # Terms of service and return policies
+            └── Account/                 # Customer Profile Dashboard (/account)
+                ├── AccountLayout.jsx    # Tabs wrapper with ProtectedCustomerRoute
+                └── tabs/
+                    ├── OverviewTab.jsx  # Recent orders summary & quick links
+                    ├── OrdersTab.jsx    # Order history with live courier tracking
+                    ├── WishlistTab.jsx  # Saved items with one-click Add to Bag
+                    ├── AddressesTab.jsx # Saved shipping & billing addresses
+                    └── SettingsTab.jsx  # Profile name, email, password update
+
+--------------------------------------------------------------------------------
+4. DATA MODELS & INVENTORY LOGIC
+--------------------------------------------------------------------------------
+A. Product Entity Structure:
+{
+  id: "SR-101",                      // String or number unique identifier
+  name: "CHANDERI CHIKANKARI SAREE", // Full product title (uppercase in display)
+  sku: "TFM110044",                  // Stock Keeping Unit
+  price: 14499,                      // Current selling price (INR)
+  regularPrice: 16999,               // MRP / Original price (optional for sale strike)
+  salePrice: 14499,                  // Discounted price
+  category: "Sarees",                // Sarees | Kurta Sets | Dupattas | Blouses | Others
+  stock: 2,                          // Inventory quantity (default 2 across catalog)
+  isOneOfOne: false,                 // Boolean: exclusive single-piece flag
+  productType: "simple",             // "simple" or "variable"
+  variations: [                      // Used when productType === "variable" (e.g. Blouses/Kurtas)
+    { size: "38", price: 2000, stock: 2, sku: "BB-0425M-38" },
+    { size: "40", price: 2000, stock: 2, sku: "BB-0425M-40" }
+  ],
+  images: [                          // Array of image paths/URLs
+    "/woman_chikankari_saree.jpg",
+    "/pdp-2.jpg"
+  ],
+  description: "Handcrafted Lucknow Chanderi silk saree with intricate Chikankari...",
+  craft: "Chikankari & Zardozi",     // Craft technique filter
+  fabric: "Pure Chanderi Silk",      // Fabric material filter
+  colour: "Ruby Red",                // Color family
+  status: "In Stock"                 // Auto-derived: "Out of Stock" if stock <= 0
+}
+
+B. Out-of-Stock Logic:
+- When `stock === 0`:
+  - `ProductCard.jsx` displays a soft red "Out of Stock" pill.
+  - `ProductDetail.jsx` disables the "ADD TO BAG" and "BUY NOW" buttons with text "SOLD OUT".
+  - Variable products disable specific size chips when variant stock is 0.
+
+C. Categories Sync:
+- Categories are defined with standard IDs and slugs:
+  `Dupattas`, `Sarees`, `Kurta Sets`, `Blouses`, `Others`.
+- In `Categories.jsx`, the "Products" count column is dynamically calculated in
+  real time by counting all active products in `ProductContext` matching the category name.
+- Fuzzy matching in `Shop.jsx` ensures singular/plural variants ("Dupatta" vs "Dupattas")
+  both display the correct products.
+
+--------------------------------------------------------------------------------
+5. KEY WORKFLOWS & RECENT ENHANCEMENTS
+--------------------------------------------------------------------------------
+1. Admin Product Listing & Bulk CSV Import:
+   - File: `frontend/src/admin/pages/Products.jsx`
+   - Features a "CSV Template" download button providing a pre-formatted template.
+   - "Bulk Import" modal allows uploading CSV files: automatically maps headers
+     (Name, SKU, Price, Regular Price, Category, Stock, Description, Image URLs),
+     creates products in `ProductContext`, and notifies the admin.
+
+2. One-of-One Immersive Banner (Homepage):
+   - File: `frontend/src/pages/Home.jsx` & `Home.css`
+   - Replaced stretched low-res imagery with a 4K UHD ($3840 \times 2160\text{ px}$) and QHD
+     master image served via responsive `<picture>` tags (`one-of-one-banner-4k.jpg`,
+     `one-of-one-banner.jpg` + `.webp` equivalents).
+   - Removed hazy beige background overlays; section background color set to `#ECDCCF`
+     to perfectly match the studio photography edge.
+   - Features a floating luxury royal wine (`#6E1E2A`) card with gold typography and
+     direct CTA link to `/one-of-one`.
+
+3. Security & Vulnerability Audits:
+   - Vite was upgraded to version `8.3.5` addressing historical CVEs (`CVE-2026-112942` etc.).
+   - Clean production build verifies with `npm run build` in ~1.0 second.
+
+--------------------------------------------------------------------------------
+6. HOW TO RUN, BUILD, AND DEPLOY
+--------------------------------------------------------------------------------
+A. Development Mode:
+   Command : npm run dev
+   Location: Run from root directory OR from inside `/frontend`
+   URL     : http://localhost:5173 (or next available port)
+
+B. Production Build:
+   Command : npm run build
+   Process : Executes `vite build` inside `/frontend`
+   Output  : Compiled HTML, JS bundles, and CSS located in `/frontend/dist/`
+
+C. Database Role Setting:
+   Command : node scripts/set-role.mjs <user_email> admin
+   Purpose : Grants admin privileges to a registered Supabase user.
+
+D. Git Repository Operations:
+   Remote  : origin (https://github.com/houseofsushmaa-coder/SafedRang.git)
+   Branch  : main
+   Command : git status && git add -A && git commit -m "<message>" && git push origin main
+
+--------------------------------------------------------------------------------
+7. GUIDELINES FOR PROMPTING THE CURRENT AI AGENT
+--------------------------------------------------------------------------------
+When using another AI to write prompts for this coding agent, follow these instructions
+for maximum efficiency, zero hallucinations, and high-accuracy code:
+
+1. Always specify exact file paths:
+   - Good: "In `frontend/src/pages/ProductDetail.jsx` and `ProductDetail.css`, ..."
+   - Bad: "On the product page, update..."
+
+2. Respect the Visual Identity:
+   - Do NOT introduce generic purple, bright neon colors, or default Bootstrap styles.
+   - Use existing CSS variables:
+     `--color-wine: #6E1E2A;`
+     `--color-antique-gold: #AE8A54;`
+     `--color-warm-beige: #FAF5EC;`
+     `--color-dark-charcoal: #2A211D;`
+   - All headings must use serif editorial styling; buttons should use uppercase with
+     slight letter spacing.
+
+3. Windows OS & PowerShell Awareness:
+   - The agent runs on Windows with PowerShell.
+   - Commands should use Windows/PowerShell syntax (e.g. forward slashes for node paths,
+     `Get-Content`, `npm run build`, etc.).
+   - When modifying files, prefer contiguous drop-in replacements or python helper
+     scripts to preserve correct line endings (LF/CRLF).
+
+4. Preserve State & Build Health:
+   - Never break `ProductContext.jsx` or reset `stock` unexpectedly.
+   - Always instruct the agent to run `npm run build` inside `frontend` to verify
+     that TypeScript/JSX syntax compiles cleanly before concluding a task.
+   - Remind the agent to commit and push changes to `main` when requested.
+
+================================================================================
+END OF PROJECT SPECIFICATION FILE
+================================================================================
