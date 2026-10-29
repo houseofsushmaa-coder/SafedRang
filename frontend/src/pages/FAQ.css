@@ -1,0 +1,777 @@
+/* ==========================================================================
+   SAFED RANG — FREQUENTLY ASKED QUESTIONS (FAQ)
+   Brand Palette:
+   - Royal Wine:      #6E1E2A
+   - Antique Gold:    #AE8A54
+   - Champagne Gold:  #C9A876
+   - Light Gold:      #E8D4B4
+   - Warm Ivory:      #FAF5EC
+   - Deep Ivory:      #F5EEE2
+   - Dark Charcoal:   #2A211D
+   - Muted Taupe:     #7D7065
+   ========================================================================== */
+
+:root {
+  --faq-wine: #6E1E2A;
+  --faq-wine-dark: #52151F;
+  --faq-wine-deep: #3B0E16;
+  --faq-gold: #AE8A54;
+  --faq-gold-light: #C9A876;
+  --faq-gold-pale: #E8D4B4;
+  --faq-gold-glow: rgba(174, 138, 84, 0.4);
+  --faq-ivory: #FAF5EC;
+  --faq-ivory-deep: #F5EEE2;
+  --faq-charcoal: #2A211D;
+  --faq-charcoal-dark: #1D1614;
+  --faq-taupe: #7D7065;
+  --faq-text: #4A3E36;
+  --faq-font-serif: var(--font-heading, "Cormorant Garamond", Georgia, serif);
+  --faq-font-sans: var(--font-body, "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+}
+
+.faq-page {
+  background-color: var(--faq-ivory);
+  color: var(--faq-charcoal);
+  font-family: var(--faq-font-sans);
+  line-height: 1.75;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   1. HERO & SEARCH SECTION
+   ────────────────────────────────────────────────────────────────────────── */
+.faq-hero {
+  position: relative;
+  min-height: 52vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6.5rem 2rem 5.5rem;
+  background-color: var(--faq-wine-deep);
+  color: #FAF5EC;
+  overflow: hidden;
+}
+
+.faq-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.faq-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  filter: brightness(0.48) saturate(1.15);
+  transform: scale(1.02);
+}
+
+.faq-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(29, 10, 14, 0.72) 0%,
+    rgba(110, 30, 42, 0.82) 50%,
+    rgba(42, 33, 29, 0.94) 100%
+  );
+}
+
+.faq-hero-container {
+  position: relative;
+  z-index: 2;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.faq-eyebrow {
+  font-family: var(--faq-font-sans);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  color: var(--faq-gold-light);
+  text-transform: uppercase;
+  display: inline-block;
+  margin-bottom: 1.2rem;
+  position: relative;
+}
+
+.faq-eyebrow::after {
+  content: "";
+  display: block;
+  width: 36px;
+  height: 1px;
+  background-color: var(--faq-gold);
+  margin: 0.5rem auto 0;
+  opacity: 0.7;
+}
+
+.faq-hero-title {
+  font-family: var(--faq-font-serif);
+  font-size: clamp(2.4rem, 4.8vw, 3.8rem);
+  font-weight: 400;
+  line-height: 1.18;
+  letter-spacing: 0.02em;
+  color: #FFFFFF;
+  margin-bottom: 1.4rem;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.35);
+}
+
+.faq-hero-title-italic {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--faq-gold-pale);
+}
+
+.faq-hero-subtitle {
+  font-size: clamp(1rem, 1.3vw, 1.14rem);
+  line-height: 1.85;
+  color: #F1E7DA;
+  max-width: 660px;
+  margin: 0 auto 2.2rem;
+  font-weight: 300;
+}
+
+/* Interactive Search Bar */
+.faq-search-wrap {
+  position: relative;
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.faq-search-icon {
+  position: absolute;
+  left: 18px;
+  color: var(--faq-gold);
+  pointer-events: none;
+}
+
+.faq-search-input {
+  width: 100%;
+  padding: 1.1rem 3rem 1.1rem 3rem;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--faq-gold);
+  border-radius: 40px;
+  font-family: var(--faq-font-sans);
+  font-size: 0.95rem;
+  color: var(--faq-charcoal);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.faq-search-input:focus {
+  background: #FFFFFF;
+  box-shadow: 0 10px 32px var(--faq-gold-glow);
+  border-color: #FFFFFF;
+}
+
+.faq-search-clear {
+  position: absolute;
+  right: 18px;
+  background: none;
+  border: none;
+  color: var(--faq-taupe);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px;
+}
+
+.faq-search-clear:hover {
+  color: var(--faq-wine);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   2. CATEGORY TABS
+   ────────────────────────────────────────────────────────────────────────── */
+.faq-nav-section {
+  padding: 2.2rem 2rem;
+  background-color: var(--faq-ivory-deep);
+  border-bottom: 1px solid rgba(174, 138, 84, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+}
+
+.faq-tabs-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.faq-tab-btn {
+  padding: 0.65rem 1.35rem;
+  background: transparent;
+  border: 1px solid rgba(174, 138, 84, 0.35);
+  border-radius: 30px;
+  color: var(--faq-charcoal);
+  font-family: var(--faq-font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.faq-tab-btn:hover {
+  border-color: var(--faq-gold);
+  color: var(--faq-wine);
+  background: rgba(174, 138, 84, 0.08);
+}
+
+.faq-tab-btn.active {
+  background-color: var(--faq-wine);
+  border-color: var(--faq-wine);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(110, 30, 42, 0.3);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   3. ACCORDION LIST
+   ────────────────────────────────────────────────────────────────────────── */
+.faq-content-section {
+  padding: 5rem 2rem 5.5rem;
+}
+
+.faq-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.faq-group-block {
+  margin-bottom: 4rem;
+}
+
+.faq-group-block:last-child {
+  margin-bottom: 0;
+}
+
+.faq-group-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1.8rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(174, 138, 84, 0.25);
+}
+
+.group-ornament {
+  color: var(--faq-gold);
+  font-size: 0.9rem;
+}
+
+.faq-group-title {
+  font-family: var(--faq-font-serif);
+  font-size: clamp(1.6rem, 2.4vw, 2.1rem);
+  font-weight: 500;
+  color: var(--faq-charcoal);
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.group-count {
+  font-size: 0.82rem;
+  color: var(--faq-taupe);
+  font-weight: 400;
+}
+
+.faq-group-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.faq-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(174, 138, 84, 0.25);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(42, 33, 29, 0.04);
+}
+
+.faq-card:hover {
+  border-color: var(--faq-gold);
+  box-shadow: 0 6px 20px rgba(42, 33, 29, 0.08);
+}
+
+.faq-card--open {
+  border-color: var(--faq-gold);
+  box-shadow: 0 8px 24px rgba(42, 33, 29, 0.09);
+}
+
+.faq-card-header {
+  width: 100%;
+  padding: 1.35rem 1.6rem;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.4rem;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+}
+
+.faq-card-question {
+  font-family: var(--faq-font-serif);
+  font-size: 1.18rem;
+  font-weight: 500;
+  color: var(--faq-charcoal);
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+.faq-card-arrow {
+  color: var(--faq-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.arrow-icon {
+  transition: transform 0.3s ease;
+}
+
+.arrow-icon.rotated {
+  transform: rotate(180deg);
+}
+
+.faq-card-body {
+  padding: 0 1.6rem 1.4rem;
+  border-top: 1px solid rgba(174, 138, 84, 0.12);
+  padding-top: 1.1rem;
+}
+
+.faq-card-body p {
+  font-size: 0.98rem;
+  line-height: 1.85;
+  color: var(--faq-text);
+  margin: 0;
+}
+
+.faq-card-link-wrap {
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+}
+
+.faq-inline-care-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--faq-wine);
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: gap 0.25s ease;
+}
+
+.faq-inline-care-link:hover {
+  gap: 10px;
+}
+
+/* Empty search state */
+.faq-empty-state {
+  padding: 4rem 2rem;
+  background: #FFFFFF;
+  border: 1px solid rgba(174, 138, 84, 0.25);
+  border-radius: 4px;
+}
+
+.empty-icon {
+  color: var(--faq-gold);
+  margin-bottom: 1.2rem;
+}
+
+.faq-empty-state h3 {
+  font-family: var(--faq-font-serif);
+  font-size: 1.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.faq-empty-state p {
+  color: var(--faq-taupe);
+  max-width: 480px;
+  margin: 0 auto 1.8rem;
+}
+
+.faq-reset-btn {
+  padding: 0.75rem 1.8rem;
+  background: transparent;
+  border: 1px solid var(--faq-charcoal);
+  color: var(--faq-charcoal);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   4. CONCIERGE HELP CARD
+   ────────────────────────────────────────────────────────────────────────── */
+.faq-concierge-section {
+  padding: 2rem 2rem 5rem;
+}
+
+.faq-concierge-card {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: #FFFFFF;
+  border: 1.5px solid var(--faq-gold);
+  border-radius: 4px;
+  padding: 3rem 2.8rem;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 3rem;
+  align-items: center;
+  box-shadow: 0 12px 35px rgba(42, 33, 29, 0.08);
+}
+
+.concierge-kicker {
+  font-family: var(--faq-font-sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  color: var(--faq-gold);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.6rem;
+}
+
+.concierge-title {
+  font-family: var(--faq-font-serif);
+  font-size: clamp(1.8rem, 2.8vw, 2.3rem);
+  font-weight: 400;
+  color: var(--faq-charcoal);
+  line-height: 1.25;
+  margin-bottom: 0.8rem;
+}
+
+.concierge-desc {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--faq-taupe);
+  margin-bottom: 1.8rem;
+}
+
+.concierge-contact-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chip-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.55rem 1rem;
+  background: var(--faq-ivory);
+  border: 1px solid rgba(174, 138, 84, 0.35);
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--faq-charcoal);
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+.chip-link:hover {
+  background: var(--faq-charcoal);
+  color: #FFFFFF;
+}
+
+.chip-link--whatsapp {
+  border-color: rgba(37, 211, 102, 0.5);
+  background: rgba(37, 211, 102, 0.08);
+  color: #128C7E;
+}
+
+.chip-link--whatsapp:hover {
+  background: #25D366;
+  color: #FFFFFF;
+  border-color: #25D366;
+}
+
+.concierge-cta-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-left: 2rem;
+  border-left: 1px solid rgba(174, 138, 84, 0.2);
+}
+
+.concierge-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 1rem 2rem;
+  background-color: var(--faq-wine);
+  color: #FFFFFF;
+  border: 1px solid var(--faq-wine);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 18px rgba(110, 30, 42, 0.35);
+  margin-bottom: 0.8rem;
+  width: 100%;
+  justify-content: center;
+}
+
+.concierge-cta-btn:hover {
+  background-color: #8C2736;
+  border-color: #8C2736;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(110, 30, 42, 0.5);
+}
+
+.concierge-timing {
+  font-size: 0.76rem;
+  color: var(--faq-taupe);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   5. CLOSING INVITATION
+   ────────────────────────────────────────────────────────────────────────── */
+.faq-closing-section {
+  padding: 6.5rem 2rem 5.5rem;
+  background-color: var(--faq-charcoal-dark);
+  color: #FAF5EC;
+  position: relative;
+  text-align: center;
+  border-top: 1px solid rgba(174, 138, 84, 0.3);
+}
+
+.closing-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 1.6rem;
+}
+
+.ornament-stitch {
+  width: 48px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--faq-gold), transparent);
+}
+
+.ornament-diamond {
+  color: var(--faq-gold);
+  font-size: 0.9rem;
+}
+
+.closing-title {
+  font-family: var(--faq-font-serif);
+  font-size: clamp(2.1rem, 4.2vw, 3.4rem);
+  font-weight: 400;
+  color: #FFFFFF;
+  line-height: 1.22;
+  margin-bottom: 1rem;
+}
+
+.closing-subtitle {
+  font-size: 1.05rem;
+  color: #DDD2C4;
+  max-width: 600px;
+  margin: 0 auto 2.8rem;
+  font-weight: 300;
+  line-height: 1.8;
+}
+
+.closing-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.4rem;
+  flex-wrap: wrap;
+  margin-bottom: 3.5rem;
+}
+
+.closing-btn-primary {
+  padding: 0.95rem 2.4rem;
+  background-color: var(--faq-wine);
+  color: #FFFFFF;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid var(--faq-wine);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 18px rgba(110, 30, 42, 0.4);
+}
+
+.closing-btn-primary:hover {
+  background-color: #8C2736;
+  border-color: #8C2736;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(110, 30, 42, 0.6);
+}
+
+.closing-btn-secondary {
+  padding: 0.95rem 2.4rem;
+  background: transparent;
+  color: var(--faq-gold-pale);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid var(--faq-gold);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.closing-btn-secondary:hover {
+  background: var(--faq-gold);
+  color: var(--faq-charcoal-dark);
+  transform: translateY(-2px);
+}
+
+.closing-brandmark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(174, 138, 84, 0.22);
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.brand-house {
+  font-family: var(--faq-font-sans);
+  font-size: 0.66rem;
+  letter-spacing: 0.3em;
+  color: var(--faq-gold);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.brand-name {
+  font-family: var(--faq-font-serif);
+  font-size: 1.35rem;
+  letter-spacing: 0.16em;
+  color: #FFFFFF;
+  font-weight: 500;
+}
+
+.brand-city {
+  font-family: var(--faq-font-sans);
+  font-size: 0.64rem;
+  letter-spacing: 0.26em;
+  color: var(--faq-taupe);
+  text-transform: uppercase;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   6. RESPONSIVE ADAPTATIONS
+   ────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .faq-concierge-card {
+    grid-template-columns: 1fr;
+    gap: 2.2rem;
+    padding: 2.4rem 1.8rem;
+  }
+
+  .concierge-cta-side {
+    padding-left: 0;
+    border-left: none;
+    border-top: 1px solid rgba(174, 138, 84, 0.2);
+    padding-top: 2rem;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .concierge-cta-btn {
+    width: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .faq-hero {
+    padding: 5.5rem 1.5rem 4rem;
+  }
+
+  .faq-search-input {
+    font-size: 0.88rem;
+    padding: 0.95rem 2.4rem 0.95rem 2.6rem;
+  }
+
+  .faq-search-icon {
+    left: 14px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .faq-nav-section {
+    padding: 1.4rem 1rem;
+  }
+
+  .faq-tab-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.68rem;
+  }
+
+  .faq-content-section {
+    padding: 3.5rem 1.2rem 4rem;
+  }
+
+  .faq-card-header {
+    padding: 1.1rem 1.2rem;
+  }
+
+  .faq-card-question {
+    font-size: 1.05rem;
+  }
+
+  .faq-card-body {
+    padding: 0 1.2rem 1.2rem;
+  }
+
+  .closing-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .closing-btn-primary,
+  .closing-btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   7. ACCESSIBILITY: PREFERS-REDUCED-MOTION
+   ────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .faq-card,
+  .arrow-icon,
+  .faq-tab-btn,
+  .faq-hero-img {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}
