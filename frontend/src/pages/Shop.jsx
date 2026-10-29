@@ -1,11 +1,12 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { Link, useSearchParams, useLocation } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
-import { useProducts } from "../context/ProductContext";
+import { useProducts, sortProductsByMode } from "../context/ProductContext";
 import { useCurrency } from "../context/CurrencyContext";
 import "./Shop.css";
 
 const SORT_OPTIONS = [
+  { value: "recommended", label: "Recommended" },
   { value: "newest", label: "New Arrivals" },
   { value: "price-desc", label: "Price: High to Low" },
   { value: "price-asc", label: "Price: Low to High" },
@@ -187,7 +188,7 @@ function CustomSortDropdown({ value, onChange, options }) {
 }
 
 export default function Shop() {
-  const { products, getAllCategories } = useProducts();
+  const { products, getAllCategories, shopSortSettings } = useProducts();
   const { formatPrice } = useCurrency();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
@@ -214,7 +215,7 @@ export default function Shop() {
   const [activeFabric, setActiveFabric] = useState("All");
   const [activePriceRange, setActivePriceRange] = useState(null);
   const [activeAvailability, setActiveAvailability] = useState("All"); // "All" | "in-stock" | "sold-out"
-  const [sortBy, setSortBy] = useState("newest");
+  const [sortBy, setSortBy] = useState("recommended");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // Sync URL params to filter state
@@ -394,6 +395,14 @@ export default function Shop() {
       list = list.filter((p) => !isProductAvailable(p));
     }
 
+    // Canonical deduplication guard: ensure unique products
+    const seenIds = new Set();
+    list = list.filter((p) => {
+      if (!p.id || seenIds.has(p.id)) return false;
+      seenIds.add(p.id);
+      return true;
+    });
+
     // Sorting
     switch (sortBy) {
       case "price-asc":
@@ -410,9 +419,25 @@ export default function Shop() {
         list.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
         break;
       case "newest":
+        list.sort((a, b) => {
+          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          if (timeA !== timeB) return timeB - timeA;
+          return String(b.id || "").localeCompare(String(a.id || ""));
+        });
+        break;
+      case "recommended":
       default:
-        list.sort((a, b) =>
-          String(b.id || "").localeCompare(String(a.id || ""))
+        list = sortProductsByMode(
+          list,
+          shopSortSettings?.sortMode || "category_first_manual",
+          shopSortSettings?.categoryOrder || [
+            "Sarees",
+            "Dupattas",
+            "Kurta Sets",
+            "Blouses",
+            "Others",
+          ]
         );
         break;
     }
@@ -428,6 +453,7 @@ export default function Shop() {
     activePriceRange,
     activeAvailability,
     sortBy,
+    shopSortSettings,
   ]);
 
   const activeFilterCount = useMemo(() => {

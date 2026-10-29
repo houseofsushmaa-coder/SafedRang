@@ -17,6 +17,130 @@ export const normalizeCategoryName = (rawCat) => {
   return c;
 };
 
+export const DEFAULT_SHOP_SORT_SETTINGS = {
+  sortMode: "category_first_manual",
+  categoryOrder: ["Sarees", "Dupattas", "Kurta Sets", "Blouses", "Others"],
+};
+
+// Helper to check if a product category matches a filter or priority category
+export function matchesCategory(productCategory, selectedCategory) {
+  if (!selectedCategory || selectedCategory === "All") return true;
+  if (!productCategory) return false;
+  const p = productCategory.toLowerCase().trim();
+  const s = selectedCategory.toLowerCase().trim();
+  if (p === s) return true;
+
+  // Normalized comparison (remove trailing 's' and non-alphanumeric chars)
+  const pNorm = p.replace(/s$/, "").replace(/[\s-_+]+/g, "");
+  const sNorm = s.replace(/s$/, "").replace(/[\s-_+]+/g, "");
+  if (pNorm === sNorm) return true;
+
+  // Handle dupatta / duppata / dupattas variants
+  const isPDupatta = pNorm.includes("dupat") || pNorm.includes("duppat");
+  const isSDupatta = sNorm.includes("dupat") || sNorm.includes("duppat");
+  if (isPDupatta && isSDupatta) return true;
+
+  // Handle kurta set / kurta variants
+  const isPKurta = pNorm.includes("kurta");
+  const isSKurta = sNorm.includes("kurta");
+  if (isPKurta && isSKurta) return true;
+
+  // Handle saree / sarees / sari
+  const isPSaree = pNorm.includes("saree") || pNorm.includes("sari");
+  const isSSaree = sNorm.includes("saree") || sNorm.includes("sari");
+  if (isPSaree && isSSaree) return true;
+
+  return p.includes(s) || s.includes(p);
+}
+
+// Master sorting helper based on active shop mode & category sequence
+export const sortProductsByMode = (
+  list,
+  mode = "category_first_manual",
+  categoryOrder = ["Sarees", "Dupattas", "Kurta Sets", "Blouses", "Others"]
+) => {
+  const getRank = (cat) => {
+    if (!cat) return categoryOrder.length;
+    const norm = normalizeCategoryName(cat);
+    const idx = categoryOrder.findIndex((c) => matchesCategory(norm, c));
+    return idx === -1 ? categoryOrder.length : idx;
+  };
+
+  const comparePrio = (a, b) => {
+    const prioA = a.displayOrder && a.displayOrder > 0 ? a.displayOrder : Infinity;
+    const prioB = b.displayOrder && b.displayOrder > 0 ? b.displayOrder : Infinity;
+    if (prioA !== prioB) return prioA - prioB;
+    return 0;
+  };
+
+  const compareNew = (a, b) => {
+    const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    if (timeA !== timeB) return timeB - timeA;
+    return String(b.id || "").localeCompare(String(a.id || ""));
+  };
+
+  const compareOld = (a, b) => {
+    const timeA = a.createdAt ? new Date(a.createdAt).getTime() : Infinity;
+    const timeB = b.createdAt ? new Date(b.createdAt).getTime() : Infinity;
+    if (timeA !== timeB) return timeA - timeB;
+    return String(a.id || "").localeCompare(String(b.id || ""));
+  };
+
+  const copy = [...list];
+
+  switch (mode) {
+    case "category_first_manual":
+      return copy.sort((a, b) => {
+        const rankA = getRank(a.category);
+        const rankB = getRank(b.category);
+        if (rankA !== rankB) return rankA - rankB;
+        const prio = comparePrio(a, b);
+        if (prio !== 0) return prio;
+        return compareNew(a, b);
+      });
+
+    case "category_oldest":
+      return copy.sort((a, b) => {
+        const rankA = getRank(a.category);
+        const rankB = getRank(b.category);
+        if (rankA !== rankB) return rankA - rankB;
+        return compareOld(a, b);
+      });
+
+    case "category_newest":
+      return copy.sort((a, b) => {
+        const rankA = getRank(a.category);
+        const rankB = getRank(b.category);
+        if (rankA !== rankB) return rankA - rankB;
+        return compareNew(a, b);
+      });
+
+    case "oldest_first":
+      return copy.sort((a, b) => compareOld(a, b));
+
+    case "newest_first":
+      return copy.sort((a, b) => compareNew(a, b));
+
+    case "manual_priority":
+      return copy.sort((a, b) => {
+        const prio = comparePrio(a, b);
+        if (prio !== 0) return prio;
+        return compareNew(a, b);
+      });
+
+    default:
+      return copy.sort((a, b) => {
+        const rankA = getRank(a.category);
+        const rankB = getRank(b.category);
+        if (rankA !== rankB) return rankA - rankB;
+        const prio = comparePrio(a, b);
+        if (prio !== 0) return prio;
+        return compareNew(a, b);
+      });
+  }
+};
+
 // Helper to normalize a raw Supabase product row into the frontend shape
 const formatProduct = (p) => {
   const isArchived = Boolean(p.is_archived ?? p.isArchived ?? (p.status === "ARCHIVED"));
@@ -81,6 +205,8 @@ const formatProduct = (p) => {
     isArchived,
     needsReview,
     sku: p.sku || "",
+    displayOrder: isNaN(displayOrderVal) ? 0 : displayOrderVal,
+    createdAt: p.createdAt || p.created_at || null,
     // Variation support
     productType: p.productType || p.product_type || "simple",
     attributeName: p.attributeName || p.attribute_name || "Size",
@@ -94,6 +220,60 @@ export const ProductProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
+  const [shopSortSettings, setShopSortSettings] = useState(DEFAULT_SHOP_SORT_SETTINGS);
+
+  const fetchShopSortSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("key", "shop_sort_settings")
+        .maybeSingle();
+
+      if (!error && data && data.value) {
+        const val = typeof data.value === "string" ? JSON.parse(data.value) : data.value;
+        if (val && val.sortMode) {
+          setShopSortSettings(val);
+          try {
+            localStorage.setItem("safedrang_shop_sort_settings", JSON.stringify(val));
+          } catch {}
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("Could not fetch shop_sort_settings:", err);
+    }
+
+    try {
+      const local = localStorage.getItem("safedrang_shop_sort_settings");
+      if (local) {
+        setShopSortSettings(JSON.parse(local));
+      }
+    } catch {}
+  };
+
+  const updateShopSortSettings = async (newSettings) => {
+    const merged = { ...shopSortSettings, ...newSettings };
+    setShopSortSettings(merged);
+    try {
+      localStorage.setItem("safedrang_shop_sort_settings", JSON.stringify(merged));
+    } catch {}
+
+    try {
+      await supabase.from("settings").upsert(
+        {
+          id: "setting_shop_sort",
+          key: "shop_sort_settings",
+          value: merged,
+          group: "shop",
+          updatedAt: new Date().toISOString(),
+        },
+        { onConflict: "key" }
+      );
+    } catch (err) {
+      console.warn("Could not persist shop_sort_settings in Supabase:", err);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -113,12 +293,24 @@ export const ProductProvider = ({ children }) => {
 
       if (!data || data.length === 0) {
         console.log("No products found in database, falling back to static products");
-        setProducts(staticProducts);
+        const formattedStatic = staticProducts.map(formatProduct);
+        const seen = new Set();
+        const deduped = formattedStatic.filter((p) => !seen.has(p.id) && seen.add(p.id));
+        setProducts(deduped);
       } else {
         const formatted = data.map(formatProduct);
-        setProducts(formatted);
+        const seen = new Set();
+        const deduped = [];
+        for (const p of formatted) {
+          if (!p.id) continue;
+          if (!seen.has(p.id)) {
+            seen.add(p.id);
+            deduped.push(p);
+          }
+        }
+        setProducts(deduped);
         try {
-          localStorage.setItem("safedrang_products_cache", JSON.stringify(formatted));
+          localStorage.setItem("safedrang_products_cache", JSON.stringify(deduped));
         } catch (e) {}
       }
     } catch (err) {
@@ -140,6 +332,7 @@ export const ProductProvider = ({ children }) => {
 
   useEffect(() => {
     fetchProducts();
+    fetchShopSortSettings();
   }, []);
 
   const addProduct = async (product) => {
@@ -164,6 +357,7 @@ export const ProductProvider = ({ children }) => {
       isOneOfOne: product.badge === "One of One" || Boolean(product.isOneOfOne),
       isArchived: Boolean(product.isArchived),
       needsReview: Boolean(product.needsReview),
+      displayOrder: Number(product.displayOrder ?? product.display_order ?? 0) || 0,
     };
 
     setProducts((prev) => [formatted, ...prev]);
@@ -189,6 +383,7 @@ export const ProductProvider = ({ children }) => {
           is_one_of_one: Boolean(formatted.isOneOfOne),
           is_archived: Boolean(formatted.isArchived),
           needs_review: Boolean(formatted.needsReview),
+          display_order: Number(formatted.displayOrder || 0),
         },
       ]);
       if (error) {
@@ -241,6 +436,7 @@ export const ProductProvider = ({ children }) => {
       isOneOfOne: assignedBadge === "One of One" || Boolean(updatedData.isOneOfOne),
       isArchived: isArchivedVal,
       needsReview: needsReviewVal,
+      displayOrder: Number(updatedData.displayOrder ?? updatedData.display_order ?? 0) || 0,
       category: normalizeCategoryName(updatedData.category),
     };
 
@@ -281,6 +477,7 @@ export const ProductProvider = ({ children }) => {
         newArrival: assignedBadge === "New Arrival",
         is_archived: isArchivedVal,
         needs_review: needsReviewVal,
+        display_order: Number(updatedData.displayOrder ?? updatedData.display_order ?? 0) || 0,
         "updatedAt": new Date().toISOString(),
       };
 
@@ -427,6 +624,8 @@ export const ProductProvider = ({ children }) => {
         bulkUpdateStockStatus,
         bulkDelete,
         getAllCategories,
+        shopSortSettings,
+        updateShopSortSettings,
         refetch: fetchProducts,
       }}
     >

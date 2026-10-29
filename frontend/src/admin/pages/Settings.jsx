@@ -3,15 +3,18 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Settings as SettingsIcon, Save, Loader2, Store, Truck, Percent,
   Bell, Globe, Shield, AlertCircle, CheckCircle2, Activity, ArrowRight,
+  ArrowUpDown,
 } from "lucide-react";
 import "./AdminPages.css";
 import "./Settings.css";
 
 import { adminService } from "../adminService.js";
 import TrackingIntegrations from "./TrackingIntegrations";
+import ShopSortManager from "../components/ShopSortManager";
 
 const TABS = [
   { key: "general", label: "General", icon: <Store size={16} /> },
+  { key: "shop_sorting", label: "Shop Display & Sorting", icon: <ArrowUpDown size={16} /> },
   { key: "shipping", label: "Shipping", icon: <Truck size={16} /> },
   { key: "tax", label: "Tax & Pricing", icon: <Percent size={16} /> },
   { key: "notifications", label: "Notifications", icon: <Bell size={16} /> },
@@ -207,6 +210,9 @@ const Settings = () => {
           </div>
         );
 
+      case "shop_sorting":
+        return <ShopSortManager />;
+
       case "tracking":
         return <TrackingIntegrations isEmbedded={true} />;
 
@@ -223,7 +229,7 @@ const Settings = () => {
           <h2>Settings</h2>
           <p className="page-subtitle">Configure your store preferences</p>
         </div>
-        {tab !== "tracking" && (
+        {tab !== "tracking" && tab !== "shop_sorting" && (
           <button className="admin-btn icon-left" onClick={handleSave} disabled={saving} id="save-settings-btn">
             {saving ? <Loader2 size={15} className="spin" /> : <Save size={15} />}
             {saving ? "Saving…" : "Save Changes"}

@@ -4161,28 +4161,6 @@ export const products = [
     "weight": "0.8 kg",
     "dimensions": "30 × 30 × 7 cm",
     "stock": 2
-  },
-  {
-    "id": "zz32ew75k",
-    "title": "Amber semi-precious ring",
-    "category": "Others",
-    "subcategory": "Jewellery",
-    "price": 699,
-    "salePrice": null,
-    "image": "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/Amber-ring-3-scaled.jpg",
-    "images": [
-      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/Amber-ring-3-scaled.jpg",
-      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/Amber-ring-1-scaled.jpg",
-      "https://mistyrose-mantis-867926.hostingersite.com/wp-content/uploads/2025/06/Amber-ring-3-1-scaled.jpg"
-    ],
-    "sku": "",
-    "stockStatus": "In Stock",
-    "craft": "Handcrafted",
-    "fabric": "Mixed",
-    "description": "",
-    "weight": "0.5 kg",
-    "dimensions": "30 × 25 × 5 cm",
-    "stock": 2
   }
 ];
 

@@ -2,8 +2,9 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Plus, Search, Edit2, Trash2, Tags, ChevronRight,
-  Loader2, FolderOpen, AlertCircle, Package, Sparkles, Tag,
+  Loader2, FolderOpen, AlertCircle, Package, Sparkles, Tag, ArrowUpDown,
 } from "lucide-react";
+import ShopSortManager from "../components/ShopSortManager";
 import "./AdminPages.css";
 import "./Settings.css";
 
@@ -28,7 +29,7 @@ const Categories = () => {
   const { products } = useProducts();
 
   // Active view tab: "categories" or "badges"
-  const [activeTab, setActiveTab] = useState(searchParams.get("tab") === "badges" ? "badges" : "categories");
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") === "badges" ? "badges" : searchParams.get("tab") === "sorting" ? "sorting" : "categories");
 
   // ── Categories State ────────────────────────────────────────────────
   const [categories, setCategories] = useState([]);
@@ -62,7 +63,7 @@ const Categories = () => {
   // Sync tab with URL
   const handleTabChange = (newTab) => {
     setActiveTab(newTab);
-    setSearchParams(newTab === "badges" ? { tab: "badges" } : {});
+    setSearchParams(newTab !== "categories" ? { tab: newTab } : {});
   };
 
   // Helper to count products matching a category name
@@ -281,6 +282,14 @@ const Categories = () => {
           style={{ padding: "8px 18px", fontSize: "0.9rem", display: "inline-flex", alignItems: "center", gap: "8px", fontWeight: 600 }}
         >
           <Sparkles size={16} /> Product Badges ({badges.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => handleTabChange("sorting")}
+          className={`admin-btn ${activeTab === "sorting" ? "" : "admin-btn-outline"}`}
+          style={{ padding: "8px 18px", fontSize: "0.9rem", display: "inline-flex", alignItems: "center", gap: "8px", fontWeight: 600 }}
+        >
+          <ArrowUpDown size={16} /> Shop Sequence &amp; Sorting
         </button>
       </div>
 
@@ -617,6 +626,11 @@ const Categories = () => {
           </div>
         </>
       )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* TAB 3: SHOP SEQUENCE & SORTING                               */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {activeTab === "sorting" && <ShopSortManager />}
 
       {/* ───────────────────────────────────────────────────────────── */}
       {/* Category Modal                                                */}

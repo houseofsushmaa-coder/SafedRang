@@ -80,6 +80,7 @@ const EditProduct = () => {
     isOneOfOne: false,
     isArchived: false,
     needsReview: false,
+    displayOrder: 0,
   });
 
   useEffect(() => {
@@ -105,6 +106,7 @@ const EditProduct = () => {
           isOneOfOne: Boolean(product.isOneOfOne || product.badge === "One of One"),
           isArchived: Boolean(product.isArchived),
           needsReview: Boolean(product.needsReview),
+          displayOrder: product.displayOrder ?? product.display_order ?? 0,
         });
       }
     }
@@ -280,6 +282,8 @@ const EditProduct = () => {
       isOneOfOne: formData.badge === "One of One" || Boolean(formData.isOneOfOne),
       isArchived: Boolean(formData.isArchived),
       needsReview: Boolean(formData.needsReview),
+      displayOrder: parseInt(formData.displayOrder, 10) || 0,
+      display_order: parseInt(formData.displayOrder, 10) || 0,
       price: parseFloat(formData.price) || 0,
       salePrice: formData.salePrice ? parseFloat(formData.salePrice) : null,
       stock:
@@ -770,6 +774,27 @@ const EditProduct = () => {
                 >
                   Badges page
                 </button>
+              </p>
+            </div>
+
+            <div className="form-group" style={{ marginTop: "16px" }}>
+              <label htmlFor="display-order-input">SHOP DISPLAY PRIORITY</label>
+              <input
+                id="display-order-input"
+                type="number"
+                min="0"
+                step="1"
+                name="displayOrder"
+                value={formData.displayOrder ?? ""}
+                onChange={(e) => {
+                  const val = e.target.value === "" ? "" : parseInt(e.target.value, 10);
+                  setFormData((prev) => ({ ...prev, displayOrder: isNaN(val) ? "" : val }));
+                }}
+                placeholder="0 (Standard priority)"
+                className="admin-input full-width"
+              />
+              <p className="field-hint">
+                Lower numbers appear first on the shop page (e.g. 1 is top priority). 0 or empty for standard ordering.
               </p>
             </div>
 

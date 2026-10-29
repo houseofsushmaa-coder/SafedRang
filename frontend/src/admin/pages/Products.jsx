@@ -722,6 +722,27 @@ const Products = () => {
                                 </span>
                               )}
 
+                              {/* Manual Priority Badge */}
+                              {product.displayOrder > 0 && (
+                                <span
+                                  style={{
+                                    fontSize: "0.62rem",
+                                    fontWeight: 700,
+                                    letterSpacing: "0.05em",
+                                    backgroundColor: "#EFF6FF",
+                                    color: "#1D4ED8",
+                                    border: "1px solid #BFDBFE",
+                                    padding: "2px 6px",
+                                    borderRadius: "3px",
+                                    display: "inline-block",
+                                    lineHeight: 1.2,
+                                  }}
+                                  title={`Shop Display Priority #${product.displayOrder}`}
+                                >
+                                  PRIORITY #{product.displayOrder}
+                                </span>
+                              )}
+
                               {/* Needs Review Pill */}
                               {product.needsReview && (
                                 <span
