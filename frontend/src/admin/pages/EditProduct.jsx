@@ -276,7 +276,7 @@ const EditProduct = () => {
       navigate("/admin/products");
     } catch (err) {
       console.error("Save failed:", err);
-      alert("Failed to save product. Please try again.");
+      alert(`Failed to save product: ${err.message || "Please check your network or inputs."}`);
     } finally {
       setSaving(false);
     }
@@ -651,31 +651,29 @@ const EditProduct = () => {
             </div>
 
             <div className="form-group" style={{ marginTop: "20px", paddingTop: "16px", borderTop: "1px solid var(--admin-border)" }}>
-              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
-                <div>
-                  <label htmlFor="isOneOfOne" style={{ fontWeight: 600, color: "var(--admin-text-main)", cursor: "pointer", display: "inline-block", marginBottom: "4px" }}>
-                    One of One
-                  </label>
-                  <p className="field-hint" style={{ margin: 0, fontSize: "0.82rem", color: "var(--admin-text-light)", lineHeight: 1.4 }}>
-                    Include this product in the exclusive One-of-One collection and display the ONE OF ONE badge.
-                  </p>
-                </div>
-                <input
-                  id="isOneOfOne"
-                  type="checkbox"
-                  name="isOneOfOne"
-                  checked={Boolean(formData.isOneOfOne)}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, isOneOfOne: e.target.checked }))}
-                  style={{
-                    width: "20px",
-                    height: "20px",
-                    cursor: "pointer",
-                    accentColor: "#6E1E2A",
-                    flexShrink: 0,
-                    marginTop: "2px"
+              <label htmlFor="badge-select">BADGES</label>
+              <div className="cat-select-wrap">
+                <select
+                  id="badge-select"
+                  name="badge"
+                  value={formData.isOneOfOne ? "One of One" : ""}
+                  onChange={(e) => {
+                    const selected = e.target.value;
+                    setFormData((prev) => ({
+                      ...prev,
+                      isOneOfOne: selected === "One of One",
+                    }));
                   }}
-                />
+                  className="admin-input full-width admin-select-native"
+                >
+                  <option value="">Select badge</option>
+                  <option value="One of One">One of One</option>
+                </select>
+                <ChevronDown size={14} className="cat-select-chevron" />
               </div>
+              <p className="field-hint">
+                Select &ldquo;One of One&rdquo; to feature this product in the exclusive One-of-One collection and display the badge.
+              </p>
             </div>
           </div>
 

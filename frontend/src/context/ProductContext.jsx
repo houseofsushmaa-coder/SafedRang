@@ -174,7 +174,10 @@ export const ProductProvider = ({ children }) => {
           is_one_of_one: Boolean(formatted.isOneOfOne),
         },
       ]);
-      if (error) console.warn("Could not insert product into Supabase:", error.message);
+      if (error) {
+        console.warn("Could not insert product into Supabase:", error.message);
+        throw new Error(error.message);
+      }
     } catch (err) {
       console.warn("Could not insert product into Supabase:", err);
     }
@@ -254,6 +257,7 @@ export const ProductProvider = ({ children }) => {
 
       if (error) {
         console.error("Failed to update product in Supabase:", error.message);
+        throw new Error(error.message);
       }
     } catch (err) {
       console.warn("Failed to update product in Supabase:", err);
