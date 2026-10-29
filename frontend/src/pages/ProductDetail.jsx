@@ -209,7 +209,7 @@ export default function ProductDetail() {
           <div className="gallery-main">
             <img src={activeImage || imagesList[0]} alt={product.title} />
             <div className="badges">
-              {product.category === "Sarees" && (
+              {Boolean(product.isOneOfOne) && (
                 <span className="badge-luxury">ONE OF ONE</span>
               )}
             </div>

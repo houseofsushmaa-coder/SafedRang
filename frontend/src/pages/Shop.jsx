@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useLocation } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { useProducts } from "../context/ProductContext";
 import { useCurrency } from "../context/CurrencyContext";
@@ -87,16 +87,7 @@ function matchesSubcategory(product, subcategory) {
   }
 
   if (target === "one of one" || target === "one-of-one") {
-    return (
-      Boolean(product.isOneOfOne) ||
-      subcat.includes("one of one") ||
-      subcat.includes("one-of-one") ||
-      combined.includes("one of one") ||
-      combined.includes("one-of-one") ||
-      combined.includes("exclusive") ||
-      combined.includes("masterpiece") ||
-      product.price >= 14000
-    );
+    return Boolean(product.isOneOfOne);
   }
 
   return subcat === target || combined.includes(target);
@@ -199,6 +190,10 @@ export default function Shop() {
   const { products, getAllCategories } = useProducts();
   const { formatPrice } = useCurrency();
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+  const isOneOfOneRoute =
+    location.pathname.includes("one-of-one") ||
+    (searchParams.get("category") || "").toLowerCase() === "one-of-one";
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
@@ -357,6 +352,11 @@ export default function Shop() {
           (p.fabric || "").toLowerCase().includes(q) ||
           (p.craft || "").toLowerCase().includes(q)
       );
+    }
+
+    // Dedicated One-of-One Collection Filter
+    if (isOneOfOneRoute) {
+      list = list.filter((p) => Boolean(p.isOneOfOne));
     }
 
     // Filter by Category
@@ -713,7 +713,22 @@ export default function Shop() {
         <div className="active-filters">
           <span className="active-label">ACTIVE:</span>
 
-          {activeFilterCount === 0 && (
+          {isOneOfOneRoute && (
+            <span
+              className="active-tag"
+              style={{
+                backgroundColor: "#6E1E2A",
+                color: "#FFFFFF",
+                borderColor: "#6E1E2A",
+                fontWeight: 600,
+                letterSpacing: "0.08em",
+              }}
+            >
+              COLLECTION: ONE OF ONE ({filteredProducts.length})
+            </span>
+          )}
+
+          {activeFilterCount === 0 && !isOneOfOneRoute && (
             <span className="active-empty-hint">
               ALL CREATIONS ({filteredProducts.length})
             </span>

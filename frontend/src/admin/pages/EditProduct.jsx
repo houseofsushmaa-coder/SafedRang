@@ -62,6 +62,7 @@ const EditProduct = () => {
     productType: "simple",
     attributeName: "Size",
     variations: [],
+    isOneOfOne: false,
   });
 
   useEffect(() => {
@@ -83,6 +84,7 @@ const EditProduct = () => {
           productType: product.productType || "simple",
           attributeName: product.attributeName || "Size",
           variations: product.variations || [],
+          isOneOfOne: Boolean(product.isOneOfOne),
         });
       }
     }
@@ -254,6 +256,7 @@ const EditProduct = () => {
       ...formData,
       image: primaryImage,
       images: syncedImages,
+      isOneOfOne: Boolean(formData.isOneOfOne),
       price: parseFloat(formData.price) || 0,
       salePrice: formData.salePrice ? parseFloat(formData.salePrice) : null,
       stock:

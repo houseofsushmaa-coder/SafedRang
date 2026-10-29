@@ -75,6 +75,7 @@ const formatProduct = (p) => {
     productType: p.productType || p.product_type || "simple",
     attributeName: p.attributeName || p.attribute_name || "Size",
     variations: Array.isArray(p.variations) ? p.variations : [],
+    isOneOfOne: Boolean(p.is_one_of_one ?? p.isOneOfOne ?? false),
   };
 };
 
@@ -148,6 +149,7 @@ export const ProductProvider = ({ children }) => {
       productType: product.productType || "simple",
       attributeName: product.attributeName || "Size",
       variations: Array.isArray(product.variations) ? product.variations : [],
+      isOneOfOne: Boolean(product.isOneOfOne),
     };
 
     setProducts((prev) => [formatted, ...prev]);
@@ -169,6 +171,7 @@ export const ProductProvider = ({ children }) => {
           product_type: formatted.productType || "simple",
           attribute_name: formatted.attributeName || "Size",
           variations: formatted.variations || [],
+          is_one_of_one: Boolean(formatted.isOneOfOne),
         },
       ]);
       if (error) console.warn("Could not insert product into Supabase:", error.message);
@@ -205,6 +208,7 @@ export const ProductProvider = ({ children }) => {
       id: String(id),
       image: primaryImage,
       images: syncedImages,
+      isOneOfOne: Boolean(updatedData.isOneOfOne),
       category: normalizeCategoryName(updatedData.category),
     };
 
@@ -239,6 +243,7 @@ export const ProductProvider = ({ children }) => {
         variations: Array.isArray(updatedData.variations)
           ? updatedData.variations
           : [],
+        is_one_of_one: Boolean(updatedData.isOneOfOne),
         "updatedAt": new Date().toISOString(),
       };
 

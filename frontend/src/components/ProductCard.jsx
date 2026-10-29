@@ -93,11 +93,11 @@ export default function ProductCard({ product }) {
             <div className="editorial-badge sold-out-badge" style={{ background: "rgba(0,0,0,0.8)", color: "#fff" }}>
               <span className="badge-line-1">OUT OF STOCK</span>
             </div>
-          ) : (
+          ) : product.isOneOfOne ? (
             <div className="editorial-badge">
               <span className="badge-line-1">ONE OF ONE</span>
             </div>
-          )}
+          ) : null}
 
           <button
             className={`wishlist-icon ${isWishlisted ? "is-active" : ""}`}

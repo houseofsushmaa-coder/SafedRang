@@ -98,6 +98,7 @@ const Products = () => {
   const [searchTerm, setSearchTerm]         = useState("");
   const [categoryFilter, setCategoryFilter] = useState(searchParams.get("category") || "all");
   const [statusFilter, setStatusFilter]     = useState("all");
+  const [oneOfOneFilter, setOneOfOneFilter] = useState("all");
   const [categories, setCategories]         = useState([]);
 
   useEffect(() => {
@@ -159,7 +160,15 @@ const Products = () => {
 
     const matchStatus = statusFilter === "all" ||
       (p.stockStatus || "").toLowerCase() === statusFilter.toLowerCase();
-    return matchSearch && matchCat && matchStatus;
+
+    let matchOneOfOne = true;
+    if (oneOfOneFilter === "one-of-one") {
+      matchOneOfOne = Boolean(p.isOneOfOne);
+    } else if (oneOfOneFilter === "regular") {
+      matchOneOfOne = !p.isOneOfOne;
+    }
+
+    return matchSearch && matchCat && matchStatus && matchOneOfOne;
   });
 
   // ── Export ────────────────────────────────────────────────────────
@@ -302,11 +311,20 @@ const Products = () => {
               </select>
               <ChevronDown size={13} className="filter-chevron" />
             </div>
-            {(categoryFilter !== "all" || statusFilter !== "all" || searchTerm) && (
+            {/* One of One Collection filter */}
+            <div className="filter-select-wrap">
+              <select className="filter-select" value={oneOfOneFilter} onChange={(e) => setOneOfOneFilter(e.target.value)}>
+                <option value="all">All Products</option>
+                <option value="one-of-one">One of One</option>
+                <option value="regular">Regular Products</option>
+              </select>
+              <ChevronDown size={13} className="filter-chevron" />
+            </div>
+            {(categoryFilter !== "all" || statusFilter !== "all" || oneOfOneFilter !== "all" || searchTerm) && (
               <button
                 className="admin-btn admin-btn-outline icon-left"
                 style={{ padding: "6px 10px", fontSize: "0.8rem" }}
-                onClick={() => { setCategoryFilter("all"); setStatusFilter("all"); setSearchTerm(""); }}
+                onClick={() => { setCategoryFilter("all"); setStatusFilter("all"); setOneOfOneFilter("all"); setSearchTerm(""); }}
               >
                 <RefreshCw size={13} /> Clear
               </button>
@@ -343,7 +361,26 @@ const Products = () => {
                         <div className="product-img" style={{ backgroundImage: `url(${product.image})` }} />
                         <div className="product-info">
                           <span className="product-title">{product.title}</span>
-                          <span className="product-sku">{product.sku || product.id?.substring(0, 8)}</span>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", marginTop: "2px" }}>
+                            <span className="product-sku">{product.sku || product.id?.substring(0, 8)}</span>
+                            {product.isOneOfOne && (
+                              <span
+                                style={{
+                                  fontSize: "0.62rem",
+                                  fontWeight: 700,
+                                  letterSpacing: "0.08em",
+                                  backgroundColor: "#6E1E2A",
+                                  color: "#FAF5EC",
+                                  padding: "2px 6px",
+                                  borderRadius: "3px",
+                                  display: "inline-block",
+                                  lineHeight: 1.2
+                                }}
+                              >
+                                ONE OF ONE
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </td>

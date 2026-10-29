@@ -1,9 +1,9 @@
 -- ==============================================================================
--- SAFED RANG — PRODUCTS & STORAGE SYNCHRONIZATION MIGRATION
+-- SAFED RANG — PRODUCTS, ONE-OF-ONE & STORAGE SYNCHRONIZATION MIGRATION
 -- ==============================================================================
 -- Fixes:
 -- 1. Adds missing column definitions to public.products so product updates
---    (images, category_name, variations, product_type) persist cleanly.
+--    (images, category_name, variations, product_type, is_one_of_one) persist cleanly.
 -- 2. Configures Row Level Security (RLS) policies allowing public read access
 --    and authorized updates to products and product_images.
 -- 3. Configures Supabase Storage policies for 'product-images' bucket so admin
@@ -18,6 +18,7 @@ ALTER TABLE public.products ADD COLUMN IF NOT EXISTS category_name TEXT;
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS product_type TEXT DEFAULT 'simple';
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS attribute_name TEXT DEFAULT 'Size';
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS variations JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS is_one_of_one BOOLEAN DEFAULT FALSE;
 
 -- 2. Configure Row Level Security (RLS) Policies on products
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
@@ -65,4 +66,3 @@ ON storage.objects FOR UPDATE USING (bucket_id = 'product-images');
 DROP POLICY IF EXISTS "Allow delete for product-images" ON storage.objects;
 CREATE POLICY "Allow delete for product-images" 
 ON storage.objects FOR DELETE USING (bucket_id = 'product-images');
-
