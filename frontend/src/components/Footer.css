@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap");
 
 .sf {
   --sf-fill: #150803;            /* Solid bottom fill matching the banner */
@@ -35,6 +35,18 @@
 .sf a {
   color: inherit;
   text-decoration: none;
+}
+
+/* ==========================================================================
+   DESKTOP FOOTER (STRICT PROTECTION: UNCHANGED AT > 640PX)
+   ========================================================================== */
+.sf-desktop {
+  display: block;
+  width: 100%;
+}
+
+.sf-mobile {
+  display: none;
 }
 
 /* Background image: 100% width, auto height, anchored to top center */
@@ -202,8 +214,8 @@
   border-radius: 4px;
 }
 
-/* ---------- Tablet (max-width: 1024px) ---------- */
-@media (max-width: 1024px) {
+/* ---------- Tablet (max-width: 1024px and > 640px) ---------- */
+@media (max-width: 1024px) and (min-width: 641px) {
   .sf-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: 36px 28px;
@@ -213,32 +225,279 @@
   }
 }
 
-/* ---------- Mobile (max-width: 640px) ---------- */
+/* ==========================================================================
+   MOBILE FOOTER (SCALED EXCLUSIVELY AT <= 640PX)
+   ========================================================================== */
 @media (max-width: 640px) {
   .sf {
-    padding-top: calc(12.5vw + 56px);
-    padding-left: 20px;
-    padding-right: 20px;
+    padding: 0 !important;
+    background-color: #150803;
+    overflow: visible;
   }
-  .sf-bg {
-    background-size: 100% auto;
+
+  .sf-desktop {
+    display: none !important;
+  }
+
+  .sf-mobile {
+    display: block !important;
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  /* Mobile Background: 100% width, natural 1:2 aspect ratio, anchored to top */
+  .sf-mob-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: url("/footer-mobile-bg.png");
     background-position: center top;
+    background-size: 100% auto;
+    background-repeat: no-repeat;
+    background-color: #150803;
   }
-  .sf-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 32px 20px;
+
+  .sf-mob-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 60%, #150803 94%);
+    pointer-events: none;
   }
-  .sf-brand {
-    grid-column: 1 / -1;
-  }
-  .sf-bottom {
+
+  /* ── 1. Ivory Upper Area ── */
+  .sf-mob-ivory {
+    position: relative;
+    z-index: 1;
+    display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    padding-bottom: 96px; /* Room for WhatsApp floating button */
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    /* Exactly scaled to the image's 47.4vw ivory dip */
+    height: calc(47.4vw);
+    min-height: 155px;
+    max-height: 230px;
+    padding: 24px 20px 38px;
+    box-sizing: border-box;
   }
-  .sf-bottom-left {
-    flex-direction: row;
+
+  .sf-mob-logo-link {
+    display: inline-block;
+    line-height: 1;
+    margin-bottom: 6px;
+    transition: opacity 0.2s ease;
+  }
+
+  .sf-mob-logo-link:hover {
+    opacity: 0.85;
+  }
+
+  .sf-mob-wordmark {
+    height: clamp(30px, 8vw, 40px);
+    width: auto;
+    max-width: 160px;
+    object-fit: contain;
+    display: block;
+  }
+
+  .sf-mob-tagline {
+    font-family: "Inter", system-ui, sans-serif;
+    font-size: clamp(8.5px, 2.3vw, 10px);
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #6E1E2A;
+    display: block;
+  }
+
+  /* ── 2. Central Dark Area ── */
+  .sf-mob-content {
+    position: relative;
+    z-index: 1;
+    padding: 16px 24px 0 24px;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
+  .sf-mob-accordions {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid rgba(212, 171, 99, 0.25);
+  }
+
+  .sf-mob-acc-item {
+    border-bottom: 1px solid rgba(212, 171, 99, 0.25);
+  }
+
+  .sf-mob-acc-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 50px;
+    padding: 14px 4px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.2s ease;
+  }
+
+  .sf-mob-acc-trigger:hover,
+  .sf-mob-acc-trigger:focus-visible {
+    opacity: 0.85;
+  }
+
+  .sf-mob-acc-title {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sf-gold);
+    line-height: 1;
+  }
+
+  .sf-mob-acc-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+  }
+
+  .sf-mob-chevron {
+    color: var(--sf-gold);
+    transition: transform 0.28s cubic-bezier(0.2, 0, 0, 1);
+    flex-shrink: 0;
+  }
+
+  .sf-mob-chevron.rotate {
+    transform: rotate(180deg);
+  }
+
+  /* Smooth pure-CSS height transition via grid-template-rows */
+  .sf-mob-acc-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s cubic-bezier(0.2, 0, 0, 1), opacity 0.25s ease;
+    opacity: 0;
+    overflow: hidden;
+  }
+
+  .sf-mob-acc-panel.expanded {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+
+  .sf-mob-acc-inner {
+    min-height: 0;
+    padding-bottom: 14px;
+    padding-left: 6px;
+  }
+
+  .sf-mob-acc-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .sf-mob-acc-links a {
+    font-family: "Inter", system-ui, sans-serif;
+    font-size: 13.5px;
+    color: rgba(245, 233, 214, 0.78);
+    transition: color 0.2s ease;
+    display: inline-block;
+    padding: 2px 0;
+  }
+
+  .sf-mob-acc-links a:hover {
+    color: var(--sf-cream);
+  }
+
+  /* ── 3. Lower Area ── */
+  .sf-mob-lower {
+    padding-top: 24px;
+    padding-bottom: 96px; /* Room for WhatsApp floating button */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .sf-mob-quote {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 15.5px;
+    font-style: italic;
+    color: var(--sf-cream);
+    margin: 0;
+    max-width: 280px;
+    line-height: 1.45;
+    opacity: 0.9;
+  }
+
+  .sf-mob-contact {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-wrap: wrap;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--sf-text);
+  }
+
+  .sf-mob-contact-link {
+    color: var(--sf-text);
+    transition: color 0.2s ease;
+  }
+
+  .sf-mob-contact-link:hover {
+    color: var(--sf-gold);
+  }
+
+  .sf-mob-legal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 11.5px;
+    color: rgba(245, 233, 214, 0.65);
+  }
+
+  .sf-mob-legal a {
+    color: inherit;
+    transition: color 0.2s ease;
+  }
+
+  .sf-mob-legal a:hover {
+    color: var(--sf-gold);
+  }
+
+  .sf-mob-dot {
+    color: var(--sf-gold);
+    opacity: 0.45;
+    font-size: 8px;
+  }
+
+  .sf-mob-bottom-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: rgba(245, 233, 214, 0.55);
+    margin-top: 4px;
+  }
+
+  .sf-mob-credit {
+    font-size: 10px;
+    opacity: 0.8;
   }
 }
