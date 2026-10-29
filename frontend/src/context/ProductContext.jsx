@@ -75,7 +75,8 @@ const formatProduct = (p) => {
     productType: p.productType || p.product_type || "simple",
     attributeName: p.attributeName || p.attribute_name || "Size",
     variations: Array.isArray(p.variations) ? p.variations : [],
-    isOneOfOne: Boolean(p.is_one_of_one ?? p.isOneOfOne ?? false),
+    badge: p.badge || (p.is_one_of_one ? "One of One" : p.bestseller ? "Best Seller" : p.newArrival ? "New Arrival" : null),
+    isOneOfOne: Boolean(p.is_one_of_one ?? p.isOneOfOne ?? (p.badge === "One of One")),
   };
 };
 
@@ -149,7 +150,8 @@ export const ProductProvider = ({ children }) => {
       productType: product.productType || "simple",
       attributeName: product.attributeName || "Size",
       variations: Array.isArray(product.variations) ? product.variations : [],
-      isOneOfOne: Boolean(product.isOneOfOne),
+      badge: product.badge || (product.isOneOfOne ? "One of One" : null),
+      isOneOfOne: product.badge === "One of One" || Boolean(product.isOneOfOne),
     };
 
     setProducts((prev) => [formatted, ...prev]);
@@ -171,6 +173,7 @@ export const ProductProvider = ({ children }) => {
           product_type: formatted.productType || "simple",
           attribute_name: formatted.attributeName || "Size",
           variations: formatted.variations || [],
+          badge: formatted.badge || (formatted.isOneOfOne ? "One of One" : null),
           is_one_of_one: Boolean(formatted.isOneOfOne),
         },
       ]);
@@ -206,12 +209,17 @@ export const ProductProvider = ({ children }) => {
       : rawImages;
 
     // Merge into local state immediately (optimistic update)
+    const assignedBadge = updatedData.badge !== undefined
+      ? (updatedData.badge || null)
+      : (updatedData.isOneOfOne ? "One of One" : null);
+
     const merged = {
       ...updatedData,
       id: String(id),
       image: primaryImage,
       images: syncedImages,
-      isOneOfOne: Boolean(updatedData.isOneOfOne),
+      badge: assignedBadge,
+      isOneOfOne: assignedBadge === "One of One" || Boolean(updatedData.isOneOfOne),
       category: normalizeCategoryName(updatedData.category),
     };
 
@@ -246,7 +254,10 @@ export const ProductProvider = ({ children }) => {
         variations: Array.isArray(updatedData.variations)
           ? updatedData.variations
           : [],
-        is_one_of_one: Boolean(updatedData.isOneOfOne),
+        badge: assignedBadge,
+        is_one_of_one: assignedBadge === "One of One" || Boolean(updatedData.isOneOfOne),
+        bestseller: assignedBadge === "Best Seller",
+        newArrival: assignedBadge === "New Arrival",
         "updatedAt": new Date().toISOString(),
       };
 

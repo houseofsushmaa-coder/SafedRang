@@ -100,11 +100,22 @@ const Products = () => {
   const [statusFilter, setStatusFilter]     = useState("all");
   const [oneOfOneFilter, setOneOfOneFilter] = useState("all");
   const [categories, setCategories]         = useState([]);
+  const [badges, setBadges]                 = useState([]);
+
+  useEffect(() => {
+    adminService.getBadges()
+      .then((b) => setBadges(b || []))
+      .catch(() => setBadges([]));
+  }, []);
 
   useEffect(() => {
     const urlCat = searchParams.get("category");
     if (urlCat) {
       setCategoryFilter(urlCat);
+    }
+    const urlBadge = searchParams.get("badge");
+    if (urlBadge) {
+      setOneOfOneFilter(urlBadge);
     }
   }, [searchParams]);
 
@@ -162,10 +173,12 @@ const Products = () => {
       (p.stockStatus || "").toLowerCase() === statusFilter.toLowerCase();
 
     let matchOneOfOne = true;
-    if (oneOfOneFilter === "one-of-one") {
-      matchOneOfOne = Boolean(p.isOneOfOne);
+    if (oneOfOneFilter === "one-of-one" || oneOfOneFilter === "One of One") {
+      matchOneOfOne = Boolean(p.isOneOfOne || p.badge === "One of One");
     } else if (oneOfOneFilter === "regular") {
-      matchOneOfOne = !p.isOneOfOne;
+      matchOneOfOne = !p.isOneOfOne && !p.badge;
+    } else if (oneOfOneFilter !== "all") {
+      matchOneOfOne = (p.badge || "").toLowerCase() === oneOfOneFilter.toLowerCase();
     }
 
     return matchSearch && matchCat && matchStatus && matchOneOfOne;
@@ -311,12 +324,15 @@ const Products = () => {
               </select>
               <ChevronDown size={13} className="filter-chevron" />
             </div>
-            {/* One of One Collection filter */}
+            {/* Badges / Collections filter */}
             <div className="filter-select-wrap">
               <select className="filter-select" value={oneOfOneFilter} onChange={(e) => setOneOfOneFilter(e.target.value)}>
-                <option value="all">All Products</option>
+                <option value="all">All Badges</option>
                 <option value="one-of-one">One of One</option>
-                <option value="regular">Regular Products</option>
+                {badges.filter((b) => b.name !== "One of One").map((b) => (
+                  <option key={b.id || b.name} value={b.name}>{b.name}</option>
+                ))}
+                <option value="regular">Regular (No Badge)</option>
               </select>
               <ChevronDown size={13} className="filter-chevron" />
             </div>
@@ -363,7 +379,7 @@ const Products = () => {
                           <span className="product-title">{product.title}</span>
                           <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", marginTop: "2px" }}>
                             <span className="product-sku">{product.sku || product.id?.substring(0, 8)}</span>
-                            {product.isOneOfOne && (
+                            {(product.badge || product.isOneOfOne) && (
                               <span
                                 style={{
                                   fontSize: "0.62rem",
@@ -377,7 +393,7 @@ const Products = () => {
                                   lineHeight: 1.2
                                 }}
                               >
-                                ONE OF ONE
+                                {(product.badge || "ONE OF ONE").toUpperCase()}
                               </span>
                             )}
                           </div>

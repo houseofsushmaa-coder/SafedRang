@@ -209,8 +209,8 @@ export default function ProductDetail() {
           <div className="gallery-main">
             <img src={activeImage || imagesList[0]} alt={product.title} />
             <div className="badges">
-              {Boolean(product.isOneOfOne) && (
-                <span className="badge-luxury">ONE OF ONE</span>
+              {Boolean(product.badge || product.isOneOfOne) && (
+                <span className="badge-luxury">{(product.badge || "ONE OF ONE").toUpperCase()}</span>
               )}
             </div>
           </div>

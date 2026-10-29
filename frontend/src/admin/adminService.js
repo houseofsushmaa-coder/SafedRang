@@ -798,6 +798,70 @@ export const adminService = {
   },
 
   // ─────────────────────────────────────────────
+  // 4b. BADGES
+  // ─────────────────────────────────────────────
+  async getBadges() {
+    try {
+      const { data, error } = await supabase
+        .from("badges")
+        .select("*")
+        .order("sort_order", { ascending: true });
+
+      if (!error && data && data.length > 0) {
+        return data;
+      }
+    } catch (e) {
+      console.warn("badges table error:", e);
+    }
+
+    return [
+      { id: "badge_1", name: "One of One", slug: "one-of-one", description: "Exclusive one-of-one luxury creations", color: "#6E1E2A", status: "ACTIVE", sort_order: 0 },
+      { id: "badge_2", name: "Best Seller", slug: "best-seller", description: "Most loved and highest selling pieces", color: "#AE8A54", status: "ACTIVE", sort_order: 1 },
+      { id: "badge_3", name: "New Arrival", slug: "new-arrival", description: "Latest additions to the Safed Rang collection", color: "#2D5A43", status: "ACTIVE", sort_order: 2 },
+      { id: "badge_4", name: "Limited Edition", slug: "limited-edition", description: "Special seasonal and rare pieces", color: "#7A2E5C", status: "ACTIVE", sort_order: 3 },
+      { id: "badge_5", name: "Handcrafted", slug: "handcrafted", description: "Authentic artisan hand embroidery", color: "#8B5E34", status: "ACTIVE", sort_order: 4 },
+      { id: "badge_6", name: "Trending", slug: "trending", description: "Currently trending styles", color: "#A13D2D", status: "ACTIVE", sort_order: 5 },
+    ];
+  },
+
+  async saveBadge(badge) {
+    const slug = (badge.slug || badge.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")).trim();
+    if (badge.id && !badge.id.startsWith("badge_temp_")) {
+      const { error } = await supabase
+        .from("badges")
+        .update({
+          name: badge.name.trim(),
+          slug,
+          description: badge.description || null,
+          color: badge.color || "#6E1E2A",
+          status: badge.status || "ACTIVE",
+          sort_order: Number(badge.sort_order || 0),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", badge.id);
+      if (error) throw error;
+    } else {
+      const { error } = await supabase.from("badges").insert([
+        {
+          id: `badge_${Date.now()}`,
+          name: badge.name.trim(),
+          slug,
+          description: badge.description || null,
+          color: badge.color || "#6E1E2A",
+          status: badge.status || "ACTIVE",
+          sort_order: Number(badge.sort_order || 0),
+        },
+      ]);
+      if (error) throw error;
+    }
+  },
+
+  async deleteBadge(id) {
+    const { error } = await supabase.from("badges").delete().eq("id", id);
+    if (error) throw error;
+  },
+
+  // ─────────────────────────────────────────────
   // 5. COUPONS & PROMOTIONS
   // ─────────────────────────────────────────────
   async getCoupons() {

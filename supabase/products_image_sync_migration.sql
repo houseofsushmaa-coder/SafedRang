@@ -66,3 +66,40 @@ ON storage.objects FOR UPDATE USING (bucket_id = 'product-images');
 DROP POLICY IF EXISTS "Allow delete for product-images" ON storage.objects;
 CREATE POLICY "Allow delete for product-images" 
 ON storage.objects FOR DELETE USING (bucket_id = 'product-images');
+
+
+-- 6. Badges table and product badge assignment
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS badge TEXT;
+UPDATE public.products SET badge = 'One of One' WHERE is_one_of_one = TRUE AND (badge IS NULL OR badge = '');
+
+CREATE TABLE IF NOT EXISTS public.badges (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  slug TEXT NOT NULL UNIQUE,
+  description TEXT,
+  color TEXT DEFAULT '#6E1E2A',
+  status TEXT DEFAULT 'ACTIVE',
+  sort_order INT DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.badges ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Public can read badges" ON public.badges;
+CREATE POLICY "Public can read badges" ON public.badges FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Public can insert badges" ON public.badges;
+CREATE POLICY "Public can insert badges" ON public.badges FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Public can update badges" ON public.badges;
+CREATE POLICY "Public can update badges" ON public.badges FOR UPDATE USING (true);
+DROP POLICY IF EXISTS "Public can delete badges" ON public.badges;
+CREATE POLICY "Public can delete badges" ON public.badges FOR DELETE USING (true);
+
+INSERT INTO public.badges (id, name, slug, description, color, status, sort_order)
+VALUES
+  ('badge_1', 'One of One', 'one-of-one', 'Exclusive one-of-one luxury creations', '#6E1E2A', 'ACTIVE', 0),
+  ('badge_2', 'Best Seller', 'best-seller', 'Most loved and highest selling pieces', '#AE8A54', 'ACTIVE', 1),
+  ('badge_3', 'New Arrival', 'new-arrival', 'Latest additions to the Safed Rang collection', '#2D5A43', 'ACTIVE', 2),
+  ('badge_4', 'Limited Edition', 'limited-edition', 'Special seasonal and rare pieces', '#7A2E5C', 'ACTIVE', 3),
+  ('badge_5', 'Handcrafted', 'handcrafted', 'Authentic artisan hand embroidery', '#8B5E34', 'ACTIVE', 4),
+  ('badge_6', 'Trending', 'trending', 'Currently trending styles', '#A13D2D', 'ACTIVE', 5)
+ON CONFLICT (name) DO NOTHING;

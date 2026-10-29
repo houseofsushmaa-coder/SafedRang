@@ -49,6 +49,20 @@ const EditProduct = () => {
         "Stole", "Suit Set", "Uncategorized",
       ];
 
+  // ── Badges from API ────────────────────────────────────────────────
+  const [badges, setBadges] = useState([]);
+  const [newBadgeName, setNewBadgeName] = useState("");
+
+  useEffect(() => {
+    adminService.getBadges()
+      .then((b) => setBadges(b || []))
+      .catch(() => setBadges([]));
+  }, []);
+
+  const badgeOptions = badges.length > 0
+    ? [...new Set(badges.map((b) => b.name))]
+    : ["One of One", "Best Seller", "New Arrival", "Limited Edition", "Handcrafted", "Trending"];
+
   const [formData, setFormData] = useState({
     title: "",
     category: "Sarees",
@@ -62,6 +76,7 @@ const EditProduct = () => {
     productType: "simple",
     attributeName: "Size",
     variations: [],
+    badge: "",
     isOneOfOne: false,
   });
 
@@ -84,7 +99,8 @@ const EditProduct = () => {
           productType: product.productType || "simple",
           attributeName: product.attributeName || "Size",
           variations: product.variations || [],
-          isOneOfOne: Boolean(product.isOneOfOne),
+          badge: product.badge || (product.isOneOfOne ? "One of One" : ""),
+          isOneOfOne: Boolean(product.isOneOfOne || product.badge === "One of One"),
         });
       }
     }
@@ -256,7 +272,8 @@ const EditProduct = () => {
       ...formData,
       image: primaryImage,
       images: syncedImages,
-      isOneOfOne: Boolean(formData.isOneOfOne),
+      badge: formData.badge && formData.badge !== "__new__" ? formData.badge : (formData.isOneOfOne ? "One of One" : null),
+      isOneOfOne: formData.badge === "One of One" || Boolean(formData.isOneOfOne),
       price: parseFloat(formData.price) || 0,
       salePrice: formData.salePrice ? parseFloat(formData.salePrice) : null,
       stock:
@@ -656,23 +673,80 @@ const EditProduct = () => {
                 <select
                   id="badge-select"
                   name="badge"
-                  value={formData.isOneOfOne ? "One of One" : ""}
+                  value={formData.badge || (formData.isOneOfOne ? "One of One" : "")}
                   onChange={(e) => {
-                    const selected = e.target.value;
-                    setFormData((prev) => ({
-                      ...prev,
-                      isOneOfOne: selected === "One of One",
-                    }));
+                    const val = e.target.value;
+                    if (val === "__new__") {
+                      setFormData((prev) => ({ ...prev, badge: "__new__" }));
+                    } else {
+                      setFormData((prev) => ({
+                        ...prev,
+                        badge: val,
+                        isOneOfOne: val === "One of One",
+                      }));
+                    }
                   }}
                   className="admin-input full-width admin-select-native"
                 >
                   <option value="">Select badge</option>
-                  <option value="One of One">One of One</option>
+                  {badgeOptions.map((bName) => (
+                    <option key={bName} value={bName}>{bName}</option>
+                  ))}
+                  <option value="__new__">+ Add new badge…</option>
                 </select>
                 <ChevronDown size={14} className="cat-select-chevron" />
               </div>
+
+              {/* Inline new badge input */}
+              {formData.badge === "__new__" && (
+                <div className="new-cat-row" style={{ marginTop: "8px" }}>
+                  <input
+                    type="text"
+                    className="admin-input"
+                    placeholder="New badge name…"
+                    value={newBadgeName}
+                    onChange={(e) => setNewBadgeName(e.target.value)}
+                    onKeyDown={async (e) => {
+                      if (e.key === "Enter" && newBadgeName.trim()) {
+                        const name = newBadgeName.trim();
+                        try {
+                          await adminService.saveBadge({ name });
+                        } catch (err) {}
+                        setBadges((prev) => [...prev, { id: `badge_${Date.now()}`, name }]);
+                        setFormData((prev) => ({ ...prev, badge: name, isOneOfOne: name === "One of One" }));
+                        setNewBadgeName("");
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="admin-btn icon-left"
+                    style={{ padding: "8px 14px", fontSize: "0.8rem" }}
+                    onClick={async () => {
+                      if (!newBadgeName.trim()) return;
+                      const name = newBadgeName.trim();
+                      try {
+                        await adminService.saveBadge({ name });
+                      } catch (err) {}
+                      setBadges((prev) => [...prev, { id: `badge_${Date.now()}`, name }]);
+                      setFormData((prev) => ({ ...prev, badge: name, isOneOfOne: name === "One of One" }));
+                      setNewBadgeName("");
+                    }}
+                  >
+                    <Plus size={13} /> Add
+                  </button>
+                </div>
+              )}
+
               <p className="field-hint">
-                Select &ldquo;One of One&rdquo; to feature this product in the exclusive One-of-One collection and display the badge.
+                Manage all badges in the{" "}
+                <button
+                  type="button"
+                  className="text-link"
+                  onClick={() => window.open("/admin/categories?tab=badges", "_blank")}
+                >
+                  Badges page
+                </button>
               </p>
             </div>
           </div>
