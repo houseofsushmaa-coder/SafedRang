@@ -2,6 +2,13 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 import { supabase } from "../lib/supabase";
 import { products as staticProducts } from "../data/products";
 
+import {
+  normalizeCategoryName,
+  DEFAULT_SHOP_SORT_SETTINGS,
+  matchesCategory,
+  sortProductsByMode,
+} from "../utils/filterUtils.js";
+
 const ProductContext = createContext();
 
 export {
@@ -9,7 +16,7 @@ export {
   DEFAULT_SHOP_SORT_SETTINGS,
   matchesCategory,
   sortProductsByMode,
-} from "../utils/filterUtils.js";
+};
 
 // Helper to normalize a raw Supabase product row into the frontend shape
 const formatProduct = (p) => {
