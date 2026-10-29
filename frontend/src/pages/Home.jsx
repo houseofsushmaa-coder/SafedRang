@@ -211,9 +211,10 @@ export default function Home() {
       {/* 4. One-of-One Immersive Banner */}
       <section className="ooo-immersive reveal-section" ref={oooRef}>
         <div className="ooo-bg-image">
-          <img src="/pdp-1.jpg" alt="One of One Edit" />
+          <img src="/one-of-one-banner.jpg" alt="The One of One Edit - Safed Rang" />
+          <div className="ooo-bg-overlay" />
         </div>
-        <div className="ooo-content-wrapper">
+        <div className="ooo-content-wrapper container">
           <div className="ooo-glass-card">
             <span className="overline">— A RARE KIND OF BEAUTY —</span>
             <h2>THE ONE-OF-ONE EDIT</h2>
@@ -225,8 +226,8 @@ export default function Home() {
               embroidery and embellishment. Once it finds its woman, the design
               is retired permanently.
             </p>
-            <Link to="/shop" className="btn-primary">
-              EXPLORE THE EDIT <ChevronRight size={16} />
+            <Link to="/one-of-one" className="btn-ooo-cta">
+              EXPLORE THE EDIT <ChevronRight size={15} />
             </Link>
           </div>
         </div>

@@ -424,11 +424,13 @@
 /* 4. One of One Immersive */
 .ooo-immersive {
   position: relative;
-  height: 80vh;
-  min-height: 600px;
+  min-height: 640px;
+  height: 84vh;
+  max-height: 820px;
   overflow: hidden;
   display: flex;
   align-items: center;
+  background-color: #F5EFEB;
 }
 
 .ooo-bg-image {
@@ -436,69 +438,127 @@
   inset: 0;
   z-index: 1;
 }
+
 .ooo-bg-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: top;
+  object-position: 85% center;
+}
+
+.ooo-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(245, 239, 235, 0.72) 0%,
+    rgba(245, 239, 235, 0.45) 32%,
+    rgba(245, 239, 235, 0.08) 58%,
+    transparent 100%
+  );
+  pointer-events: none;
 }
 
 .ooo-content-wrapper {
   position: relative;
   z-index: 2;
   width: 100%;
-  padding: 0 5%;
+  padding-left: clamp(2rem, 6vw, 6rem);
+  padding-right: 2rem;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .ooo-glass-card {
-  background: rgba(110, 30, 42, 0.85); /* Deep wine glassmorphism */
-  backdrop-filter: blur(10px);
-  max-width: 500px;
-  padding: 4rem;
+  background: #6E1E2A;
+  max-width: 480px;
+  width: 100%;
+  padding: 3.5rem 3rem;
   color: var(--color-white);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(174, 138, 84, 0.35);
+  box-shadow: 0 25px 50px -12px rgba(42, 33, 29, 0.35), 0 0 0 1px rgba(174, 138, 84, 0.25);
+  border-radius: 2px;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.ooo-glass-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 30px 60px -12px rgba(42, 33, 29, 0.42), 0 0 0 1px rgba(174, 138, 84, 0.4);
 }
 
 .ooo-glass-card .overline {
   font-family: var(--font-body);
-  font-size: 0.75rem;
-  letter-spacing: 0.2em;
+  font-size: 0.72rem;
+  letter-spacing: 0.25em;
   display: block;
-  margin-bottom: 1rem;
-  color: var(--color-antique-gold);
+  margin-bottom: 1.25rem;
+  color: #C9A876;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .ooo-glass-card h2 {
   color: var(--color-white);
-  font-size: 2.5rem;
-  line-height: 1.1;
+  font-family: var(--font-heading);
+  font-size: 2.25rem;
+  line-height: 1.15;
+  letter-spacing: 0.04em;
   margin-bottom: 1rem;
+  font-weight: 500;
 }
 
 .ooo-glass-card .italic {
-  font-size: 1.2rem;
-  margin-bottom: 1.5rem;
-  color: var(--color-soft-blush);
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: 1.12rem;
+  line-height: 1.45;
+  margin-bottom: 1.25rem;
+  color: #F6DFD5;
+  font-weight: 400;
 }
 
 .ooo-glass-card .ooo-desc {
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 2.5rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 2.25rem;
+  font-weight: 300;
 }
 
-.ooo-glass-card .btn-primary {
-  background-color: var(--color-antique-gold);
-  color: var(--color-white);
-  border-color: var(--color-antique-gold);
+.btn-ooo-cta {
+  background-color: #AE8A54;
+  color: #FFFFFF;
+  border: 1px solid #AE8A54;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
+  padding: 13px 26px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 2px;
+  transition: all 0.25s ease;
+  font-family: var(--font-body);
 }
-.ooo-glass-card .btn-primary:hover {
-  background-color: var(--color-white);
-  color: var(--color-dark-charcoal);
-  border-color: var(--color-white);
+
+.btn-ooo-cta:hover {
+  background-color: #956E3A;
+  border-color: #956E3A;
+  color: #FFFFFF;
+  transform: translateX(2px);
+}
+
+.btn-ooo-cta svg {
+  transition: transform 0.2s ease;
+}
+
+.btn-ooo-cta:hover svg {
+  transform: translateX(4px);
 }
 
 /* 5. The Journey Section */
@@ -1115,10 +1175,33 @@
   .clothing-cat-title {
     font-size: 1.18rem;
   }
+  .ooo-immersive {
+    height: auto;
+    min-height: auto;
+    padding: 3.5rem 1.25rem;
+  }
+  .ooo-bg-image img {
+    object-position: 70% top;
+  }
+  .ooo-bg-overlay {
+    background: rgba(245, 239, 235, 0.75);
+  }
+  .ooo-content-wrapper {
+    padding: 0;
+    justify-content: center;
+  }
   .ooo-glass-card {
+    max-width: 100%;
     margin: 0 auto;
     text-align: center;
-    padding: 2rem;
+    padding: 2.5rem 1.5rem;
+  }
+  .ooo-glass-card h2 {
+    font-size: 1.85rem;
+  }
+  .ooo-glass-card .btn-ooo-cta {
+    justify-content: center;
+    width: 100%;
   }
   .journey-steps {
     gap: 4rem;
