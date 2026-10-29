@@ -204,6 +204,7 @@ function App() {
                 <Route path="shop" element={<Shop />} />
                 <Route path="about" element={<About />} />
                 <Route path="craft" element={<Craft />} />
+                <Route path="the-craft" element={<Craft />} />
                 <Route path="product/:id" element={<ProductDetail />} />
                 <Route path="checkout" element={<Checkout />} />
                 <Route path="payment/verify" element={<PaymentVerify />} />
@@ -212,12 +213,14 @@ function App() {
                 <Route path="journey" element={<Journey />} />
                 <Route path="journal" element={<Journey />} />
                 <Route path="story" element={<About />} />
+                <Route path="our-story" element={<About />} />
                 <Route path="artisans" element={<Craft />} />
                 <Route path="care" element={<CareGuide />} />
                 <Route path="care-guide" element={<CareGuide />} />
                 <Route path="contact" element={<Contact />} />
                 <Route path="contact-us" element={<Contact />} />
                 <Route path="faq" element={<About />} />
+                <Route path="faqs" element={<About />} />
                 <Route path="archive" element={<Shop />} />
                 <Route path="shipping" element={<PrivacyPolicy />} />
                 <Route path="shipping-policy" element={<PrivacyPolicy />} />

@@ -1,208 +1,116 @@
-import React, { useState } from "react";
-import "./Footer.css";
+import React from "react";
 import { Link } from "react-router-dom";
-import { Award, ShieldCheck, Globe, Leaf, Phone, Mail } from "lucide-react";
-import toast from "react-hot-toast";
+import "./Footer.css";
+
+/*
+  Safedrang footer
+  - Background: /footer-bg.png  (frontend/public/footer-bg.png)
+  - Logo:       /favicon.png    (frontend/public/favicon.png)
+  - Links below match the live footer routes using React Router Link.
+*/
+
+const COLUMNS = [
+  {
+    title: "Shop",
+    links: [
+      { label: "Sarees", to: "/shop?category=Sarees" },
+      { label: "One-of-One", to: "/one-of-one" },
+      { label: "Chikankari", to: "/shop?craft=chikankari" },
+      { label: "Zardozi", to: "/shop?craft=zardozi" },
+      { label: "Bridal Sets", to: "/shop?category=bridal" },
+    ],
+  },
+  {
+    title: "Discover",
+    links: [
+      { label: "Our Story", to: "/about" },
+      { label: "The Craft", to: "/craft" },
+      { label: "Artisans", to: "/artisans" },
+      { label: "Journey", to: "/journey" },
+      { label: "Archive", to: "/archive" },
+    ],
+  },
+  {
+    title: "Customer Care",
+    links: [
+      { label: "Contact Us", to: "/contact" },
+      { label: "Shipping", to: "/shipping" },
+      { label: "Care Guide", to: "/care" },
+      { label: "Returns & Exchange", to: "/returns" },
+      { label: "FAQs", to: "/faq" },
+      { label: "Privacy Policy", to: "/privacy-policy" },
+      { label: "Terms & Conditions", to: "/terms" },
+    ],
+  },
+];
+
+const SOCIAL = [
+  { label: "Instagram", href: "https://www.instagram.com/" },
+  { label: "Facebook", href: "https://www.facebook.com/" },
+  { label: "Pinterest", href: "https://www.pinterest.com/" },
+  { label: "YouTube", href: "https://www.youtube.com/" },
+];
 
 export default function Footer() {
-  const [email, setEmail] = useState("");
-  const [isSubscribed, setIsSubscribed] = useState(false);
-
-  const handleSubscribe = (e) => {
-    e.preventDefault();
-    if (!email || !email.includes("@")) {
-      toast.error("Please enter a valid email address.");
-      return;
-    }
-    setIsSubscribed(true);
-    toast.success("Welcome to Safedrang! You're subscribed to our newsletter.");
-    setEmail("");
-  };
-
   return (
-    <footer className="site-footer">
-      {/* Newsletter Section */}
-      <div className="newsletter-section">
-        <div className="container newsletter-grid">
-          <div className="newsletter-form-container">
-            <h3>ENTER THE WORLD OF SAFEDRANG</h3>
-            <p>
-              Be the first to discover new one-of-one creations, stories from
-              our artisans, and more.
-            </p>
-            <form className="newsletter-form" onSubmit={handleSubscribe}>
-              <input
-                type="email"
-                placeholder={isSubscribed ? "Thank you for subscribing!" : "Your email address"}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-              <button type="submit">{isSubscribed ? "SUBSCRIBED" : "SUBSCRIBE"}</button>
-            </form>
-          </div>
-          <div className="trust-markers">
-            <div className="trust-item">
-              <Award size={20} strokeWidth={1.5} /> <span>Authentic Craftsmanship</span>
-            </div>
-            <div className="trust-item">
-              <ShieldCheck size={20} strokeWidth={1.5} /> <span>Secure Payment</span>
-            </div>
-            <div className="trust-item">
-              <Globe size={20} strokeWidth={1.5} /> <span>Worldwide Shipping</span>
-            </div>
-            <div className="trust-item">
-              <Leaf size={20} strokeWidth={1.5} /> <span>A More Thoughtful Wardrobe</span>
-            </div>
-          </div>
-        </div>
-      </div>
+    <footer className="sf">
+      <div className="sf-bg" aria-hidden="true" />
 
-      {/* Main Footer Links */}
-      <div className="footer-main">
-        <div className="container footer-grid">
-          <div className="brand-col">
-            <Link
-              to="/"
-              style={{
-                textDecoration: "none",
-                display: "inline-block",
-                marginBottom: "2rem",
-              }}
-            >
-              <div
-                className="logo-circle"
-                style={{
-                  width: "120px",
-                  height: "120px",
-                  borderRadius: "50%",
-                  border: "1px solid var(--color-dark-charcoal)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  overflow: "hidden"
-                }}
-              >
-                <img 
-                  src="/circle-logo.png" 
-                  alt="Safedrang Circle Logo" 
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }} 
-                />
-              </div>
+      <div className="sf-wrap">
+        <div className="sf-grid">
+          <div className="sf-brand">
+            <Link to="/" aria-label="Safedrang home" className="sf-logo">
+              <img src="/favicon.png" alt="Safedrang" />
             </Link>
+            <p className="sf-quote">
+              “Keeping our craft alive for a more beautiful tomorrow.”
+            </p>
           </div>
 
-          <div className="links-col">
-            <h4>SHOP</h4>
+          {COLUMNS.map((col) => (
+            <nav key={col.title} className="sf-col" aria-label={col.title}>
+              <h3 className="sf-h">{col.title}</h3>
+              <ul>
+                {col.links.map((l) => (
+                  <li key={l.label}>
+                    <Link to={l.to}>{l.label}</Link>
+                  </li>
+                ))}
+              </ul>
+              {col.title === "Customer Care" && (
+                <ul className="sf-contact">
+                  <li>
+                    <a href="tel:+919151566602">+91 91515 66602</a>
+                  </li>
+                  <li>
+                    <a href="mailto:contact@safedrang.com">contact@safedrang.com</a>
+                  </li>
+                </ul>
+              )}
+            </nav>
+          ))}
+
+          <nav className="sf-col" aria-label="Follow">
+            <h3 className="sf-h">Follow</h3>
             <ul>
-              <li>
-                <Link to="/shop?category=sarees">Sarees</Link>
-              </li>
-              <li>
-                <Link to="/one-of-one">One-of-One</Link>
-              </li>
-              <li>
-                <Link to="/shop?craft=chikankari">Chikankari</Link>
-              </li>
-              <li>
-                <Link to="/shop?craft=zardozi">Zardozi</Link>
-              </li>
-              <li>
-                <Link to="/shop?category=bridal">Bridal Sets</Link>
-              </li>
+              {SOCIAL.map((s) => (
+                <li key={s.label}>
+                  <a href={s.href} target="_blank" rel="noopener noreferrer">
+                    {s.label}
+                  </a>
+                </li>
+              ))}
             </ul>
-          </div>
-
-          <div className="links-col">
-            <h4>DISCOVER</h4>
-            <ul>
-              <li>
-                <Link to="/story">Our Story</Link>
-              </li>
-              <li>
-                <Link to="/craft">The Craft</Link>
-              </li>
-              <li>
-                <Link to="/artisans">Artisans</Link>
-              </li>
-              <li>
-                <Link to="/journey">Journey</Link>
-              </li>
-              <li>
-                <Link to="/archive">Archive</Link>
-              </li>
-            </ul>
-          </div>
-
-          <div className="links-col">
-            <h4>CUSTOMER CARE</h4>
-            <ul>
-              <li>
-                <Link to="/contact">Contact Us</Link>
-              </li>
-              <li className="footer-direct-contact-item">
-                <a href="tel:+919151566602" className="footer-direct-contact-link">
-                  <Phone size={12} /> +91 91515 66602
-                </a>
-              </li>
-              <li className="footer-direct-contact-item">
-                <a href="mailto:contact@safedrang.com" className="footer-direct-contact-link">
-                  <Mail size={12} /> contact@safedrang.com
-                </a>
-              </li>
-              <li>
-                <Link to="/shipping">Shipping</Link>
-              </li>
-              <li>
-                <Link to="/care">Care Guide</Link>
-              </li>
-              <li>
-                <Link to="/returns">Returns & Exchange</Link>
-              </li>
-              <li>
-                <Link to="/faq">FAQs</Link>
-              </li>
-              <li>
-                <Link to="/privacy">Privacy Policy</Link>
-              </li>
-              <li>
-                <Link to="/terms">Terms & Conditions</Link>
-              </li>
-            </ul>
-          </div>
-
-          <div className="links-col">
-            <h4>FOLLOW</h4>
-            <ul>
-              <li>
-                <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">Instagram</a>
-              </li>
-              <li>
-                <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer">Facebook</a>
-              </li>
-              <li>
-                <a href="https://www.pinterest.com/" target="_blank" rel="noopener noreferrer">Pinterest</a>
-              </li>
-              <li>
-                <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">YouTube</a>
-              </li>
-            </ul>
-          </div>
-
-          <div className="quote-col">
-            <blockquote>
-              "Keeping our craft alive for a more beautiful tomorrow."
-            </blockquote>
-          </div>
+          </nav>
         </div>
-      </div>
 
-      <div className="footer-bottom container">
-        <p>&copy; {new Date().getFullYear()} Safedrang. All rights reserved.</p>
-        <div className="legal-links">
-          <Link to="/privacy">Privacy Policy</Link>
-          <Link to="/terms">Terms & Conditions</Link>
-          <Link to="/shipping-policy">Shipping Policy</Link>
+        <div className="sf-bottom">
+          <span>© {new Date().getFullYear()} Safedrang. All rights reserved.</span>
+          <div className="sf-legal">
+            <Link to="/privacy-policy">Privacy Policy</Link>
+            <Link to="/terms">Terms &amp; Conditions</Link>
+            <Link to="/shipping-policy">Shipping Policy</Link>
+          </div>
         </div>
       </div>
     </footer>

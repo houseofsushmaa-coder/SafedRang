@@ -1,276 +1,138 @@
-.site-footer {
-  background-color: var(--color-warm-ivory);
-  margin-top: 4rem;
-}
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500&display=swap");
 
-/* Newsletter Section */
-.newsletter-section {
-  background-color: var(--color-dark-charcoal);
-  color: var(--color-white);
-  padding: 5rem 0;
-}
+.sf {
+  --sf-fill: #150803;            /* bottom colour of the banner */
+  --sf-gold: #d4ab63;
+  --sf-cream: #f5e9d6;
+  --sf-text: rgba(245, 233, 214, 0.72);
+  --sf-line: rgba(212, 171, 99, 0.25);
 
-.newsletter-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
-  align-items: center;
-}
-
-.newsletter-form-container h3 {
-  font-family: var(--font-heading);
-  color: var(--color-white);
-  font-size: 1.25rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  margin-bottom: 1rem;
-}
-
-.newsletter-form-container p {
-  color: var(--color-warm-taupe);
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  font-weight: 300;
-  margin-bottom: 2rem;
-}
-
-.newsletter-form {
-  display: flex;
-  gap: 0;
+  position: relative;
+  isolation: isolate;
   width: 100%;
-  max-width: 450px;
+  overflow: hidden;
+  background: var(--sf-fill);
+  color: var(--sf-text);
+  font-family: "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  /* top space = the cream curve area of the banner, so content starts inside the dark part */
+  padding: clamp(110px, 12vw, 190px) clamp(20px, 5vw, 80px) 0;
+}
+.sf *, .sf *::before, .sf *::after { box-sizing: border-box; }
+.sf ul { list-style: none; margin: 0; padding: 0; }
+.sf a { color: inherit; text-decoration: none; }
+
+.sf-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: url("/footer-bg.png") center top / cover no-repeat;
+}
+.sf-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 55%, var(--sf-fill) 100%);
 }
 
-.newsletter-form input {
-  flex: 1;
-  padding: 1rem 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-right: none;
-  background: transparent;
-  color: var(--color-white);
-  font-family: var(--font-body);
-  font-size: 0.8125rem;
-  min-width: 0; /* prevents flex blowout on small screens */
-  transition: border-color 0.3s ease;
+.sf-wrap { max-width: 1240px; margin: 0 auto; }
+
+/* ---------- grid ---------- */
+.sf-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1.2fr 0.9fr;
+  gap: clamp(24px, 4vw, 60px);
+  padding: 30px 0 56px;
 }
 
-.newsletter-form input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+.sf-logo {
+  display: inline-block;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid var(--sf-gold);
+  background: #fff;
+}
+.sf-logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.sf-quote {
+  margin: 22px 0 0;
+  max-width: 300px;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 21px;
+  line-height: 1.5;
+  font-weight: 500;
+  color: var(--sf-cream);
 }
 
-.newsletter-form input:focus {
-  outline: none;
-  border-color: var(--color-white);
-}
-
-.newsletter-form button {
-  border: 1px solid var(--color-white);
-  padding: 1rem 1.5rem;
-  background-color: var(--color-white);
-  color: var(--color-dark-charcoal);
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  font-size: 0.75rem;
+.sf-h {
+  margin: 0 0 20px;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 20px;
   font-weight: 600;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  white-space: nowrap;
+  letter-spacing: 0.08em;
+  color: var(--sf-gold);
 }
 
-.newsletter-form button:hover {
-  background-color: var(--color-antique-gold);
-  border-color: var(--color-antique-gold);
-  color: var(--color-white);
+.sf-col ul { display: grid; gap: 12px; }
+.sf-col a {
+  position: relative;
+  display: inline-block;
+  font-size: 14px;
+  padding-bottom: 2px;
+  transition: color 0.25s ease;
 }
-
-.trust-markers {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem 1.5rem;
+.sf-col a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--sf-gold);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
+.sf-col a:hover { color: var(--sf-cream); }
+.sf-col a:hover::after { transform: scaleX(1); transform-origin: left; }
 
-.trust-item {
+.sf-contact { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--sf-line); }
+
+/* ---------- bottom bar ---------- */
+.sf-bottom {
   display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.trust-item span {
-  font-size: 0.85rem;
-  color: var(--color-white);
-  font-weight: 300;
-  letter-spacing: 0.05em;
-  opacity: 0.9;
-}
-
-.trust-item svg {
-  color: var(--color-antique-gold);
-  flex-shrink: 0;
-}
-
-/* Main Footer */
-.footer-main {
-  padding: 5rem 0 2rem;
-  background-color: var(--color-warm-ivory);
-}
-
-.footer-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr 2fr;
-  gap: 2rem;
-}
-
-.brand-col .logo-circle {
-  border-color: var(--color-dark-charcoal) !important;
-}
-
-.brand-col .script-font {
-  font-family: var(
-    --font-heading
-  ) !important; /* Overriding script font for the logo text */
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  font-size: 1.25rem !important;
-}
-
-.links-col h4 {
-  font-family: var(--font-heading);
-  font-size: 0.875rem;
-  letter-spacing: 0.18em;
-  margin-bottom: 2rem;
-  color: var(--color-dark-charcoal);
-  text-transform: uppercase;
-}
-
-.links-col ul {
-  list-style: none;
-}
-
-.links-col li {
-  margin-bottom: 1rem;
-}
-
-.links-col a {
-  color: var(--color-warm-taupe);
-  font-size: 0.875rem;
-  font-weight: 300;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.links-col a:hover {
-  color: var(--color-dark-charcoal);
-}
-
-.quote-col blockquote {
-  font-family: var(--font-heading);
-  font-size: 1.25rem;
-  line-height: 1.4;
-  color: var(--color-dark-charcoal);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  border-left: none;
-  padding-left: 0;
-  margin-top: 1rem;
-}
-
-/* Footer Bottom */
-.footer-bottom {
-  display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  padding: 2rem;
-  background-color: var(--color-warm-ivory);
-  border-top: 1px solid var(--color-soft-blush);
-  font-size: 0.75rem;
-  color: var(--color-warm-taupe);
-  font-weight: 300;
+  gap: 14px;
+  padding: 22px 0 28px;
+  border-top: 1px solid var(--sf-line);
+  font-size: 12.5px;
+}
+.sf-legal { display: flex; flex-wrap: wrap; gap: 22px; }
+.sf-legal a { transition: color 0.25s ease; }
+.sf-legal a:hover { color: var(--sf-gold); }
+
+.sf a:focus-visible {
+  outline: 2px solid var(--sf-gold);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
-.legal-links {
-  display: flex;
-  gap: 2rem;
-}
-
+/* ---------- tablet ---------- */
 @media (max-width: 1024px) {
-  .newsletter-grid {
-    grid-template-columns: 1fr;
-    gap: 3rem;
-  }
-  .footer-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .quote-col,
-  .brand-col {
-    grid-column: 1 / -1;
-  }
+  .sf-grid { grid-template-columns: repeat(3, 1fr); }
+  .sf-brand { grid-column: 1 / -1; }
 }
 
-@media (max-width: 600px) {
-  .newsletter-section {
-    padding: 3rem 0;
-  }
-  
-  .trust-markers {
-    grid-template-columns: 1fr;
-    gap: 1.2rem;
-  }
-
-  .newsletter-form {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .newsletter-form input {
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 2px;
-  }
-
-  .newsletter-form button {
-    border-radius: 2px;
-  }
-
-  .footer-grid {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
-    text-align: center;
-  }
-  
-  .brand-col {
-    display: flex;
-    justify-content: center;
-  }
-
-  .footer-bottom {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
-  
-  .legal-links {
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-}
-
-
-/* Direct Atelier Contact Links in Footer */
-.footer-direct-contact-item {
-  margin-bottom: 0.65rem !important;
-}
-
-.footer-direct-contact-link {
-  display: inline-flex !important;
-  align-items: center;
-  gap: 7px;
-  color: var(--color-antique-gold) !important;
-  font-size: 0.82rem !important;
-  font-weight: 500 !important;
-  letter-spacing: 0.04em;
-  transition: all 0.3s ease;
-}
-
-.footer-direct-contact-link:hover {
-  color: var(--color-royal-wine) !important;
-  transform: translateX(2px);
+/* ---------- mobile ---------- */
+@media (max-width: 640px) {
+  .sf { padding-top: clamp(80px, 22vw, 110px); }
+  /* keeps the gold curve visible instead of squashing the banner */
+  .sf-bg { background-size: max(100%, 1000px) auto; }
+  .sf-grid { grid-template-columns: 1fr 1fr; gap: 32px 20px; }
+  .sf-brand { grid-column: 1 / -1; }
+  .sf-bottom { flex-direction: column; align-items: flex-start; padding-bottom: 96px; } /* room for the WhatsApp button */
 }
