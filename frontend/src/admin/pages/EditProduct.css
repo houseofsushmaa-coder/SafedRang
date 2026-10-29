@@ -439,3 +439,54 @@ textarea.admin-input {
 .mt-3 {
   margin-top: 12px;
 }
+
+/* ── Category dropdown ─────────────────────────────────────── */
+.cat-select-wrap {
+  position: relative;
+}
+
+.admin-select-native {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 36px !important;
+  cursor: pointer;
+}
+
+.cat-select-chevron {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--admin-text-muted);
+  pointer-events: none;
+}
+
+.new-cat-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  align-items: center;
+}
+
+.new-cat-row .admin-input {
+  flex: 1;
+}
+
+.field-hint {
+  font-size: 0.75rem;
+  color: var(--admin-text-light);
+  margin: 6px 0 0;
+}
+
+.text-link {
+  background: none;
+  border: none;
+  color: var(--gold);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: inherit;
+  text-decoration: none;
+  font-family: inherit;
+  padding: 0;
+}
+.text-link:hover { text-decoration: underline; }

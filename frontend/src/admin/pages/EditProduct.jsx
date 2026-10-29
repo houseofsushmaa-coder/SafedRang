@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useProducts } from "../../context/ProductContext";
+import { adminService } from "../adminService";
 import {
   Save,
   X,
@@ -24,6 +25,27 @@ const EditProduct = () => {
   const galleryUploadRef = useRef(null);
   const [draggingMain, setDraggingMain] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // ── Categories from API ────────────────────────────────────────────
+  const [categories, setCategories] = useState([]);
+  const [catLoading, setCatLoading] = useState(true);
+  const [newCatName, setNewCatName] = useState("");
+
+  useEffect(() => {
+    setCatLoading(true);
+    adminService.getCategories()
+      .then((cats) => setCategories(cats || []))
+      .catch(() => setCategories([]))
+      .finally(() => setCatLoading(false));
+  }, []);
+
+  // Derived flat list of category names for dropdown
+  const catOptions = categories.length > 0
+    ? [...new Set(categories.flatMap((c) => [c.name, ...(c.children || []).map((ch) => ch.name)]))]
+    : [
+        "Sarees", "Dupattas", "Kurta Set", "Blouse",
+        "Stole", "Suit Set", "Uncategorized",
+      ];
 
   const [formData, setFormData] = useState({
     title: "",
@@ -503,14 +525,71 @@ const EditProduct = () => {
             <h3 className="card-heading">Organisation</h3>
             <div className="form-group">
               <label>Category</label>
-              <input
-                type="text"
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                className="admin-input full-width"
-                placeholder="e.g. Sarees"
-              />
+              <div className="cat-select-wrap">
+                {catLoading ? (
+                  <select className="admin-input full-width admin-select-native" disabled>
+                    <option>Loading categories…</option>
+                  </select>
+                ) : (
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    className="admin-input full-width admin-select-native"
+                  >
+                    <option value="">— Select a category —</option>
+                    {catOptions.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                    <option value="__new__">+ Add new category…</option>
+                  </select>
+                )}
+                <ChevronDown size={14} className="cat-select-chevron" />
+              </div>
+              {/* Inline new category input */}
+              {formData.category === "__new__" && (
+                <div className="new-cat-row">
+                  <input
+                    type="text"
+                    className="admin-input"
+                    placeholder="New category name…"
+                    value={newCatName}
+                    onChange={(e) => setNewCatName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && newCatName.trim()) {
+                        const name = newCatName.trim();
+                        setCategories((prev) => [...prev, { id: `cat_new_${Date.now()}`, name }]);
+                        setFormData((prev) => ({ ...prev, category: name }));
+                        setNewCatName("");
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="admin-btn icon-left"
+                    style={{ padding: "8px 14px", fontSize: "0.8rem" }}
+                    onClick={() => {
+                      if (!newCatName.trim()) return;
+                      const name = newCatName.trim();
+                      setCategories((prev) => [...prev, { id: `cat_new_${Date.now()}`, name }]);
+                      setFormData((prev) => ({ ...prev, category: name }));
+                      setNewCatName("");
+                    }}
+                  >
+                    <Plus size={13} /> Add
+                  </button>
+                </div>
+              )}
+              <p className="field-hint">
+                Manage all categories in the{" "}
+                <button
+                  type="button"
+                  className="text-link"
+                  onClick={() => window.open("/admin/categories", "_blank")}
+                >
+                  Categories page
+                </button>
+              </p>
             </div>
           </div>
 
