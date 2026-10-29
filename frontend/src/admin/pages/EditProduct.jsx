@@ -649,6 +649,34 @@ const EditProduct = () => {
                 </button>
               </p>
             </div>
+
+            <div className="form-group" style={{ marginTop: "20px", paddingTop: "16px", borderTop: "1px solid var(--admin-border)" }}>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
+                <div>
+                  <label htmlFor="isOneOfOne" style={{ fontWeight: 600, color: "var(--admin-text-main)", cursor: "pointer", display: "inline-block", marginBottom: "4px" }}>
+                    One of One
+                  </label>
+                  <p className="field-hint" style={{ margin: 0, fontSize: "0.82rem", color: "var(--admin-text-light)", lineHeight: 1.4 }}>
+                    Include this product in the exclusive One-of-One collection and display the ONE OF ONE badge.
+                  </p>
+                </div>
+                <input
+                  id="isOneOfOne"
+                  type="checkbox"
+                  name="isOneOfOne"
+                  checked={Boolean(formData.isOneOfOne)}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, isOneOfOne: e.target.checked }))}
+                  style={{
+                    width: "20px",
+                    height: "20px",
+                    cursor: "pointer",
+                    accentColor: "#6E1E2A",
+                    flexShrink: 0,
+                    marginTop: "2px"
+                  }}
+                />
+              </div>
+            </div>
           </div>
 
           <div className="admin-card">

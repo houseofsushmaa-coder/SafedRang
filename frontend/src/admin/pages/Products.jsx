@@ -17,6 +17,7 @@ import {
   ChevronDown,
   Tag,
   RefreshCw,
+  Sparkles,
 } from "lucide-react";
 import Papa from "papaparse";
 import "./AdminPages.css";
@@ -90,7 +91,23 @@ function downloadTemplate() {
 }
 
 const Products = () => {
-  const { products, deleteProduct, addProduct, loading } = useProducts();
+  const { products, deleteProduct, addProduct, updateProduct, loading } = useProducts();
+  const [togglingOneOfOneId, setTogglingOneOfOneId] = useState(null);
+
+  const handleToggleOneOfOne = async (product, e) => {
+    e.stopPropagation();
+    try {
+      setTogglingOneOfOneId(product.id);
+      await updateProduct(product.id, {
+        ...product,
+        isOneOfOne: !product.isOneOfOne,
+      });
+    } catch (err) {
+      console.error("Failed to toggle One of One:", err);
+    } finally {
+      setTogglingOneOfOneId(null);
+    }
+  };
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -361,25 +378,34 @@ const Products = () => {
                         <div className="product-img" style={{ backgroundImage: `url(${product.image})` }} />
                         <div className="product-info">
                           <span className="product-title">{product.title}</span>
-                          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", marginTop: "2px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap", marginTop: "4px" }}>
                             <span className="product-sku">{product.sku || product.id?.substring(0, 8)}</span>
-                            {product.isOneOfOne && (
-                              <span
-                                style={{
-                                  fontSize: "0.62rem",
-                                  fontWeight: 700,
-                                  letterSpacing: "0.08em",
-                                  backgroundColor: "#6E1E2A",
-                                  color: "#FAF5EC",
-                                  padding: "2px 6px",
-                                  borderRadius: "3px",
-                                  display: "inline-block",
-                                  lineHeight: 1.2
-                                }}
-                              >
-                                ONE OF ONE
-                              </span>
-                            )}
+                            <button
+                              type="button"
+                              onClick={(e) => handleToggleOneOfOne(product, e)}
+                              disabled={togglingOneOfOneId === product.id}
+                              title={product.isOneOfOne ? "Click to remove from One of One" : "Click to mark as One of One"}
+                              style={{
+                                fontSize: "0.62rem",
+                                fontWeight: 700,
+                                letterSpacing: "0.07em",
+                                backgroundColor: product.isOneOfOne ? "#6E1E2A" : "transparent",
+                                color: product.isOneOfOne ? "#FAF5EC" : "var(--admin-text-light)",
+                                border: product.isOneOfOne ? "1px solid #6E1E2A" : "1px dashed var(--admin-border)",
+                                padding: "2px 7px",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                lineHeight: 1.2,
+                                transition: "all 0.15s ease",
+                                opacity: togglingOneOfOneId === product.id ? 0.6 : 1
+                              }}
+                            >
+                              <Sparkles size={10} />
+                              {product.isOneOfOne ? "ONE OF ONE" : "+ One of One"}
+                            </button>
                           </div>
                         </div>
                       </div>
