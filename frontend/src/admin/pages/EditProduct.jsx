@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useProducts } from "../../context/ProductContext";
 import { adminService } from "../adminService";
 import { supabase } from "../../lib/supabase";
+import toast from "react-hot-toast";
+import { optimizeImageForUpload } from "../../utils/imageOptimizer";
 import {
   Save,
   X,
@@ -13,6 +15,7 @@ import {
   Plus,
   Layers,
   ChevronDown,
+  Loader2,
 } from "lucide-react";
 import "./AdminPages.css";
 import "./EditProduct.css";
@@ -25,8 +28,10 @@ const EditProduct = () => {
   const mainUploadRef = useRef(null);
   const galleryUploadRef = useRef(null);
   const [draggingMain, setDraggingMain] = useState(false);
+  const [draggingGallery, setDraggingGallery] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(null);
 
   // ── Categories from API ────────────────────────────────────────────
   const [categories, setCategories] = useState([]);
@@ -128,64 +133,150 @@ const EditProduct = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Upload a single file to Supabase Storage and return its public URL
-  const uploadToStorage = async (file) => {
-    const ext = file.name.split(".").pop();
-    const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  // Upload a single file to Supabase Storage with in-browser optimization and retry
+  const uploadToStorage = async (rawFile, retries = 2) => {
+    // 1. Optimize image in-browser: downscales oversized images, ensures <1MB, removes all size limit failures
+    let file = rawFile;
+    try {
+      file = await optimizeImageForUpload(rawFile, 2400, 0.90);
+    } catch (e) {
+      console.warn("Client-side image optimization skipped/failed, uploading original:", e);
+      file = rawFile;
+    }
+
+    const rawExt = file.name ? file.name.split(".").pop().toLowerCase() : "jpg";
+    const ext = ["jpg", "jpeg", "png", "webp", "gif"].includes(rawExt) ? rawExt : "jpg";
+    const cleanName = (file.name || "image")
+      .replace(/\.[^/.]+$/, "")
+      .replace(/[^a-zA-Z0-9_-]/g, "_")
+      .slice(0, 30);
+    const fileName = `${Date.now()}_${cleanName}_${Math.random().toString(36).slice(2, 7)}.${ext}`;
     const filePath = `products/${fileName}`;
 
-    const { error } = await supabase.storage
-      .from("product-images")
-      .upload(filePath, file, { upsert: true, contentType: file.type });
+    let lastError = null;
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const { error } = await supabase.storage
+          .from("product-images")
+          .upload(filePath, file, {
+            upsert: true,
+            contentType: file.type || "image/jpeg",
+            cacheControl: "3600",
+          });
 
-    if (error) throw error;
+        if (error) throw error;
 
-    const { data } = supabase.storage
-      .from("product-images")
-      .getPublicUrl(filePath);
+        const { data } = supabase.storage
+          .from("product-images")
+          .getPublicUrl(filePath);
 
-    return data.publicUrl;
+        if (!data?.publicUrl) {
+          throw new Error("Unable to retrieve public image URL from storage.");
+        }
+
+        return data.publicUrl;
+      } catch (err) {
+        lastError = err;
+        if (attempt < retries) {
+          // Wait 600ms before retrying
+          await new Promise((r) => setTimeout(r, 600 * (attempt + 1)));
+        }
+      }
+    }
+
+    throw lastError || new Error("Failed to upload image.");
   };
 
-  const handleMainImageUpload = async (files) => {
-    const file = files[0];
-    if (!file || !file.type.startsWith("image/")) return;
+  /**
+   * Upload multiple images with batch progress and error resilience
+   * @param {FileList|File[]} fileList
+   * @param {boolean} isMainTrigger - whether triggered from the Featured/Main dropzone
+   */
+  const handleUploadImages = async (fileList, isMainTrigger = false) => {
+    if (!fileList || fileList.length === 0) return;
+
+    const files = Array.from(fileList).filter((f) => f && f.type && f.type.startsWith("image/"));
+    if (!files.length) {
+      toast.error("Please select valid image files (JPG, PNG, WebP).");
+      return;
+    }
+
     setUploading(true);
-    try {
-      const url = await uploadToStorage(file);
+    const total = files.length;
+    setUploadProgress({ current: 0, total, name: files[0].name });
+
+    const uploadedUrls = [];
+    let failureCount = 0;
+
+    for (let i = 0; i < total; i++) {
+      const currentFile = files[i];
+      setUploadProgress({ current: i + 1, total, name: currentFile.name });
+
+      try {
+        const url = await uploadToStorage(currentFile);
+        if (url) {
+          uploadedUrls.push(url);
+        }
+      } catch (err) {
+        console.error(`Error uploading ${currentFile.name}:`, err);
+        failureCount++;
+      }
+    }
+
+    if (uploadedUrls.length > 0) {
       setFormData((prev) => {
-        const remaining = (prev.images || []).filter((img) => img !== prev.image && img !== url);
+        const currentList = Array.isArray(prev.images) ? [...prev.images] : [];
+        const mergedImages = [...currentList];
+
+        uploadedUrls.forEach((u) => {
+          if (!mergedImages.includes(u)) {
+            mergedImages.push(u);
+          }
+        });
+
+        // If triggered from Featured dropzone, make the first uploaded image the featured one
+        let newMain = prev.image;
+        if (isMainTrigger && uploadedUrls[0]) {
+          newMain = uploadedUrls[0];
+          const withoutMain = mergedImages.filter((u) => u !== newMain);
+          mergedImages.length = 0;
+          mergedImages.push(newMain, ...withoutMain);
+        } else if (!newMain && mergedImages.length > 0) {
+          newMain = mergedImages[0];
+        }
+
         return {
           ...prev,
-          image: url,
-          images: [url, ...remaining],
+          image: newMain,
+          images: mergedImages,
         };
       });
-    } catch (err) {
-      console.error("Image upload failed:", err);
-      alert("Image upload failed: " + err.message);
-    } finally {
-      setUploading(false);
+
+      if (failureCount === 0) {
+        toast.success(
+          total === 1
+            ? "Image uploaded successfully!"
+            : `All ${total} images uploaded successfully!`
+        );
+      } else {
+        toast.success(
+          `Uploaded ${uploadedUrls.length} image(s). (${failureCount} failed)`
+        );
+      }
+    } else {
+      toast.error("Failed to upload image(s). Please check your internet connection.");
     }
+
+    setUploading(false);
+    setUploadProgress(null);
   };
 
-  const handleGalleryUpload = async (files) => {
-    const imageFiles = Array.from(files).filter((f) => f.type.startsWith("image/"));
-    if (!imageFiles.length) return;
-    setUploading(true);
-    try {
-      const urls = await Promise.all(imageFiles.map(uploadToStorage));
-      setFormData((prev) => ({
-        ...prev,
-        images: [...prev.images, ...urls],
-        image: prev.image || urls[0] || "",
-      }));
-    } catch (err) {
-      console.error("Gallery upload failed:", err);
-      alert("Gallery upload failed: " + err.message);
-    } finally {
-      setUploading(false);
-    }
+  const handleMainImageUpload = (files) => {
+    handleUploadImages(files, true);
+  };
+
+  const handleGalleryUpload = (files) => {
+    handleUploadImages(files, false);
   };
 
   const removeGalleryImage = (index) => {
@@ -206,18 +297,45 @@ const EditProduct = () => {
     });
   };
 
-  const onDragOver = (e) => {
+  const onDragOverMain = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     setDraggingMain(true);
   };
-  const onDragLeave = () => setDraggingMain(false);
-  const onDrop = (e) => {
+  const onDragLeaveMain = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     setDraggingMain(false);
-    handleMainImageUpload(e.dataTransfer.files);
+  };
+  const onDropMain = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDraggingMain(false);
+    if (e.dataTransfer?.files?.length) {
+      handleUploadImages(e.dataTransfer.files, true);
+    }
   };
 
-  // ── Variation helpers ──────────────────────────────────────
+  const onDragOverGallery = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDraggingGallery(true);
+  };
+  const onDragLeaveGallery = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDraggingGallery(false);
+  };
+  const onDropGallery = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDraggingGallery(false);
+    if (e.dataTransfer?.files?.length) {
+      handleUploadImages(e.dataTransfer.files, false);
+    }
+  };
+
+    // ── Variation helpers ──────────────────────────────────────
   const addVariation = () => {
     setFormData((prev) => ({
       ...prev,
@@ -842,49 +960,113 @@ const EditProduct = () => {
           </div>
 
           <div className="admin-card">
-            <h3 className="card-heading">Product Media</h3>
+            <div className="card-header-row">
+              <h3 className="card-heading" style={{ margin: 0 }}>Product Media</h3>
+              <button
+                type="button"
+                className="admin-btn-secondary-sm"
+                onClick={() => galleryUploadRef.current?.click()}
+                disabled={uploading}
+                title="Select all product images from your computer at once"
+              >
+                + Select All Images
+              </button>
+            </div>
+
+            {uploadProgress && (
+              <div className="upload-progress-container">
+                <div className="upload-progress-info">
+                  <span className="upload-progress-label">
+                    Uploading image {uploadProgress.current} of {uploadProgress.total}...
+                  </span>
+                  <span className="upload-progress-pct">
+                    {Math.round((uploadProgress.current / uploadProgress.total) * 100)}%
+                  </span>
+                </div>
+                <div className="upload-progress-track">
+                  <div
+                    className="upload-progress-fill"
+                    style={{
+                      width: `${(uploadProgress.current / uploadProgress.total) * 100}%`,
+                    }}
+                  />
+                </div>
+                <p className="upload-progress-filename" title={uploadProgress.name}>
+                  {uploadProgress.name}
+                </p>
+              </div>
+            )}
 
             <label className="sub-label">Featured Image</label>
             <div
-              className={`image-upload-zone ${draggingMain ? "dragging" : ""}`}
-              onDragOver={onDragOver}
-              onDragLeave={onDragLeave}
-              onDrop={onDrop}
-              onClick={() => mainUploadRef.current.click()}
+              className={`image-upload-zone ${draggingMain ? "dragging" : ""} ${uploading ? "uploading" : ""}`}
+              onDragOver={onDragOverMain}
+              onDragLeave={onDragLeaveMain}
+              onDrop={onDropMain}
+              onClick={() => !uploading && mainUploadRef.current?.click()}
             >
-              {formData.image ? (
-                <div className="upload-preview-main">
-                  <img src={formData.image} alt="Featured" />
-                  <div className="upload-overlay">
-                    <UploadCloud size={24} />
-                    <span>Replace Image</span>
+              {uploading && (
+                <div className="upload-active-state">
+                  <Loader2 size={32} className="upload-spinner-icon" />
+                  <p className="upload-active-text">Processing &amp; Optimizing Images...</p>
+                  <p className="upload-active-sub">Auto-scaling large photos to HD luxury quality</p>
+                </div>
+              )}
+              {!uploading && (
+                formData.image ? (
+                  <div className="upload-preview-main">
+                    <img src={formData.image} alt="Featured" />
+                    <div className="upload-overlay">
+                      <UploadCloud size={24} />
+                      <span>Change Featured or Add More</span>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="upload-placeholder">
-                  <ImageIcon size={32} className="upload-icon-svg" />
-                  <p>
-                    Drag &amp; drop or <strong>browse</strong>
-                  </p>
-                  <p className="upload-hint">
-                    High resolution images recommended
-                  </p>
-                </div>
+                ) : (
+                  <div className="upload-placeholder">
+                    <ImageIcon size={32} className="upload-icon-svg" />
+                    <p>
+                      Drag &amp; drop or <strong>browse files</strong>
+                    </p>
+                    <p className="upload-hint">
+                      Select all images at once &bull; No size limit (Auto-optimized)
+                    </p>
+                  </div>
+                )
               )}
               <input
                 type="file"
                 accept="image/*"
+                multiple
                 ref={mainUploadRef}
                 style={{ display: "none" }}
+                onClick={(e) => { e.target.value = null; }}
                 onChange={(e) => handleMainImageUpload(e.target.files)}
               />
             </div>
 
-            <label className="sub-label mt-4">Image Gallery</label>
-            <div className="gallery-grid">
+            <div className="gallery-header-row mt-4">
+              <label className="sub-label" style={{ margin: 0 }}>
+                Image Gallery ({formData.images.length})
+              </label>
+              <button
+                type="button"
+                className="gallery-add-link"
+                onClick={() => galleryUploadRef.current?.click()}
+                disabled={uploading}
+              >
+                + Add / Select All
+              </button>
+            </div>
+
+            <div
+              className={`gallery-grid ${draggingGallery ? "dragging" : ""}`}
+              onDragOver={onDragOverGallery}
+              onDragLeave={onDragLeaveGallery}
+              onDrop={onDropGallery}
+            >
               {formData.images.map((img, index) => (
                 <div
-                  key={index}
+                  key={`${img}-${index}`}
                   className={`gallery-thumb ${index === 0 ? "gallery-thumb-main" : ""}`}
                 >
                   <img src={img} alt={`Gallery ${index + 1}`} />
@@ -920,10 +1102,11 @@ const EditProduct = () => {
               ))}
               <div
                 className="gallery-add-btn"
-                onClick={() => galleryUploadRef.current.click()}
+                onClick={() => !uploading && galleryUploadRef.current?.click()}
+                title="Select multiple images"
               >
                 <PlusIcon />
-                <span>Add</span>
+                <span>Add All</span>
               </div>
             </div>
 
@@ -933,10 +1116,11 @@ const EditProduct = () => {
               multiple
               ref={galleryUploadRef}
               style={{ display: "none" }}
+              onClick={(e) => { e.target.value = null; }}
               onChange={(e) => handleGalleryUpload(e.target.files)}
             />
 
-            <div className="form-divider"></div>
+              <div className="form-divider"></div>
 
             <div className="form-group">
               <label>Or provide image URL</label>
