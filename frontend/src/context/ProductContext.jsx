@@ -24,13 +24,16 @@ const formatProduct = (p) => {
   const needsReview = Boolean(p.needs_review ?? p.needsReview ?? false);
   const isVariable = p.product_type === "variable" || p.productType === "variable";
 
-  let computedStock = p.stock !== undefined && p.stock !== null ? Number(p.stock) : 2;
+  // Derive stock: if database has a stock value, use it; otherwise default simple to 1
+  let computedStock = p.stock !== undefined && p.stock !== null ? Number(p.stock) : 1;
   if (isVariable && Array.isArray(p.variations) && p.variations.length > 0) {
     computedStock = p.variations.reduce((sum, v) => sum + (Number(v.stock) || 0), 0);
   }
 
   const rawStatus = (p.stock_status || p.status || p.stockStatus || "").toLowerCase();
-  const isOut = rawStatus === "out of stock" || rawStatus === "sold out" || computedStock <= 0;
+  const isExplicitlyOut = rawStatus === "out of stock" || rawStatus === "sold out";
+  const isOut = isExplicitlyOut || computedStock <= 0;
+  const determinedStatus = isOut ? "Out of Stock" : (computedStock < 5 ? "Low Stock" : "In Stock");
 
   // Resolve images from jsonb column, joined table, or image_url
   let resolvedImages = [];
@@ -47,7 +50,7 @@ const formatProduct = (p) => {
     }
   }
 
-  // Primary image —優先 priority: p.image_url -> p.image -> first in resolvedImages
+  // Primary image priority: p.image_url -> p.image -> first in resolvedImages
   const primaryImage =
     p.image_url ||
     p.image ||
@@ -65,6 +68,8 @@ const formatProduct = (p) => {
     finalImages = [primaryImage];
   }
 
+  const displayOrderVal = parseInt(p.display_order ?? p.displayOrder, 10);
+
   return {
     id: String(p.id),
     title: p.name || p.title || "",
@@ -77,8 +82,8 @@ const formatProduct = (p) => {
     fabric: p.fabric || p.material || "",
     image: primaryImage,
     images: finalImages,
-    stockStatus: isOut ? "Out of Stock" : (computedStock < 5 ? "Low Stock" : "In Stock"),
-    stock: computedStock,
+    stockStatus: determinedStatus,
+    stock: isExplicitlyOut && computedStock > 0 ? 0 : computedStock,
     isArchived,
     needsReview,
     sku: p.sku || "",
@@ -304,9 +309,22 @@ export const ProductProvider = ({ children }) => {
       : Boolean(updatedData.status === "ARCHIVED");
     const needsReviewVal = Boolean(updatedData.needsReview);
 
+    // Compute stock accurately without hardcoding 10
+    const finalStock = updatedData.productType === "variable"
+      ? (Array.isArray(updatedData.variations) ? updatedData.variations.reduce((sum, v) => sum + (Number(v.stock) || 0), 0) : Number(updatedData.stock || 0))
+      : (updatedData.stock !== undefined && updatedData.stock !== null && updatedData.stock !== "")
+      ? Math.max(0, parseInt(updatedData.stock, 10))
+      : (updatedData.stockStatus === "Out of Stock" || updatedData.stockStatus === "Sold Out" ? 0 : 1);
+
+    const finalStockStatus = finalStock <= 0
+      ? "Out of Stock"
+      : (updatedData.stockStatus && updatedData.stockStatus !== "Out of Stock" ? updatedData.stockStatus : "In Stock");
+
     const merged = {
       ...updatedData,
       id: String(id),
+      stock: finalStock,
+      stockStatus: finalStockStatus,
       image: primaryImage,
       images: syncedImages,
       badge: assignedBadge,
@@ -331,14 +349,9 @@ export const ProductProvider = ({ children }) => {
         price: updatedData.price,
         "salePrice": updatedData.salePrice ?? null,
         description: updatedData.description,
-        stock:
-          updatedData.productType === "variable"
-            ? (updatedData.stock ?? 0)
-            : updatedData.stockStatus === "In Stock"
-            ? updatedData.stock || 10
-            : 0,
-        stock_status: updatedData.stockStatus || "In Stock",
-        status: "PUBLISHED",
+        stock: finalStock,
+        stock_status: finalStockStatus,
+        status: finalStock <= 0 ? "OUT_OF_STOCK" : "PUBLISHED",
         sku: updatedData.sku || null,
         image_url: primaryImage,
         images: syncedImages,
@@ -369,10 +382,11 @@ export const ProductProvider = ({ children }) => {
       }
     } catch (err) {
       console.warn("Failed to update product in Supabase:", err);
+      throw err;
     }
   };
 
-  const importProducts = () => {
+    const importProducts = () => {
     console.log("Import handled via Supabase now");
   };
 
@@ -423,15 +437,39 @@ export const ProductProvider = ({ children }) => {
   };
 
   const quickUpdateStock = async (id, newStock) => {
-    const qty = Math.max(0, Number(newStock));
-    const stockStatus = qty > 0 ? "In Stock" : "Out of Stock";
-    setProducts((prev) =>
-      prev.map((p) => (String(p.id) === String(id) ? { ...p, stock: qty, stockStatus } : p))
-    );
+    const qty = Math.max(0, parseInt(newStock, 10) || 0);
+    const stockStatus = qty > 0 ? (qty < 5 ? "Low Stock" : "In Stock") : "Out of Stock";
+    
+    // Immediate optimistic update of products state & localStorage cache
+    setProducts((prev) => {
+      const next = prev.map((p) =>
+        String(p.id) === String(id) ? { ...p, stock: qty, stockStatus } : p
+      );
+      try {
+        localStorage.setItem("safedrang_products_cache", JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+
     try {
-      await supabase.from("products").update({ stock: qty, stock_status: stockStatus }).eq("id", id);
+      const { error } = await supabase
+        .from("products")
+        .update({
+          stock: qty,
+          stock_status: stockStatus,
+          status: qty > 0 ? "PUBLISHED" : "OUT_OF_STOCK",
+          updatedAt: new Date().toISOString(),
+        })
+        .eq("id", id);
+
+      if (error) {
+        console.error("Failed to update stock in Supabase:", error);
+        throw error;
+      }
+      return true;
     } catch (err) {
       console.warn("Failed to update stock:", err);
+      throw err;
     }
   };
 

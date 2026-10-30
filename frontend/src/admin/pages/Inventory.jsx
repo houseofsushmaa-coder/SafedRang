@@ -34,7 +34,7 @@ const Toast = ({ toast, onClose }) => {
 };
 
 /* ── Adjust Stock Modal ── */
-const AdjustStockModal = ({ item, onClose, onSuccess }) => {
+const AdjustStockModal = ({ item, onClose, onSuccess, onUpdateStock }) => {
   // item can be a main product or a variant
   const isVariant = !!item.variantId;
 
@@ -66,8 +66,12 @@ const AdjustStockModal = ({ item, onClose, onSuccess }) => {
     setLoading(true);
     try {
       const newTotal = Math.max(0, item.currentStock + payloadQuantity);
-      await adminService.updateStock(item.productId, newTotal);
-      onSuccess(`Stock updated successfully for ${item.name} (${newTotal} units)`);
+      if (onUpdateStock) {
+        await onUpdateStock(item.productId, newTotal);
+      } else {
+        await adminService.updateStock(item.productId, newTotal);
+      }
+      onSuccess(`Stock updated successfully for ${item.name} (${newTotal} units)`, item.productId, newTotal);
     } catch (err) {
       setError(err.message || "Failed to update stock");
     } finally {
@@ -201,7 +205,7 @@ const AdjustStockModal = ({ item, onClose, onSuccess }) => {
 };
 
 const Inventory = () => {
-  const { products: contextProducts } = useProducts();
+  const { products: contextProducts, quickUpdateStock } = useProducts();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -225,7 +229,7 @@ const Inventory = () => {
             title: p.title,
             sku: p.sku || `SR-${p.id}`,
             category: p.category,
-            stock: p.stock ?? 10,
+            stock: p.stock !== undefined && p.stock !== null ? Number(p.stock) : 1,
             price: p.price,
             image: p.image,
             hasVariants: false,
@@ -247,10 +251,14 @@ const Inventory = () => {
     fetchInventory();
   }, [fetchInventory]);
 
-  const handleStockSuccess = (msg) => {
+  const handleStockSuccess = (msg, prodId, newTotal) => {
     setItemToAdjust(null);
     showToast(msg, "success");
-    fetchInventory();
+    if (prodId && newTotal !== undefined) {
+      setProducts((prev) =>
+        prev.map((p) => (String(p.id) === String(prodId) ? { ...p, stock: newTotal } : p))
+      );
+    }
   };
 
   const filtered = products.filter(
@@ -271,6 +279,7 @@ const Inventory = () => {
           item={itemToAdjust}
           onClose={() => setItemToAdjust(null)}
           onSuccess={handleStockSuccess}
+          onUpdateStock={quickUpdateStock}
         />
       )}
 

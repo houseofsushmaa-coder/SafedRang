@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useProducts } from "../../context/ProductContext";
@@ -283,15 +284,34 @@ const Products = () => {
     setSelectedIds(new Set());
   };
 
-  const handleQuickStock = async (product) => {
-    const current = product.stock ?? 0;
-    const input = window.prompt(`Update available stock for "${product.title}":`, String(current));
-    if (input !== null) {
-      const val = parseInt(input, 10);
-      if (!isNaN(val) && val >= 0) {
-        await quickUpdateStock(product.id, val);
-      }
+
+
+  // ── Inline Stock Editing State ────────────────────────────────────
+  const [editingStockId, setEditingStockId] = useState(null);
+  const [editingStockVal, setEditingStockVal] = useState("");
+  const [stockSavingId, setStockSavingId]   = useState(null);
+
+  const saveStockChange = async (productId, valStr, productTitle) => {
+    const val = parseInt(valStr, 10);
+    if (isNaN(val) || val < 0) {
+      toast.error("Please enter a valid non-negative number for stock.");
+      return;
     }
+    setStockSavingId(productId);
+    try {
+      await quickUpdateStock(productId, val);
+      toast.success(`Stock for "${productTitle}" set to ${val} unit${val === 1 ? "" : "s"}`);
+      setEditingStockId(null);
+    } catch (err) {
+      toast.error(`Failed to update stock: ${err.message || "Database update error"}`);
+    } finally {
+      setStockSavingId(null);
+    }
+  };
+
+  const handleQuickStock = async (product) => {
+    setEditingStockId(product.id);
+    setEditingStockVal(String(product.stock ?? 0));
   };
 
   // ── Bulk import state ──────────────────────────────────────────────
@@ -785,24 +805,96 @@ const Products = () => {
                       </td>
 
                       <td>
-                        <div
-                          className="inventory-cell"
-                          style={{ cursor: "pointer" }}
-                          onClick={() => handleQuickStock(product)}
-                          title="Click to quickly update stock quantity"
-                        >
-                          <span
-                            className="stock-count"
-                            style={{
-                              fontWeight: 700,
-                              color: (product.stock ?? 0) <= 0 ? "#DC2626" : "inherit"
-                            }}
+                        {editingStockId === product.id ? (
+                          <div
+                            className="stock-inline-edit-box"
+                            onClick={(e) => e.stopPropagation()}
+                            style={{ display: "flex", alignItems: "center", gap: "4px" }}
                           >
-                            {product.stock ?? 0}
-                          </span>
-                          <span className="stock-label"> units</span>
-                          <span style={{ fontSize: "0.7rem", color: "var(--admin-text-light)", marginLeft: 4 }}>✎</span>
-                        </div>
+                            <input
+                              type="number"
+                              min="0"
+                              value={editingStockVal}
+                              autoFocus
+                              onChange={(e) => setEditingStockVal(e.target.value)}
+                              onKeyDown={async (e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  await saveStockChange(product.id, editingStockVal, product.title);
+                                } else if (e.key === "Escape") {
+                                  setEditingStockId(null);
+                                }
+                              }}
+                              style={{
+                                width: "64px",
+                                padding: "4px 6px",
+                                border: "1px solid var(--admin-border)",
+                                borderRadius: "4px",
+                                fontSize: "0.85rem",
+                                fontWeight: 700,
+                                textAlign: "center",
+                                outline: "none",
+                              }}
+                              disabled={stockSavingId === product.id}
+                            />
+                            <button
+                              type="button"
+                              title="Save stock"
+                              style={{
+                                padding: "4px 8px",
+                                background: "#6E1E2A",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                                fontSize: "0.75rem",
+                                fontWeight: 600,
+                              }}
+                              disabled={stockSavingId === product.id}
+                              onClick={async () => {
+                                await saveStockChange(product.id, editingStockVal, product.title);
+                              }}
+                            >
+                              {stockSavingId === product.id ? <Loader2 size={12} className="spin" /> : "✓"}
+                            </button>
+                            <button
+                              type="button"
+                              title="Cancel"
+                              style={{
+                                padding: "4px 6px",
+                                background: "none",
+                                border: "1px solid var(--admin-border)",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                                fontSize: "0.75rem",
+                                color: "var(--admin-text-muted)",
+                              }}
+                              disabled={stockSavingId === product.id}
+                              onClick={() => setEditingStockId(null)}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ) : (
+                          <div
+                            className="inventory-cell"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => handleQuickStock(product)}
+                            title="Click to quickly update stock quantity"
+                          >
+                            <span
+                              className="stock-count"
+                              style={{
+                                fontWeight: 700,
+                                color: (product.stock ?? 0) <= 0 ? "#DC2626" : "inherit"
+                              }}
+                            >
+                              {product.stock ?? 0}
+                            </span>
+                            <span className="stock-label"> units</span>
+                            <span style={{ fontSize: "0.75rem", color: "var(--admin-text-light)", marginLeft: 4 }}>✎</span>
+                          </div>
+                        )}
                       </td>
 
                       <td>

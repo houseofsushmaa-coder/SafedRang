@@ -74,6 +74,7 @@ const EditProduct = () => {
     price: "",
     salePrice: "",
     sku: "",
+    stock: "1",
     stockStatus: "In Stock",
     image: "",
     images: [],
@@ -100,6 +101,7 @@ const EditProduct = () => {
           price: product.price || "",
           salePrice: product.salePrice || "",
           sku: product.sku || "",
+          stock: product.stock !== undefined && product.stock !== null ? String(product.stock) : "1",
           stockStatus: product.stockStatus || "In Stock",
           image: product.image || "",
           images: product.images || (product.image ? [product.image] : []),
@@ -119,6 +121,23 @@ const EditProduct = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === "stock") {
+      const qty = parseInt(value, 10);
+      setFormData((prev) => ({
+        ...prev,
+        stock: value,
+        stockStatus: !isNaN(qty) && qty <= 0 ? "Out of Stock" : (prev.stockStatus === "Out of Stock" ? "In Stock" : prev.stockStatus),
+      }));
+      return;
+    }
+    if (name === "stockStatus") {
+      setFormData((prev) => ({
+        ...prev,
+        stockStatus: value,
+        stock: value === "Out of Stock" ? "0" : (Number(prev.stock) <= 0 ? "1" : prev.stock),
+      }));
+      return;
+    }
     if (name === "image") {
       setFormData((prev) => {
         const remaining = (prev.images || []).filter((img) => img !== prev.image && img !== value);
@@ -407,9 +426,15 @@ const EditProduct = () => {
       stock:
         formData.productType === "variable"
           ? formData.variations.reduce((sum, v) => sum + (Number(v.stock) || 0), 0)
-          : formData.stockStatus === "In Stock"
-          ? 10
-          : 0,
+          : (formData.stock !== undefined && formData.stock !== null && formData.stock !== "")
+          ? Math.max(0, parseInt(formData.stock, 10))
+          : (formData.stockStatus === "Out of Stock" ? 0 : 1),
+      stockStatus:
+        formData.productType === "variable"
+          ? formData.stockStatus
+          : (Number(formData.stock) <= 0 || formData.stockStatus === "Out of Stock")
+          ? "Out of Stock"
+          : (formData.stockStatus || "In Stock"),
     };
 
     try {
@@ -597,6 +622,20 @@ const EditProduct = () => {
                   className="admin-input full-width"
                 />
               </div>
+              {!isVariable && (
+                <div className="form-group half-width">
+                  <label>Stock Quantity (Units Available)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    name="stock"
+                    value={formData.stock}
+                    onChange={handleChange}
+                    className="admin-input full-width"
+                    placeholder="e.g. 1"
+                  />
+                </div>
+              )}
               {!isVariable && (
                 <div className="form-group half-width">
                   <label>Stock Status</label>

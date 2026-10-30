@@ -115,3 +115,4 @@ export async function optimizeImageForUpload(file, maxDimension = 2400, quality 
     img.src = objectUrl;
   });
 }
+
