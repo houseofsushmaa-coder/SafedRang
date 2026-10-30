@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Search,
   ShoppingBag,
@@ -43,6 +43,15 @@ export default function Header() {
   const { user, session, token, isAdmin } = useAuth();
   const { products = [] } = useProducts();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Reset all drawers and body overflow on every route change
+  useEffect(() => {
+    setIsSearchOpen(false);
+    setIsWishlistOpen(false);
+    setIsMobileMenuOpen(false);
+    document.body.style.overflow = "";
+  }, [location.pathname]);
 
   // Modals & Drawers state
   const [isSearchOpen, setIsSearchOpen] = useState(false);

@@ -202,7 +202,7 @@ function App() {
 
               <Route path="/" element={<StorefrontLayout />}>
                 <Route index element={<Home />} />
-                <Route path="shop" element={<Shop />} />
+                <Route path="shop" element={<Shop key="shop" />} />
                 <Route path="about" element={<About />} />
                 <Route path="craft" element={<Craft />} />
                 <Route path="the-craft" element={<Craft />} />
@@ -210,7 +210,7 @@ function App() {
                 <Route path="checkout" element={<Checkout />} />
                 <Route path="payment/verify" element={<PaymentVerify />} />
                 <Route path="order-success" element={<OrderSuccess />} />
-                <Route path="one-of-one" element={<Shop />} />
+                <Route path="one-of-one" element={<Shop key="one-of-one" />} />
                 <Route path="journey" element={<Journey />} />
                 <Route path="journal" element={<Journey />} />
                 <Route path="story" element={<About />} />
@@ -222,7 +222,7 @@ function App() {
                 <Route path="contact-us" element={<Contact />} />
                 <Route path="faq" element={<FAQ />} />
                 <Route path="faqs" element={<FAQ />} />
-                <Route path="archive" element={<Shop />} />
+                <Route path="archive" element={<Shop key="archive" />} />
                 <Route path="shipping" element={<PrivacyPolicy />} />
                 <Route path="shipping-policy" element={<PrivacyPolicy />} />
                 <Route path="privacy" element={<PrivacyPolicy />} />
