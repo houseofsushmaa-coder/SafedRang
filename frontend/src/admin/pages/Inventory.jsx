@@ -240,6 +240,17 @@ const Inventory = () => {
   const [search, setSearch] = useState("");
   const [toast, setToast] = useState(null);
   const [viewFilter, setViewFilter] = useState("all"); // 'all' | 'instock' | 'lowstock' | 'outofstock'
+  const [sortField, setSortField] = useState("title");
+  const [sortDirection, setSortDirection] = useState("asc");
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
 
   // Selection for bulk actions
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -435,6 +446,34 @@ const Inventory = () => {
       return true;
     });
   }, [products, search, viewFilter]);
+
+  const sortedFiltered = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      let valA, valB;
+      if (sortField === "stock") {
+        valA = Number(a.stock) || 0;
+        valB = Number(b.stock) || 0;
+      } else if (sortField === "status") {
+        valA = a.stockStatus || "";
+        valB = b.stockStatus || "";
+      } else if (sortField === "category") {
+        valA = a.category || "";
+        valB = b.category || "";
+      } else if (sortField === "sku") {
+        valA = a.sku || "";
+        valB = b.sku || "";
+      } else {
+        valA = a.title || "";
+        valB = b.title || "";
+      }
+      if (typeof valA === "number") {
+        return sortDirection === "asc" ? valA - valB : valB - valA;
+      }
+      return sortDirection === "asc"
+        ? String(valA).localeCompare(String(valB))
+        : String(valB).localeCompare(String(valA));
+    });
+  }, [filtered, sortField, sortDirection]);
 
   const handleSelectAll = (checked) => {
     if (checked) {
@@ -675,22 +714,32 @@ const Inventory = () => {
                 <th style={{ width: "36px" }}>
                   <input
                     type="checkbox"
-                    checked={selectedIds.size > 0 && selectedIds.size === filtered.length}
+                    checked={selectedIds.size > 0 && selectedIds.size === sortedFiltered.length}
                     onChange={(e) => handleSelectAll(e.target.checked)}
                     aria-label="Select all products"
                     style={{ cursor: "pointer" }}
                   />
                 </th>
-                <th>Product / Variant</th>
-                <th>SKU</th>
-                <th>Category</th>
-                <th>Status</th>
-                <th>Available Units</th>
+                <th onClick={() => handleSort("title")} style={{ cursor: "pointer", userSelect: "none" }} title="Click to sort by Product Name">
+                  Product / Variant {sortField === "title" ? (sortDirection === "asc" ? "▲" : "▼") : ""}
+                </th>
+                <th onClick={() => handleSort("sku")} style={{ cursor: "pointer", userSelect: "none" }} title="Click to sort by SKU">
+                  SKU {sortField === "sku" ? (sortDirection === "asc" ? "▲" : "▼") : ""}
+                </th>
+                <th onClick={() => handleSort("category")} style={{ cursor: "pointer", userSelect: "none" }} title="Click to sort by Category">
+                  Category {sortField === "category" ? (sortDirection === "asc" ? "▲" : "▼") : ""}
+                </th>
+                <th onClick={() => handleSort("status")} style={{ cursor: "pointer", userSelect: "none" }} title="Click to sort by Status">
+                  Status {sortField === "status" ? (sortDirection === "asc" ? "▲" : "▼") : ""}
+                </th>
+                <th onClick={() => handleSort("stock")} style={{ cursor: "pointer", userSelect: "none" }} title="Click to sort by Stock Quantity">
+                  Available Units {sortField === "stock" ? (sortDirection === "asc" ? "▲" : "▼") : ""}
+                </th>
                 <th style={{ textAlign: "right" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((product) => {
+              {sortedFiltered.map((product) => {
                 const isSelected = selectedIds.has(product.id);
                 const hasVariants = product.hasVariants && product.variants.length > 0;
                 const rows = [];
@@ -719,6 +768,20 @@ const Inventory = () => {
                             src={product.image || "/placeholder.png"}
                             alt=""
                             className="product-thumb"
+                            style={{
+                              width: "48px",
+                              height: "48px",
+                              minWidth: "48px",
+                              maxWidth: "48px",
+                              minHeight: "48px",
+                              maxHeight: "48px",
+                              objectFit: "cover",
+                              borderRadius: "8px",
+                              border: "1px solid var(--admin-border)",
+                              backgroundColor: "var(--ivory)",
+                              flexShrink: 0,
+                              display: "block",
+                            }}
                             onError={(e) => { e.currentTarget.src = "/placeholder.png"; }}
                           />
                           <div className="product-info">
@@ -911,6 +974,20 @@ const Inventory = () => {
                             src={product.image || "/placeholder.png"}
                             alt=""
                             className="product-thumb"
+                            style={{
+                              width: "48px",
+                              height: "48px",
+                              minWidth: "48px",
+                              maxWidth: "48px",
+                              minHeight: "48px",
+                              maxHeight: "48px",
+                              objectFit: "cover",
+                              borderRadius: "8px",
+                              border: "1px solid var(--admin-border)",
+                              backgroundColor: "var(--ivory)",
+                              flexShrink: 0,
+                              display: "block",
+                            }}
                             onError={(e) => { e.currentTarget.src = "/placeholder.png"; }}
                           />
                           <div className="product-info">

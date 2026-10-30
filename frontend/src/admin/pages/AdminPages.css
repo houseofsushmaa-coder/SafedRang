@@ -348,13 +348,27 @@
 /* ── Product cells ── */
 .product-cell { display: flex; align-items: center; gap: 12px; }
 .product-img {
-  width: 44px; height: 44px;
-  border-radius: 7px;
+  width: 48px; height: 48px;
+  border-radius: 8px;
   background-size: cover;
   background-position: center;
   border: 1px solid var(--admin-border);
   background-color: var(--ivory);
   flex-shrink: 0;
+}
+.product-thumb {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
+  border-radius: 8px !important;
+  object-fit: cover !important;
+  border: 1px solid var(--admin-border) !important;
+  background-color: var(--ivory) !important;
+  flex-shrink: 0 !important;
+  display: block !important;
 }
 .product-info { display: flex; flex-direction: column; }
 .product-title { font-weight: 600; color: var(--admin-text-main); margin-bottom: 2px; font-size: 0.875rem; }
