@@ -166,7 +166,8 @@ export const ProductProvider = ({ children }) => {
       let { data, error } = await supabase
         .from("products")
         .select("*")
-        .limit(300);
+        .order("created_at", { ascending: false })
+        .limit(1000);
 
       if (error) {
         console.warn("Direct select failed, trying fallback:", error.message);
@@ -226,7 +227,9 @@ export const ProductProvider = ({ children }) => {
       salePrice: product.salePrice ? Number(product.salePrice) : null,
       description: product.description || "",
       sku: product.sku || `SR-${Date.now()}`,
+      craft: product.craft || "",
       fabric: product.fabric || "",
+      subcategory: product.subcategory || "",
       image: product.image || product.images?.[0] || "",
       images: product.images || (product.image ? [product.image] : []),
       stockStatus: (product.stock > 0 || product.stockStatus === "In Stock") ? "In Stock" : "Out of Stock",
@@ -246,8 +249,9 @@ export const ProductProvider = ({ children }) => {
 
     try {
       const imagesArr = formatted.images.filter(Boolean);
-      const { error } = await supabase.from("products").insert([
+      const { data: inserted, error } = await supabase.from("products").insert([
         {
+          // Do NOT send id — let Supabase generate the real UUID
           name: formatted.title,
           price: formatted.price,
           sale_price: formatted.salePrice ?? null,
@@ -256,6 +260,9 @@ export const ProductProvider = ({ children }) => {
           description: formatted.description,
           category_name: formatted.category,
           sku: formatted.sku,
+          craft: formatted.craft || null,
+          fabric: formatted.fabric || null,
+          subcategory: formatted.subcategory || null,
           image_url: imagesArr[0] || formatted.image || null,
           images: imagesArr,
           product_type: formatted.productType || "simple",
@@ -267,13 +274,17 @@ export const ProductProvider = ({ children }) => {
           needs_review: Boolean(formatted.needsReview),
           display_order: Number(formatted.displayOrder || 0),
         },
-      ]);
+      ]).select();
       if (error) {
         console.warn("Could not insert product into Supabase:", error.message);
         throw new Error(error.message);
       }
+      // Refetch to replace optimistic fake-ID state with real DB rows
+      try { localStorage.removeItem("safedrang_products_cache"); } catch {}
+      await fetchProducts();
     } catch (err) {
       console.warn("Could not insert product into Supabase:", err);
+      throw err;
     }
   };
 
@@ -347,12 +358,15 @@ export const ProductProvider = ({ children }) => {
       const dbPayload = {
         name: updatedData.title,
         price: updatedData.price,
-        "salePrice": updatedData.salePrice ?? null,
+        sale_price: updatedData.salePrice ?? null,
         description: updatedData.description,
         stock: finalStock,
         stock_status: finalStockStatus,
         status: finalStock <= 0 ? "OUT_OF_STOCK" : "PUBLISHED",
         sku: updatedData.sku || null,
+        craft: updatedData.craft || null,
+        fabric: updatedData.fabric || null,
+        subcategory: updatedData.subcategory || null,
         image_url: primaryImage,
         images: syncedImages,
         category_name: normalizeCategoryName(updatedData.category),
@@ -368,7 +382,7 @@ export const ProductProvider = ({ children }) => {
         is_archived: isArchivedVal,
         needs_review: needsReviewVal,
         display_order: Number(updatedData.displayOrder ?? updatedData.display_order ?? 0) || 0,
-        "updatedAt": new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
 
       const { error } = await supabase
@@ -380,6 +394,9 @@ export const ProductProvider = ({ children }) => {
         console.error("Failed to update product in Supabase:", error.message);
         throw new Error(error.message);
       }
+      // Refetch to keep local state perfectly in sync with DB
+      try { localStorage.removeItem("safedrang_products_cache"); } catch {}
+      await fetchProducts();
     } catch (err) {
       console.warn("Failed to update product in Supabase:", err);
       throw err;

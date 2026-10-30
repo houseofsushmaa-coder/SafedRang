@@ -83,6 +83,9 @@ const EditProduct = () => {
     attributeName: "Size",
     variations: [],
     badge: "",
+    craft: "",
+    fabric: "",
+    subcategory: "",
     isOneOfOne: false,
     isArchived: false,
     needsReview: false,
@@ -112,6 +115,9 @@ const EditProduct = () => {
           badge: product.badge || (product.isOneOfOne ? "One of One" : ""),
           isOneOfOne: Boolean(product.isOneOfOne || product.badge === "One of One"),
           isArchived: Boolean(product.isArchived),
+          craft: product.craft || "",
+          fabric: product.fabric || "",
+          subcategory: product.subcategory || "",
           needsReview: Boolean(product.needsReview),
           displayOrder: product.displayOrder ?? product.display_order ?? 0,
         });
@@ -380,6 +386,27 @@ const EditProduct = () => {
       return { ...prev, variations: updated };
     });
   };
+
+  // Quick-fill helpers for common variation sets
+  const populateBlouseSizes = () => {
+    setFormData((prev) => ({
+      ...prev,
+      variations: [
+        ...(prev.variations || []),
+        ...["36", "38", "40", "42", "44"].map((s) => ({ size: s, stock: 1, priceModifier: 0 })),
+      ],
+    }));
+  };
+
+  const populateStandardSizes = () => {
+    setFormData((prev) => ({
+      ...prev,
+      variations: [
+        ...(prev.variations || []),
+        ...["XS", "S", "M", "L", "XL", "XXL"].map((s) => ({ size: s, stock: 1, priceModifier: 0 })),
+      ],
+    }));
+  };
   // ──────────────────────────────────────────────────────────
 
   const handleSave = async (e) => {
@@ -527,6 +554,64 @@ const EditProduct = () => {
                 rows="8"
                 placeholder="Describe your product here..."
               ></textarea>
+            </div>
+
+            {/* ── Craft, Fabric, Subcategory ── */}
+            <div className="form-row mt-3">
+              <div className="form-group half-width">
+                <label>Artisan Craft</label>
+                <input
+                  type="text"
+                  name="craft"
+                  value={formData.craft}
+                  onChange={handleChange}
+                  className="admin-input full-width"
+                  placeholder="e.g. Lucknowi Chikankari, Zardozi, Gota Patti"
+                  list="craft-suggestions"
+                />
+                <datalist id="craft-suggestions">
+                  <option value="Lucknowi Chikankari" />
+                  <option value="Handcrafted Chikankari" />
+                  <option value="Handcrafted" />
+                  <option value="Zardozi" />
+                  <option value="Gota Patti" />
+                </datalist>
+              </div>
+              <div className="form-group half-width">
+                <label>Fabric / Material</label>
+                <input
+                  type="text"
+                  name="fabric"
+                  value={formData.fabric}
+                  onChange={handleChange}
+                  className="admin-input full-width"
+                  placeholder="e.g. Silk, Chanderi Silk, Georgette, Cotton"
+                  list="fabric-suggestions"
+                />
+                <datalist id="fabric-suggestions">
+                  <option value="Silk" />
+                  <option value="Chanderi Silk" />
+                  <option value="Mul Chanderi" />
+                  <option value="Georgette" />
+                  <option value="Viscose Georgette" />
+                  <option value="Cotton" />
+                  <option value="Muslin Cotton" />
+                  <option value="Organza" />
+                  <option value="Kota" />
+                </datalist>
+              </div>
+            </div>
+            <div className="form-group">
+              <label>Subcategory <span className="label-optional">Optional</span></label>
+              <input
+                type="text"
+                name="subcategory"
+                value={formData.subcategory}
+                onChange={handleChange}
+                className="admin-input full-width"
+                placeholder="e.g. Chikankari, Zardozi, Bridal, Ready to Wear"
+              />
+              <p className="field-hint">Used for fine-grained shop filtering (e.g. Sarees → Chikankari).</p>
             </div>
           </div>
 
@@ -1166,7 +1251,7 @@ const EditProduct = () => {
               <input
                 type="text"
                 name="image"
-                value={formData.image.startsWith("data:") ? "" : formData.image}
+                value={(formData.image || "").startsWith("data:") ? "" : (formData.image || "")}
                 onChange={handleChange}
                 placeholder="https://example.com/image.jpg"
                 className="admin-input full-width"
