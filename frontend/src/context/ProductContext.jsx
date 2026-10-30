@@ -249,20 +249,24 @@ export const ProductProvider = ({ children }) => {
 
     try {
       const imagesArr = formatted.images.filter(Boolean);
+      const newUuid = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : (formatted.id && !formatted.id.startsWith("prod_") ? formatted.id : "sr_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8));
+      const cleanSlug = (formatted.title || "product").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") + "-" + newUuid.slice(0, 8);
+      
       const { data: inserted, error } = await supabase.from("products").insert([
         {
-          // Do NOT send id — let Supabase generate the real UUID
+          id: newUuid,
           name: formatted.title,
+          slug: cleanSlug,
           price: formatted.price,
-          sale_price: formatted.salePrice ?? null,
+          salePrice: formatted.salePrice ?? null,
           stock: formatted.stock,
           stock_status: formatted.stockStatus,
+          status: formatted.stock > 0 ? "PUBLISHED" : "OUT_OF_STOCK",
           description: formatted.description,
           category_name: formatted.category,
           sku: formatted.sku,
           craft: formatted.craft || null,
           fabric: formatted.fabric || null,
-          subcategory: formatted.subcategory || null,
           image_url: imagesArr[0] || formatted.image || null,
           images: imagesArr,
           product_type: formatted.productType || "simple",
@@ -273,6 +277,8 @@ export const ProductProvider = ({ children }) => {
           is_archived: Boolean(formatted.isArchived),
           needs_review: Boolean(formatted.needsReview),
           display_order: Number(formatted.displayOrder || 0),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         },
       ]).select();
       if (error) {
@@ -280,7 +286,9 @@ export const ProductProvider = ({ children }) => {
         throw new Error(error.message);
       }
       // Refetch to replace optimistic fake-ID state with real DB rows
+      // Small delay ensures Supabase has committed before we re-read
       try { localStorage.removeItem("safedrang_products_cache"); } catch {}
+      await new Promise((r) => setTimeout(r, 400));
       await fetchProducts();
     } catch (err) {
       console.warn("Could not insert product into Supabase:", err);
@@ -358,7 +366,7 @@ export const ProductProvider = ({ children }) => {
       const dbPayload = {
         name: updatedData.title,
         price: updatedData.price,
-        sale_price: updatedData.salePrice ?? null,
+        salePrice: updatedData.salePrice ?? null,
         description: updatedData.description,
         stock: finalStock,
         stock_status: finalStockStatus,
@@ -366,7 +374,6 @@ export const ProductProvider = ({ children }) => {
         sku: updatedData.sku || null,
         craft: updatedData.craft || null,
         fabric: updatedData.fabric || null,
-        subcategory: updatedData.subcategory || null,
         image_url: primaryImage,
         images: syncedImages,
         category_name: normalizeCategoryName(updatedData.category),
@@ -382,7 +389,7 @@ export const ProductProvider = ({ children }) => {
         is_archived: isArchivedVal,
         needs_review: needsReviewVal,
         display_order: Number(updatedData.displayOrder ?? updatedData.display_order ?? 0) || 0,
-        updated_at: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       const { error } = await supabase
@@ -395,7 +402,9 @@ export const ProductProvider = ({ children }) => {
         throw new Error(error.message);
       }
       // Refetch to keep local state perfectly in sync with DB
+      // Small delay ensures Supabase has committed before we re-read
       try { localStorage.removeItem("safedrang_products_cache"); } catch {}
+      await new Promise((r) => setTimeout(r, 400));
       await fetchProducts();
     } catch (err) {
       console.warn("Failed to update product in Supabase:", err);
@@ -453,14 +462,79 @@ export const ProductProvider = ({ children }) => {
     }
   };
 
-  const quickUpdateStock = async (id, newStock) => {
+  const quickUpdateStock = async (id, newStock, variantId = null) => {
     const qty = Math.max(0, parseInt(newStock, 10) || 0);
-    const stockStatus = qty > 0 ? (qty < 5 ? "Low Stock" : "In Stock") : "Out of Stock";
-    
+
+    // Determine if updating variant or main product
+    const target = products.find((p) => String(p.id) === String(id));
+    let updatedVariations = Array.isArray(target?.variations) ? [...target.variations] : [];
+    let finalStock = qty;
+
+    if (variantId && updatedVariations.length > 0) {
+      updatedVariations = updatedVariations.map((v, idx) => {
+        const vId = v.id || `${id}-v${idx}`;
+        if (String(vId) === String(variantId) || String(v.size) === String(variantId)) {
+          return { ...v, stock: qty };
+        }
+        return v;
+      });
+      finalStock = updatedVariations.reduce((sum, v) => sum + (Number(v.stock) || 0), 0);
+    }
+
+    const stockStatus = finalStock > 0 ? (finalStock < 5 ? "Low Stock" : "In Stock") : "Out of Stock";
+
     // Immediate optimistic update of products state & localStorage cache
     setProducts((prev) => {
+      const next = prev.map((p) => {
+        if (String(p.id) !== String(id)) return p;
+        return {
+          ...p,
+          stock: finalStock,
+          stockStatus,
+          variations: updatedVariations,
+        };
+      });
+      try {
+        localStorage.setItem("safedrang_products_cache", JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+
+    try {
+      const payload = {
+        stock: finalStock,
+        stock_status: stockStatus,
+        status: finalStock > 0 ? "PUBLISHED" : "OUT_OF_STOCK",
+        updatedAt: new Date().toISOString(),
+      };
+      if (variantId && updatedVariations.length > 0) {
+        payload.variations = updatedVariations;
+      }
+
+      const { error } = await supabase
+        .from("products")
+        .update(payload)
+        .eq("id", id);
+
+      if (error) {
+        console.error("Failed to update stock in Supabase:", error);
+        throw error;
+      }
+      return true;
+    } catch (err) {
+      console.warn("Failed to update stock:", err);
+      throw err;
+    }
+  };
+
+  const bulkSetStock = async (ids, newStock) => {
+    const qty = Math.max(0, parseInt(newStock, 10) || 0);
+    const stockStatus = qty > 0 ? (qty < 5 ? "Low Stock" : "In Stock") : "Out of Stock";
+    const idList = Array.from(new Set(ids.map(String)));
+
+    setProducts((prev) => {
       const next = prev.map((p) =>
-        String(p.id) === String(id) ? { ...p, stock: qty, stockStatus } : p
+        idList.includes(String(p.id)) ? { ...p, stock: qty, stockStatus } : p
       );
       try {
         localStorage.setItem("safedrang_products_cache", JSON.stringify(next));
@@ -477,15 +551,12 @@ export const ProductProvider = ({ children }) => {
           status: qty > 0 ? "PUBLISHED" : "OUT_OF_STOCK",
           updatedAt: new Date().toISOString(),
         })
-        .eq("id", id);
+        .in("id", idList);
 
-      if (error) {
-        console.error("Failed to update stock in Supabase:", error);
-        throw error;
-      }
+      if (error) throw error;
       return true;
     } catch (err) {
-      console.warn("Failed to update stock:", err);
+      console.warn("Failed to bulk update stock in Supabase:", err);
       throw err;
     }
   };
@@ -515,15 +586,40 @@ export const ProductProvider = ({ children }) => {
   };
 
   const bulkUpdateStockStatus = async (ids, newStatus) => {
-    const idSet = new Set(ids.map(String));
-    const qty = newStatus === "Out of Stock" ? 0 : 2;
-    setProducts((prev) =>
-      prev.map((p) => (idSet.has(String(p.id)) ? { ...p, stockStatus: newStatus, stock: p.stock > 0 && newStatus === "In Stock" ? p.stock : qty } : p))
-    );
+    const idList = Array.from(new Set(ids.map(String)));
+    const isOut = newStatus === "Out of Stock";
+
+    setProducts((prev) => {
+      const next = prev.map((p) => {
+        if (!idList.includes(String(p.id))) return p;
+        const newQty = isOut ? 0 : (p.stock > 0 ? p.stock : 1);
+        return { ...p, stockStatus: newStatus, stock: newQty };
+      });
+      try {
+        localStorage.setItem("safedrang_products_cache", JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+
     try {
-      await supabase.from("products").update({ stock_status: newStatus, stock: qty }).in("id", Array.from(idSet));
+      const updateData = {
+        stock_status: newStatus,
+        status: isOut ? "OUT_OF_STOCK" : "PUBLISHED",
+        updatedAt: new Date().toISOString(),
+      };
+      if (isOut) {
+        updateData.stock = 0;
+      }
+      const { error } = await supabase
+        .from("products")
+        .update(updateData)
+        .in("id", idList);
+
+      if (error) throw error;
+      return true;
     } catch (err) {
       console.warn("Failed to bulk update stock status:", err);
+      throw err;
     }
   };
 
@@ -551,6 +647,7 @@ export const ProductProvider = ({ children }) => {
         restoreProduct,
         toggleNeedsReview,
         quickUpdateStock,
+        bulkSetStock,
         bulkArchive,
         bulkRestore,
         bulkUpdateStockStatus,

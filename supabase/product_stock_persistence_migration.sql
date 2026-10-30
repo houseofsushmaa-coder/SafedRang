@@ -46,3 +46,4 @@ ON public.inventory_logs FOR ALL USING (true) WITH CHECK (true);
 -- 4. Add index for faster stock queries
 CREATE INDEX IF NOT EXISTS idx_products_stock ON public.products (stock);
 CREATE INDEX IF NOT EXISTS idx_products_stock_status ON public.products (stock_status);
+

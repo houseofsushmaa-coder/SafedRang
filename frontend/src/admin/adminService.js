@@ -724,13 +724,15 @@ export const adminService = {
   // ─────────────────────────────────────────────
   async updateStock(productId, newStock) {
     const stockNum = Math.max(0, Number(newStock));
-    const status = stockNum > 0 ? "In Stock" : "Out of Stock";
+    const status = stockNum > 0 ? (stockNum < 5 ? "Low Stock" : "In Stock") : "Out of Stock";
 
     const { error } = await supabase
       .from("products")
       .update({
         stock: stockNum,
         stock_status: status,
+        status: stockNum > 0 ? "PUBLISHED" : "OUT_OF_STOCK",
+        updatedAt: new Date().toISOString(),
       })
       .eq("id", productId);
 

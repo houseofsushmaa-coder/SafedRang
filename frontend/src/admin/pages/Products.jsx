@@ -119,6 +119,7 @@ const Products = () => {
     restoreProduct,
     toggleNeedsReview,
     quickUpdateStock,
+    bulkSetStock,
     bulkArchive,
     bulkRestore,
     bulkUpdateStockStatus,
@@ -128,6 +129,8 @@ const Products = () => {
 
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [bulkQtyVal, setBulkQtyVal] = useState("1");
+  const [isBulkQtyApplying, setIsBulkQtyApplying] = useState(false);
 
   // ── Navigation View Tabs: all | instock | outofstock | archived | needsreview ──
   const [viewTab, setViewTab] = useState(searchParams.get("tab") || "all");
@@ -282,6 +285,26 @@ const Products = () => {
     if (!window.confirm(`Permanently delete ${selectedIds.size} selected products? This action cannot be undone.`)) return;
     await bulkDelete(Array.from(selectedIds));
     setSelectedIds(new Set());
+  };
+
+  const handleBulkSetQty = async () => {
+    const val = parseInt(bulkQtyVal, 10);
+    if (isNaN(val) || val < 0) {
+      toast.error("Please enter a valid non-negative number for stock.");
+      return;
+    }
+    setIsBulkQtyApplying(true);
+    try {
+      if (bulkSetStock) {
+        await bulkSetStock(Array.from(selectedIds), val);
+      }
+      toast.success(`Set stock to ${val} units for ${selectedIds.size} selected products`);
+      setSelectedIds(new Set());
+    } catch (err) {
+      toast.error(`Failed to bulk set stock: ${err.message}`);
+    } finally {
+      setIsBulkQtyApplying(false);
+    }
   };
 
 
@@ -551,6 +574,34 @@ const Products = () => {
                 <Archive size={14} /> Archive Selected
               </button>
             )}
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ fontSize: "0.82rem", fontWeight: 600 }}>Set Qty:</span>
+              <input
+                type="number"
+                min="0"
+                value={bulkQtyVal}
+                onChange={(e) => setBulkQtyVal(e.target.value)}
+                style={{
+                  width: "55px",
+                  padding: "5px 6px",
+                  borderRadius: "4px",
+                  border: "1px solid var(--admin-border)",
+                  fontSize: "0.85rem",
+                  fontWeight: 700,
+                  textAlign: "center",
+                }}
+              />
+              <button
+                type="button"
+                className="admin-btn icon-left"
+                style={{ fontSize: "0.82rem", padding: "6px 12px" }}
+                disabled={isBulkQtyApplying}
+                onClick={handleBulkSetQty}
+              >
+                {isBulkQtyApplying ? <Loader2 size={13} className="spin" /> : "Apply Qty"}
+              </button>
+            </div>
+
             <button
               className="admin-btn admin-btn-outline icon-left"
               style={{ fontSize: "0.82rem", padding: "6px 12px" }}
