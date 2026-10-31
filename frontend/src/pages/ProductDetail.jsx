@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { trackEvent, toAnalyticsItem } from "../lib/tracking";
 import { getDetailRows } from "../utils/productDetails";
+import { applyHead, productPath, productSeo } from "../lib/seo";
 import "./ProductDetail.css";
 
 // Product descriptions are admin-authored plain text (sometimes with simple
@@ -38,6 +39,7 @@ export default function ProductDetail() {
   const product = products.find(
     (p) =>
       p.id === id ||
+      (p.slug && p.slug === id) ||
       p.sku?.toLowerCase() === id?.toLowerCase() ||
       (id === "bb0425m-rusty-red-blouse" && (p.sku === "BB-0425M" || p.id === "djhwme2ku"))
   );
@@ -102,6 +104,11 @@ export default function ProductDetail() {
     return () => document.body.classList.remove("has-pdp-sticky-bar");
   }, [showStickyBar]);
 
+  // Title, meta description, canonical URL, social preview and Product schema.
+  useEffect(() => {
+    if (product) applyHead(productSeo(product));
+  }, [product]);
+
   // view_item once per product page view.
   useEffect(() => {
     if (!product) return;
@@ -165,7 +172,7 @@ export default function ProductDetail() {
     ? `https://wa.me/919151566602?text=${encodeURIComponent(
         `Hello Safed Rang, I'd like to know more about "${product.title.replace(/"/g, "")}"${
           selectedSize ? ` (size ${selectedSize})` : ""
-        }: ${window.location.origin}/product/${product.id}`
+        }: ${window.location.origin}${productPath(product)}`
       )}`
     : "";
 
@@ -175,7 +182,7 @@ export default function ProductDetail() {
         await navigator.share({
           title: product.title,
           text: `Check out ${product.title} at Safedrang`,
-          url: window.location.href,
+          url: `${window.location.origin}${productPath(product)}`,
         });
         return;
       } catch (err) {
@@ -183,10 +190,10 @@ export default function ProductDetail() {
       }
     }
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.href);
+      navigator.clipboard.writeText(`${window.location.origin}${productPath(product)}`);
       toast.success("Product link copied to clipboard!");
     } else {
-      toast.success("Link: " + window.location.href);
+      toast.success("Link: " + `${window.location.origin}${productPath(product)}`);
     }
   };
 

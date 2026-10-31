@@ -5,6 +5,7 @@ import {
   initStorefrontTracking,
   trackEvent,
 } from "../lib/tracking";
+import { applyHead } from "../lib/seo";
 
 export const GoogleAnalytics = () => {
   const location = useLocation();
@@ -34,6 +35,13 @@ export const GoogleAnalytics = () => {
     window.addEventListener("safedrang:tracking_updated", handleUpdate);
     return () => window.removeEventListener("safedrang:tracking_updated", handleUpdate);
   }, []);
+
+  // Reset <head> (title, description, canonical, social tags) to site defaults
+  // on every page change. This component renders before the routes, so this
+  // runs first and each page can then set its own tags.
+  useEffect(() => {
+    if (!isAdminRoute) applyHead();
+  }, [isAdminRoute, location.pathname]);
 
   // One page_view per page (path) change, after scripts are initialised.
   // Query-string changes from shop filters are tracked as filter_apply instead,

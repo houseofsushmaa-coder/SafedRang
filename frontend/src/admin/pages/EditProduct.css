@@ -925,3 +925,45 @@ textarea.admin-input {
   text-transform: uppercase;
   color: var(--admin-text-light);
 }
+
+/* Google search listing preview */
+.ep-serp {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: #fff;
+  font-family: Arial, sans-serif;
+}
+
+.ep-serp-url {
+  font-size: 0.75rem;
+  color: #4d5156;
+  word-break: break-all;
+}
+
+.ep-serp-title {
+  font-size: 1.05rem;
+  line-height: 1.3;
+  color: #1a0dab;
+}
+
+.ep-serp-desc {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #4d5156;
+}
+
+.ep-count {
+  float: right;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--admin-text-light);
+}
+
+.ep-count.is-over {
+  color: var(--admin-warning);
+}

@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useCart } from '../../../context/CartContext';
+import { productPath } from '../../../lib/seo';
 
 // ─── Wishlist Tab ─────────────────────────────────────────────────────────────
 // Uses CartContext wishlist (already implemented in CartContext).
@@ -17,7 +18,7 @@ export default function WishlistTab() {
   const moveToBag = (item) => {
     const result = addToCart(item);
     if (result.ok) toast.success('Added to your bag');
-    else if (result.reason === 'needs_size') navigate(`/product/${item.id}`);
+    else if (result.reason === 'needs_size') navigate(productPath(item));
     else if (result.reason === 'max_reached') toast('All available pieces are already in your bag.');
     else toast.error('This piece is no longer available.');
   };
@@ -58,7 +59,7 @@ export default function WishlistTab() {
               {/* Product Image */}
               <div
                 style={{ position: 'relative', aspectRatio: '3/4', overflow: 'hidden', cursor: 'pointer', background: '#F5EDE0' }}
-                onClick={() => navigate(`/product/${item.id}`)}
+                onClick={() => navigate(productPath(item))}
               >
                 {item.image || item.images?.[0] ? (
                   <img
@@ -89,7 +90,7 @@ export default function WishlistTab() {
               <div style={{ padding: '1rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <div
                   style={{ fontFamily: 'Cormorant Garamond, serif', fontSize: '0.95rem', fontWeight: 500, color: '#2A211D', cursor: 'pointer', lineHeight: 1.3 }}
-                  onClick={() => navigate(`/product/${item.id}`)}
+                  onClick={() => navigate(productPath(item))}
                 >
                   {item.title || item.name}
                 </div>

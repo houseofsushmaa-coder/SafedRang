@@ -30,6 +30,12 @@ RewriteCond %{REQUEST_URI} ^/assets/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^ - [R=404,L]
 
+# Pre-rendered product pages (written by scripts/prerender-seo.mjs) give
+# search engines and link previews real product titles, descriptions and images.
+RewriteCond %{REQUEST_URI} ^/product/([a-z0-9-]+)/?$
+RewriteCond %{DOCUMENT_ROOT}/product/%1.html -f
+RewriteRule ^product/([a-z0-9-]+)/?$ /product/$1.html [L]
+
 # SPA Fallback for client-side routing
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

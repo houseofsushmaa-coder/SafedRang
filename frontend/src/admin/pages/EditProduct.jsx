@@ -11,6 +11,7 @@ import {
   parseDescription,
   composeDescription,
 } from "../../utils/productDetails";
+import { autoSeoDescription, autoSeoTitle, productPath, slugify, SITE_URL } from "../../lib/seo";
 import {
   Save,
   X,
@@ -138,6 +139,9 @@ const EditProduct = () => {
     isDraft: true,
     needsReview: false,
     displayOrder: 0,
+    slug: "",
+    seoTitle: "",
+    seoDescription: "",
   });
 
   // Load the product once (not on every catalogue refresh, which would wipe edits).
@@ -175,6 +179,9 @@ const EditProduct = () => {
       subcategory: product.subcategory || "",
       needsReview: Boolean(product.needsReview),
       displayOrder: product.displayOrder ?? product.display_order ?? 0,
+      slug: product.slug || "",
+      seoTitle: product.seoTitle || "",
+      seoDescription: product.seoDescription || "",
     });
   }, [id, isNew, products, loading]);
 
@@ -520,6 +527,12 @@ const EditProduct = () => {
     { key: "photos3", label: "3+ photos (front, drape, close-up)", done: photoCount >= 3, required: false },
   ];
   const missingRequired = checklist.filter((c) => c.required && !c.done);
+
+  // Search listing: admin-written text, or defaults generated from the product.
+  const seoSource = { title: formData.title, description, fabric: formData.fabric, craft: formData.craft, isOneOfOne: formData.isOneOfOne };
+  const seoTitleShown = formData.seoTitle.trim() || autoSeoTitle(seoSource);
+  const seoDescShown = formData.seoDescription.trim() || autoSeoDescription(seoSource);
+  const productUrl = `${SITE_URL}${productPath({ slug: formData.slug || slugify(formData.title), id })}`;
   const canPublish = missingRequired.length === 0;
 
   const validate = (publish) => {
@@ -597,6 +610,8 @@ const EditProduct = () => {
       display_order: parseInt(formData.displayOrder, 10) || 0,
       price,
       salePrice: hasSale ? salePrice : null,
+      seoTitle: formData.seoTitle,
+      seoDescription: formData.seoDescription,
       stock,
       stockStatus: stock <= 0 ? "Out of Stock" : (formData.stockStatus === "Out of Stock" ? "In Stock" : formData.stockStatus || "In Stock"),
     };
@@ -1310,6 +1325,49 @@ const EditProduct = () => {
                 placeholder="https://example.com/image.jpg"
                 className="admin-input full-width"
               />
+            </div>
+          </div>
+
+          {/* ── Search listing (SEO) ─────────────────────── */}
+          <div className="admin-card">
+            <h3 className="card-heading">Google search listing</h3>
+            <div className="ep-serp" aria-label="Search result preview">
+              <span className="ep-serp-url">{productUrl.replace("https://", "")}</span>
+              <span className="ep-serp-title">{seoTitleShown}</span>
+              <span className="ep-serp-desc">{seoDescShown}</span>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="ep-seo-title">
+                SEO title <span className={`ep-count ${seoTitleShown.length > 60 ? "is-over" : ""}`}>{seoTitleShown.length}/60</span>
+              </label>
+              <input
+                id="ep-seo-title"
+                type="text"
+                name="seoTitle"
+                value={formData.seoTitle}
+                onChange={handleChange}
+                className="admin-input full-width"
+                placeholder={autoSeoTitle(seoSource)}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="ep-seo-desc">
+                Meta description <span className={`ep-count ${seoDescShown.length > 158 ? "is-over" : ""}`}>{seoDescShown.length}/158</span>
+              </label>
+              <textarea
+                id="ep-seo-desc"
+                name="seoDescription"
+                value={formData.seoDescription}
+                onChange={handleChange}
+                className="admin-input full-width"
+                rows="3"
+                placeholder={autoSeoDescription(seoSource)}
+              />
+              <p className="field-hint">
+                Leave both empty to use the text generated from the product (shown greyed out).
+                {!isNew && formData.slug && " The page address stays the same so existing links keep working."}
+              </p>
             </div>
           </div>
 

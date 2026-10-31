@@ -20,6 +20,7 @@ import {
   sortProducts,
 } from "../utils/filterUtils";
 import { trackEvent, toAnalyticsItem } from "../lib/tracking";
+import { applyHead } from "../lib/seo";
 import "./Shop.css";
 
 // Re-export for any consumers or tests
@@ -488,6 +489,28 @@ export default function Shop() {
     : activeCategory !== "All"
     ? activeCategory
     : "Shop";
+
+  // Page title and meta description for the collection being browsed.
+  useEffect(() => {
+    if (isOneOfOneRoute) {
+      applyHead({
+        title: "The One of One Edit — Single-Piece Sarees | Safed Rang",
+        description:
+          "One of One sarees by Safed Rang: single pieces, each a unique combination of fabric, dye and hand embroidery from Lucknow. Once sold, the design is retired.",
+      });
+    } else if (listName !== "Shop" && listName !== "Archive") {
+      applyHead({
+        title: `Handcrafted ${listName} — Lucknowi Chikankari & Zardozi | Safed Rang`,
+        description: `Shop handcrafted ${listName.toLowerCase()} from Safed Rang — Lucknowi chikankari and zardozi, hand-embroidered by karigars in Lucknow. Free shipping on online payment.`,
+      });
+    } else {
+      applyHead({
+        title: "Shop Handcrafted Sarees, Kurta Sets & Dupattas | Safed Rang",
+        description:
+          "Shop hand-embroidered Lucknowi chikankari and zardozi sarees, kurta sets, dupattas and blouses from Safed Rang, Lucknow. Free shipping on online payment.",
+      });
+    }
+  }, [isOneOfOneRoute, listName]);
 
   // view_item_list once the shopper settles on a result set (first 24 items).
   useEffect(() => {

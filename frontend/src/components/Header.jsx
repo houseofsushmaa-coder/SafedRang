@@ -19,6 +19,7 @@ import { useAuth } from "../context/AuthContext";
 import { useProducts } from "../context/ProductContext";
 import toast from "react-hot-toast";
 import { trackEvent } from "../lib/tracking";
+import { productPath } from "../lib/seo";
 import "./Header.css";
 
 const POPULAR_SEARCH_TAGS = [
@@ -128,10 +129,10 @@ export default function Header() {
       .slice(0, 8); // Top 8 immediate matches
   }, [searchQuery, products]);
 
-  const handleSearchResultClick = (productId) => {
+  const handleSearchResultClick = (item) => {
     setIsSearchOpen(false);
     setSearchQuery("");
-    navigate(`/product/${productId}`);
+    navigate(productPath(item));
   };
 
   const handleMoveToBag = (product) => {
@@ -141,7 +142,7 @@ export default function Header() {
     } else if (result.reason === "needs_size") {
       // Sized pieces need a size choice on the product page.
       setIsWishlistOpen(false);
-      navigate(`/product/${product.id}`);
+      navigate(productPath(product));
     } else if (result.reason === "max_reached") {
       toast("All available pieces are already in your bag.");
     } else {
@@ -435,7 +436,7 @@ export default function Header() {
                       <div
                         key={item.id}
                         className="ajax-result-card"
-                        onClick={() => handleSearchResultClick(item.id)}
+                        onClick={() => handleSearchResultClick(item)}
                       >
                         <div className="ajax-result-thumb">
                           <img
@@ -534,7 +535,7 @@ export default function Header() {
                   {wishlist.map((item) => (
                     <div key={item.id} className="wishlist-item-card">
                       <Link
-                        to={`/product/${item.id}`}
+                        to={productPath(item)}
                         onClick={() => setIsWishlistOpen(false)}
                         className="wishlist-item-img-link"
                       >
@@ -549,7 +550,7 @@ export default function Header() {
                         <span className="wishlist-item-category">{item.category}</span>
                         <h4 className="wishlist-item-title">
                           <Link
-                            to={`/product/${item.id}`}
+                            to={productPath(item)}
                             onClick={() => setIsWishlistOpen(false)}
                           >
                             {item.title.replace(/"/g, "")}

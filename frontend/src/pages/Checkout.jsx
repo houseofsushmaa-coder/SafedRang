@@ -12,6 +12,7 @@ import {
 import { supabase } from "../lib/supabase";
 import { COUNTRIES, COUNTRY_MAP } from "../data/countries";
 import { trackEvent, toAnalyticsItem } from "../lib/tracking";
+import { productPath } from "../lib/seo";
 import "./Checkout.css";
 
 const CF_ENV = import.meta.env.VITE_CASHFREE_ENV || "SANDBOX";
@@ -649,14 +650,14 @@ export default function Checkout() {
                 const atMax = item.quantity >= item.available;
                 return (
                   <div key={lineId} className={`summary-item ${item.purchasable ? "" : "summary-item-unavailable"}`}>
-                    <Link to={`/product/${item.id}`} className="summary-item-img">
+                    <Link to={productPath(item)} className="summary-item-img">
                       <img src={item.images?.[0] || item.image} alt={item.title}
                         onError={(e) => { e.currentTarget.src = "/logo.png"; }} />
                       <span className="summary-item-qty">{item.quantity}</span>
                     </Link>
                     <div className="summary-item-info">
                       <h4 style={{ textTransform: "capitalize" }}>
-                        <Link to={`/product/${item.id}`}>{item.title?.replace(/"/g, "")}</Link>
+                        <Link to={productPath(item)}>{item.title?.replace(/"/g, "")}</Link>
                       </h4>
                       {item.selectedSize && (
                         <p className="size-tag">Size: {item.selectedSize}</p>

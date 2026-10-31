@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useMemo } from "react";
 import { supabase } from "../lib/supabase";
+import { slugify } from "../lib/seo";
 import { products as staticProducts } from "../data/products";
 
 import {
@@ -91,6 +92,9 @@ const formatProduct = (p) => {
     needsReview,
     sku: p.sku || "",
     weight: p.weight ?? null,
+    slug: p.slug || "",
+    seoTitle: p.seoTitle || "",
+    seoDescription: p.seoDescription || "",
     featured: Boolean(p.featured),
     displayOrder: isNaN(displayOrderVal) ? 0 : displayOrderVal,
     createdAt: p.createdAt || p.created_at || null,
@@ -256,7 +260,11 @@ export const ProductProvider = ({ children }) => {
     try {
       const imagesArr = formatted.images.filter(Boolean);
       const newUuid = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : (formatted.id && !formatted.id.startsWith("prod_") ? formatted.id : "sr_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8));
-      const cleanSlug = (formatted.title || "product").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") + "-" + newUuid.slice(0, 8);
+      // Readable, unique URL slug, e.g. "surili-raag-glass-organza-silk-saree".
+      const baseSlug = slugify(formatted.title) || "product";
+      const taken = new Set(products.map((p) => p.slug));
+      let cleanSlug = baseSlug;
+      for (let n = 2; taken.has(cleanSlug); n++) cleanSlug = `${baseSlug}-${n}`;
       
       const { data: inserted, error } = await supabase.from("products").insert([
         {
@@ -283,6 +291,8 @@ export const ProductProvider = ({ children }) => {
           is_archived: Boolean(formatted.isArchived),
           needs_review: Boolean(formatted.needsReview),
           display_order: Number(formatted.displayOrder || 0),
+          seoTitle: product.seoTitle?.trim() || null,
+          seoDescription: product.seoDescription?.trim() || null,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         },
@@ -396,6 +406,8 @@ export const ProductProvider = ({ children }) => {
         is_archived: isArchivedVal,
         needs_review: needsReviewVal,
         display_order: Number(updatedData.displayOrder ?? updatedData.display_order ?? 0) || 0,
+        seoTitle: updatedData.seoTitle?.trim() || null,
+        seoDescription: updatedData.seoDescription?.trim() || null,
         updatedAt: new Date().toISOString(),
       };
 

@@ -4,6 +4,7 @@ import { Heart } from "lucide-react";
 import { useCurrency } from "../context/CurrencyContext";
 import { useCart } from "../context/CartContext";
 import { trackEvent, toAnalyticsItem } from "../lib/tracking";
+import { productPath } from "../lib/seo";
 import "./ProductCard.css";
 
 // `priority` cards (the first row) load their image eagerly; the rest lazily.
@@ -60,7 +61,7 @@ export default function ProductCard({ product, index, listName, priority = false
   return (
     <div className={`product-card ${isSold ? "is-sold" : ""}`}>
       <Link
-        to={`/product/${product.id}`}
+        to={productPath(product)}
         className="product-card-link"
         onClick={() => {
           if (listName) {
