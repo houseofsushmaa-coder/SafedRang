@@ -44,7 +44,7 @@ export default function Header() {
     clearCart,
   } = useCart();
   const { user, session, token, isAdmin } = useAuth();
-  const { products = [] } = useProducts();
+  const { storefrontProducts: products = [] } = useProducts();
   const navigate = useNavigate();
   const location = useLocation();
 

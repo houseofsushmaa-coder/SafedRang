@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useState, useContext, useEffect, useMemo } from "react";
 import { supabase } from "../lib/supabase";
 import { products as staticProducts } from "../data/products";
 
@@ -22,6 +22,8 @@ export {
 const formatProduct = (p) => {
   const isArchived = Boolean(p.is_archived ?? p.isArchived ?? (p.status === "ARCHIVED"));
   const needsReview = Boolean(p.needs_review ?? p.needsReview ?? false);
+  // Drafts are saved but hidden from the storefront until published.
+  const isDraft = String(p.status || "").toUpperCase() === "DRAFT" || Boolean(p.isDraft);
   const isVariable = p.product_type === "variable" || p.productType === "variable";
 
   // Derive stock: if database has a stock value, use it; otherwise default simple to 1
@@ -85,6 +87,7 @@ const formatProduct = (p) => {
     stockStatus: determinedStatus,
     stock: isExplicitlyOut && computedStock > 0 ? 0 : computedStock,
     isArchived,
+    isDraft,
     needsReview,
     sku: p.sku || "",
     weight: p.weight ?? null,
@@ -235,7 +238,7 @@ export const ProductProvider = ({ children }) => {
       image: product.image || product.images?.[0] || "",
       images: product.images || (product.image ? [product.image] : []),
       stockStatus: (product.stock > 0 || product.stockStatus === "In Stock") ? "In Stock" : "Out of Stock",
-      stock: product.stock !== undefined ? Number(product.stock) : 10,
+      stock: product.stock !== undefined && product.stock !== "" ? Number(product.stock) : 1,
       // Variation support
       productType: product.productType || "simple",
       attributeName: product.attributeName || "Size",
@@ -243,6 +246,7 @@ export const ProductProvider = ({ children }) => {
       badge: product.badge || (product.isOneOfOne ? "One of One" : null),
       isOneOfOne: product.badge === "One of One" || Boolean(product.isOneOfOne),
       isArchived: Boolean(product.isArchived),
+      isDraft: Boolean(product.isDraft),
       needsReview: Boolean(product.needsReview),
       displayOrder: Number(product.displayOrder ?? product.display_order ?? 0) || 0,
     };
@@ -263,7 +267,7 @@ export const ProductProvider = ({ children }) => {
           salePrice: formatted.salePrice ?? null,
           stock: formatted.stock,
           stock_status: formatted.stockStatus,
-          status: formatted.stock > 0 ? "PUBLISHED" : "OUT_OF_STOCK",
+          status: formatted.isDraft ? "DRAFT" : formatted.stock > 0 ? "PUBLISHED" : "OUT_OF_STOCK",
           description: formatted.description,
           category_name: formatted.category,
           sku: formatted.sku,
@@ -351,6 +355,7 @@ export const ProductProvider = ({ children }) => {
       badge: assignedBadge,
       isOneOfOne: assignedBadge === "One of One" || Boolean(updatedData.isOneOfOne),
       isArchived: isArchivedVal,
+      isDraft: Boolean(updatedData.isDraft),
       needsReview: needsReviewVal,
       displayOrder: Number(updatedData.displayOrder ?? updatedData.display_order ?? 0) || 0,
       category: normalizeCategoryName(updatedData.category),
@@ -372,7 +377,7 @@ export const ProductProvider = ({ children }) => {
         description: updatedData.description,
         stock: finalStock,
         stock_status: finalStockStatus,
-        status: finalStock <= 0 ? "OUT_OF_STOCK" : "PUBLISHED",
+        status: updatedData.isDraft ? "DRAFT" : finalStock <= 0 ? "OUT_OF_STOCK" : "PUBLISHED",
         sku: updatedData.sku || null,
         craft: updatedData.craft || null,
         fabric: updatedData.fabric || null,
@@ -506,7 +511,6 @@ export const ProductProvider = ({ children }) => {
       const payload = {
         stock: finalStock,
         stock_status: stockStatus,
-        status: finalStock > 0 ? "PUBLISHED" : "OUT_OF_STOCK",
         updatedAt: new Date().toISOString(),
       };
       if (variantId && updatedVariations.length > 0) {
@@ -550,7 +554,6 @@ export const ProductProvider = ({ children }) => {
         .update({
           stock: qty,
           stock_status: stockStatus,
-          status: qty > 0 ? "PUBLISHED" : "OUT_OF_STOCK",
           updatedAt: new Date().toISOString(),
         })
         .in("id", idList);
@@ -606,7 +609,6 @@ export const ProductProvider = ({ children }) => {
     try {
       const updateData = {
         stock_status: newStatus,
-        status: isOut ? "OUT_OF_STOCK" : "PUBLISHED",
         updatedAt: new Date().toISOString(),
       };
       if (isOut) {
@@ -635,10 +637,15 @@ export const ProductProvider = ({ children }) => {
     }
   };
 
+  // What shoppers may see: everything except unpublished drafts.
+  // Admin screens keep using `products`, which includes drafts.
+  const storefrontProducts = useMemo(() => products.filter((p) => !p.isDraft), [products]);
+
   return (
     <ProductContext.Provider
       value={{
         products,
+        storefrontProducts,
         loading,
         fetchError,
         addProduct,

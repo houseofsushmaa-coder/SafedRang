@@ -421,3 +421,27 @@
   animation: fadeIn 0.2s ease;
 }
 
+
+/* Draft / missing-photo pills in the product list */
+.product-pill {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  border: 1px solid transparent;
+}
+
+.product-pill-draft {
+  color: #8a5a00;
+  background: #fdf3e1;
+  border-color: #f0d9a8;
+}
+
+.product-pill-nophoto {
+  color: #9b2c2c;
+  background: #fdecec;
+  border-color: #f5c2c2;
+}

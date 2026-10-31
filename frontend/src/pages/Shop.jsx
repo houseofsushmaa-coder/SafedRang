@@ -133,7 +133,7 @@ function CustomSortDropdown({ value, onChange, options }) {
 }
 
 export default function Shop() {
-  const { products, getAllCategories, shopSortSettings } = useProducts();
+  const { storefrontProducts: products, getAllCategories, shopSortSettings } = useProducts();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
 

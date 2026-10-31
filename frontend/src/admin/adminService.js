@@ -731,7 +731,6 @@ export const adminService = {
       .update({
         stock: stockNum,
         stock_status: status,
-        status: stockNum > 0 ? "PUBLISHED" : "OUT_OF_STOCK",
         updatedAt: new Date().toISOString(),
       })
       .eq("id", productId);

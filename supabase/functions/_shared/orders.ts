@@ -95,7 +95,7 @@ export async function priceCart(db: SupabaseClient, input: unknown) {
     const p: any = byId.get(line.productId)
     if (!p) throw new UserError('An item in your bag is no longer available. Please remove it and try again.')
     const name = p.name || 'This piece'
-    if (p.is_archived || String(p.status).toUpperCase() === 'ARCHIVED' || isOut(p.stock_status)) {
+    if (p.is_archived || ['ARCHIVED', 'DRAFT'].includes(String(p.status).toUpperCase()) || isOut(p.stock_status)) {
       throw new UserError(`${name} is no longer available.`)
     }
     if (line.quantity > MAX_QTY_PER_LINE) throw new UserError(`Please contact us to order more than ${MAX_QTY_PER_LINE} of ${name}.`)

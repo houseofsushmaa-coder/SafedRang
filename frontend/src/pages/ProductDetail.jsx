@@ -15,6 +15,7 @@ import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { trackEvent, toAnalyticsItem } from "../lib/tracking";
+import { getDetailRows } from "../utils/productDetails";
 import "./ProductDetail.css";
 
 // Product descriptions are admin-authored plain text (sometimes with simple
@@ -29,7 +30,7 @@ const formatDescription = (raw = "") =>
 
 export default function ProductDetail() {
   const { id } = useParams();
-  const { products, loading: productsLoading } = useProducts();
+  const { storefrontProducts: products, loading: productsLoading } = useProducts();
   const { formatPrice } = useCurrency();
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const navigate = useNavigate();
@@ -210,6 +211,9 @@ export default function ProductDetail() {
       </div>
     );
   }
+
+  // Structured "Product Details:" lines from the description, keyed by label.
+  const detailMap = Object.fromEntries(getDetailRows(product.description));
 
   const imagesList = (() => {
     const raw = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
@@ -550,8 +554,13 @@ export default function ProductDetail() {
             <div className="tab-pane">
               {[
                 ["Category", product.category],
-                ["Fabric", product.fabric],
+                ["Fabric", detailMap.Fabric || product.fabric],
                 ["Craft", product.craft],
+                ["Work", detailMap.Work],
+                ["Colour", detailMap.Colour],
+                ["Blouse", detailMap.Blouse],
+                ["Saree Length", detailMap["Saree Length"]],
+                ["Blouse Length", detailMap["Blouse Length"]],
                 ["Weight", product.weight ? `${product.weight} kg` : ""],
                 ["SKU", product.sku],
               ]

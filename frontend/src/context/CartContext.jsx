@@ -25,7 +25,7 @@ export const resolveLine = (product, selectedSize) => {
 };
 
 export const CartProvider = ({ children }) => {
-  const { products, loading: productsLoading } = useProducts();
+  const { storefrontProducts: products, loading: productsLoading } = useProducts();
 
   const [cart, setCart] = useState(() => {
     try {

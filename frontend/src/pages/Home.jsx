@@ -123,7 +123,7 @@ const useIsMobile = () => {
 
 export default function Home() {
   const isMobile = useIsMobile();
-  const { products } = useProducts();
+  const { storefrontProducts: products } = useProducts();
 
   // Admin-flagged featured pieces, in the admin-controlled display order.
   const featuredProducts = useMemo(

@@ -19,6 +19,7 @@ import {
   Tag,
   RefreshCw,
   Archive,
+  FileEdit,
   RotateCcw,
   Flag,
   Layers,
@@ -174,7 +175,7 @@ const Products = () => {
 
   // ── Dynamic live counts ────────────────────────────────────────────
   const counts = useMemo(() => {
-    let all = 0, inStock = 0, outOfStock = 0, archived = 0, needsReview = 0;
+    let all = 0, inStock = 0, outOfStock = 0, archived = 0, needsReview = 0, drafts = 0;
     products.forEach((p) => {
       if (p.isArchived) {
         archived++;
@@ -190,8 +191,11 @@ const Products = () => {
       if (p.needsReview) {
         needsReview++;
       }
+      if (p.isDraft && !p.isArchived) {
+        drafts++;
+      }
     });
-    return { all, inStock, outOfStock, archived, needsReview };
+    return { all, inStock, outOfStock, archived, needsReview, drafts };
   }, [products]);
 
   // ── Filtered products ──────────────────────────────────────────────
@@ -202,6 +206,8 @@ const Products = () => {
         if (!p.isArchived) return false;
       } else if (viewTab === "needsreview") {
         if (!p.needsReview) return false;
+      } else if (viewTab === "drafts") {
+        if (!p.isDraft || p.isArchived) return false;
       } else {
         if (p.isArchived) return false;
         const isOut = p.stockStatus === "Out of Stock" || (p.stock !== undefined && Number(p.stock) <= 0);
@@ -513,6 +519,15 @@ const Products = () => {
         </button>
         <button
           type="button"
+          onClick={() => handleTabChange("drafts")}
+          className={`admin-btn ${viewTab === "drafts" ? "" : "admin-btn-outline"}`}
+          style={{ padding: "8px 16px", fontSize: "0.88rem", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "8px" }}
+          title="Saved but hidden from the shop until published"
+        >
+          <FileEdit size={15} color="#b7791f" /> Drafts ({counts.drafts})
+        </button>
+        <button
+          type="button"
           onClick={() => handleTabChange("archived")}
           className={`admin-btn ${viewTab === "archived" ? "" : "admin-btn-outline"}`}
           style={{ padding: "8px 16px", fontSize: "0.88rem", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "8px" }}
@@ -814,6 +829,18 @@ const Products = () => {
                                 </span>
                               )}
 
+                              {/* Draft / missing photo pills */}
+                              {product.isDraft && !product.isArchived && (
+                                <span className="product-pill product-pill-draft" title="Hidden from the shop until published">
+                                  DRAFT
+                                </span>
+                              )}
+                              {(!product.image || product.image.includes("placeholder")) && (
+                                <span className="product-pill product-pill-nophoto" title="Add a photo before publishing">
+                                  NO PHOTO
+                                </span>
+                              )}
+
                               {/* Needs Review Pill */}
                               {product.needsReview && (
                                 <span
@@ -950,7 +977,7 @@ const Products = () => {
 
                       <td>
                         <span className={`status-badge ${getStatusClass(product.stockStatus, product.isArchived)}`}>
-                          {product.isArchived ? "Archived" : product.stockStatus || "In Stock"}
+                          {product.isArchived ? "Archived" : product.isDraft ? "Draft" : product.stockStatus || "In Stock"}
                         </span>
                       </td>
 
