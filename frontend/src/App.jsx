@@ -56,17 +56,36 @@ import { Toaster } from "react-hot-toast";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 import WhatsAppButton from "./components/WhatsAppButton";
 
-// ─── Storefront layout: Header + Outlet (page content) + Footer ───────────────
-// Uses location.key as the Outlet key so every navigation forces the
-// correct page component to mount — permanently fixes "URL changes but
-// page doesn't update" across ALL routes, with no future exceptions.
+// ─────────────────────────────────────────────────────────────────────────────
+// ROUTING FIX — PERMANENT HARDCODE
+//
+// Problem: URL changes but wrong page content stays on screen.
+//
+// Root cause: React Router's <Outlet> is a virtual rendering slot.
+// Putting key={} on <Outlet> has NO effect — React ignores keys on virtual nodes.
+//
+// Real fix: key={location.pathname} on the ROOT REAL ELEMENT (<div className="app-layout">)
+// inside StorefrontLayout. When the key changes, React unmounts the ENTIRE
+// layout subtree (Header + main content + Footer) and remounts it fresh.
+// This makes it IMPOSSIBLE for a stale page component to persist.
+//
+// Secondary fix: key={location.pathname} on <Routes> in AppRoutes() forces
+// React to re-evaluate all route matching on every navigation.
+//
+// location.pathname is used (not location.key) because location.key changes
+// on every history event (scroll, back/forward) causing unnecessary remounts.
+// pathname only changes on actual route transitions — exactly what we want.
+// ─────────────────────────────────────────────────────────────────────────────
+
 const StorefrontLayout = () => {
   const location = useLocation();
   return (
-    <div className="app-layout">
+    // key on this real DOM element is the ONLY way to guarantee remount.
+    // Every pathname change = new key = React destroys old tree, mounts correct page.
+    <div key={location.pathname} className="app-layout">
       <Header />
       <main>
-        <Outlet key={location.key} />
+        <Outlet />
       </main>
       <Footer />
     </div>
@@ -114,7 +133,6 @@ const ProtectedAdminRoute = ({ children }) => {
 
   if (!user && !session && !token) return <Navigate to="/admin/login" replace />;
 
-  // Enforce role-based access: Customers cannot view admin dashboard
   if (!isAdmin) {
     return <Navigate to="/admin/login?error=unauthorized" replace />;
   }
@@ -122,18 +140,18 @@ const ProtectedAdminRoute = ({ children }) => {
   return children;
 };
 
-// ─── AppRoutes: defined inside Router so useLocation is available ──────────────
+// AppRoutes is a separate component so useLocation() can be called inside <Router>
 function AppRoutes() {
   const location = useLocation();
   return (
-    // key={location.key} on <Routes> is the nuclear-option permanent fix:
-    // React destroys and recreates the entire route subtree on every navigation,
-    // so stale page components can NEVER persist across route changes.
-    <Routes key={location.key}>
+    // key={location.pathname} — secondary insurance: forces Routes to rematch
+    // every route on each navigation. Works together with StorefrontLayout's key.
+    <Routes key={location.pathname}>
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/login" element={<CustomerLogin />} />
       <Route path="/signup" element={<CustomerLogin />} />
       <Route path="/dashboard" element={<Navigate to="/admin" replace />} />
+
       <Route
         path="/account"
         element={
@@ -175,7 +193,6 @@ function AppRoutes() {
         <Route path="tracking" element={<TrackingIntegrations />} />
         <Route path="coupons" element={<Coupons />} />
         <Route path="abandoned-carts" element={<AbandonedCarts />} />
-        {/* Placeholder for future routes */}
         <Route
           path="*"
           element={
@@ -234,20 +251,20 @@ function App() {
               <ScrollToTop />
               <GoogleAnalytics />
               <WhatsAppButton />
-              <Toaster 
+              <Toaster
                 position="bottom-center"
                 toastOptions={{
                   style: {
-                    background: 'var(--color-dark-charcoal)',
-                    color: 'var(--color-white)',
-                    fontFamily: 'var(--font-body)',
-                    letterSpacing: '0.05em',
-                    border: '1px solid var(--color-antique-gold)',
+                    background: "var(--color-dark-charcoal)",
+                    color: "var(--color-white)",
+                    fontFamily: "var(--font-body)",
+                    letterSpacing: "0.05em",
+                    border: "1px solid var(--color-antique-gold)",
                   },
                   success: {
                     iconTheme: {
-                      primary: 'var(--color-antique-gold)',
-                      secondary: 'var(--color-dark-charcoal)',
+                      primary: "var(--color-antique-gold)",
+                      secondary: "var(--color-dark-charcoal)",
                     },
                   },
                 }}

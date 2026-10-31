@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   Search,
   Loader2,
@@ -270,58 +270,63 @@ const Inventory = () => {
     setTimeout(() => setToast(null), 4000);
   };
 
-  // Sync products from contextProducts cleanly
+  // ONE-TIME load: hasFetchedRef gates this effect to run only once after mount.
+  // It waits for contextProducts to be non-empty (dep needed), but the ref
+  // prevents re-running when contextProducts changes due to stock saves.
+  // This is the permanent fix for "stock auto-reverts after edit" bug.
+  const hasFetchedRef = useRef(false);
+
   useEffect(() => {
-    if (!contextProducts || contextProducts.length === 0) {
-      setProducts([]);
-      setLoading(false);
-      return;
-    }
+    if (hasFetchedRef.current) return; // already loaded once — never overwrite user edits
+    if (!contextProducts || contextProducts.length === 0) return; // wait for data
 
-    setProducts(
-      contextProducts.map((p) => {
-        const isVariable =
-          p.productType === "variable" &&
-          Array.isArray(p.variations) &&
-          p.variations.length > 0;
+    hasFetchedRef.current = true;
 
-        const variants = isVariable
-          ? p.variations.map((v, idx) => ({
-              id: v.id || `${p.id}-v${idx}`,
-              size: v.size || "",
-              sku: v.sku || "",
-              stock: Number(v.stock) || 0,
-              priceModifier: Number(v.priceModifier) || 0,
-            }))
-          : [];
+    const mapped = contextProducts.map((p) => {
+      const isVariable =
+        p.productType === "variable" &&
+        Array.isArray(p.variations) &&
+        p.variations.length > 0;
 
-        const totalStock = isVariable
-          ? variants.reduce((sum, v) => sum + v.stock, 0)
-          : p.stock !== undefined && p.stock !== null
-          ? Number(p.stock)
-          : 1;
+      const variants = isVariable
+        ? p.variations.map((v, idx) => ({
+            id: v.id || `${p.id}-v${idx}`,
+            size: v.size || "",
+            sku: v.sku || "",
+            stock: Number(v.stock) || 0,
+            priceModifier: Number(v.priceModifier) || 0,
+          }))
+        : [];
 
-        return {
-          id: p.id,
-          title: p.title,
-          sku: p.sku || `SR-${p.id}`,
-          category: p.category,
-          stock: totalStock,
-          stockStatus:
-            totalStock <= 0
-              ? "Out of Stock"
-              : totalStock < 5
-              ? "Low Stock"
-              : "In Stock",
-          price: p.price,
-          image: p.image || p.images?.[0] || "",
-          hasVariants: isVariable,
-          variants,
-        };
-      })
-    );
+      const totalStock = isVariable
+        ? variants.reduce((sum, v) => sum + v.stock, 0)
+        : p.stock !== undefined && p.stock !== null
+        ? Number(p.stock)
+        : 1;
+
+      return {
+        id: p.id,
+        title: p.title,
+        sku: p.sku || `SR-${p.id}`,
+        category: p.category,
+        stock: totalStock,
+        stockStatus:
+          totalStock <= 0
+            ? "Out of Stock"
+            : totalStock < 5
+            ? "Low Stock"
+            : "In Stock",
+        price: p.price,
+        image: p.image || p.images?.[0] || "",
+        hasVariants: isVariable,
+        variants,
+      };
+    });
+
+    setProducts(mapped);
     setLoading(false);
-  }, [contextProducts]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contextProducts]); // dep kept so effect fires when data arrives; ref prevents re-fires
 
   const handleStockSuccess = (msg, prodId, newTotal, variantId = null) => {
     setItemToAdjust(null);

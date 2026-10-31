@@ -73,7 +73,7 @@ const formatProduct = (p) => {
   return {
     id: String(p.id),
     title: p.name || p.title || "",
-    category: normalizeCategoryName(p.category?.name || p.category_name || p.category),
+    category: normalizeCategoryName(p.category_name || p.category?.name || (typeof p.category === "string" ? p.category : "") || ""),
     price: Number(p.price || 0),
     salePrice: p.salePrice ? Number(p.salePrice) : p.sale_price ? Number(p.sale_price) : null,
     description: p.description || "",
