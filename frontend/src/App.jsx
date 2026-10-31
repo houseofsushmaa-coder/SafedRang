@@ -4,6 +4,7 @@ import {
   Route,
   Outlet,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -55,15 +56,22 @@ import { Toaster } from "react-hot-toast";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 import WhatsAppButton from "./components/WhatsAppButton";
 
-const StorefrontLayout = () => (
-  <div className="app-layout">
-    <Header />
-    <main>
-      <Outlet />
-    </main>
-    <Footer />
-  </div>
-);
+// ─── Storefront layout: Header + Outlet (page content) + Footer ───────────────
+// Uses location.key as the Outlet key so every navigation forces the
+// correct page component to mount — permanently fixes "URL changes but
+// page doesn't update" across ALL routes, with no future exceptions.
+const StorefrontLayout = () => {
+  const location = useLocation();
+  return (
+    <div className="app-layout">
+      <Header />
+      <main>
+        <Outlet key={location.key} />
+      </main>
+      <Footer />
+    </div>
+  );
+};
 
 const ProtectedAdminRoute = ({ children }) => {
   const { user, session, token, loading, isAdmin } = useAuth();
@@ -114,6 +122,108 @@ const ProtectedAdminRoute = ({ children }) => {
   return children;
 };
 
+// ─── AppRoutes: defined inside Router so useLocation is available ──────────────
+function AppRoutes() {
+  const location = useLocation();
+  return (
+    // key={location.key} on <Routes> is the nuclear-option permanent fix:
+    // React destroys and recreates the entire route subtree on every navigation,
+    // so stale page components can NEVER persist across route changes.
+    <Routes key={location.key}>
+      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/login" element={<CustomerLogin />} />
+      <Route path="/signup" element={<CustomerLogin />} />
+      <Route path="/dashboard" element={<Navigate to="/admin" replace />} />
+      <Route
+        path="/account"
+        element={
+          <ProtectedCustomerRoute>
+            <AccountLayout />
+          </ProtectedCustomerRoute>
+        }
+      >
+        <Route index element={<OverviewTab />} />
+        <Route path="orders" element={<OrdersTab />} />
+        <Route path="wishlist" element={<WishlistTab />} />
+        <Route path="addresses" element={<AddressesTab />} />
+        <Route path="settings" element={<SettingsTab />} />
+      </Route>
+
+      <Route
+        path="/admin"
+        element={
+          <AdminErrorBoundary>
+            <ProtectedAdminRoute>
+              <AdminLayout />
+            </ProtectedAdminRoute>
+          </AdminErrorBoundary>
+        }
+      >
+        <Route index element={<Dashboard />} />
+        <Route path="orders" element={<Orders />} />
+        <Route path="products" element={<Products />} />
+        <Route path="product/:id" element={<EditProduct />} />
+        <Route path="users" element={<Users />} />
+        <Route path="customers" element={<Users />} />
+        <Route path="inventory" element={<Inventory />} />
+        <Route path="analytics" element={<Analytics />} />
+        <Route path="analytics/sales" element={<SalesAnalytics />} />
+        <Route path="categories" element={<Categories />} />
+        <Route path="payments" element={<Payments />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="settings/tracking" element={<TrackingIntegrations />} />
+        <Route path="tracking" element={<TrackingIntegrations />} />
+        <Route path="coupons" element={<Coupons />} />
+        <Route path="abandoned-carts" element={<AbandonedCarts />} />
+        {/* Placeholder for future routes */}
+        <Route
+          path="*"
+          element={
+            <div style={{ padding: "40px" }}>
+              <h2>Coming Soon</h2>
+              <p>This module is under construction.</p>
+            </div>
+          }
+        />
+      </Route>
+
+      <Route path="/" element={<StorefrontLayout />}>
+        <Route index element={<Home />} />
+        <Route path="shop" element={<Shop />} />
+        <Route path="about" element={<About />} />
+        <Route path="craft" element={<Craft />} />
+        <Route path="the-craft" element={<Craft />} />
+        <Route path="product/:id" element={<ProductDetail />} />
+        <Route path="checkout" element={<Checkout />} />
+        <Route path="payment/verify" element={<PaymentVerify />} />
+        <Route path="order-success" element={<OrderSuccess />} />
+        <Route path="one-of-one" element={<Shop />} />
+        <Route path="journey" element={<Journey />} />
+        <Route path="journal" element={<Journey />} />
+        <Route path="story" element={<About />} />
+        <Route path="our-story" element={<About />} />
+        <Route path="artisans" element={<Craft />} />
+        <Route path="care" element={<CareGuide />} />
+        <Route path="care-guide" element={<CareGuide />} />
+        <Route path="contact" element={<Contact />} />
+        <Route path="contact-us" element={<Contact />} />
+        <Route path="faq" element={<FAQ />} />
+        <Route path="faqs" element={<FAQ />} />
+        <Route path="archive" element={<Shop />} />
+        <Route path="shipping" element={<PrivacyPolicy />} />
+        <Route path="shipping-policy" element={<PrivacyPolicy />} />
+        <Route path="privacy" element={<PrivacyPolicy />} />
+        <Route path="privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="terms" element={<TermsConditions />} />
+        <Route path="terms-conditions" element={<TermsConditions />} />
+        <Route path="terms-and-conditions" element={<TermsConditions />} />
+        <Route path="returns" element={<TermsConditions />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Route>
+    </Routes>
+  );
+}
+
 function App() {
   return (
     <AuthProvider>
@@ -142,99 +252,8 @@ function App() {
                   },
                 }}
               />
-            <Routes>
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/login" element={<CustomerLogin />} />
-              <Route path="/signup" element={<CustomerLogin />} />
-              <Route path="/dashboard" element={<Navigate to="/admin" replace />} />
-              <Route
-                path="/account"
-                element={
-                  <ProtectedCustomerRoute>
-                    <AccountLayout />
-                  </ProtectedCustomerRoute>
-                }
-              >
-                <Route index element={<OverviewTab />} />
-                <Route path="orders" element={<OrdersTab />} />
-                <Route path="wishlist" element={<WishlistTab />} />
-                <Route path="addresses" element={<AddressesTab />} />
-                <Route path="settings" element={<SettingsTab />} />
-              </Route>
-
-              <Route
-                path="/admin"
-                element={
-                  <AdminErrorBoundary>
-                    <ProtectedAdminRoute>
-                      <AdminLayout />
-                    </ProtectedAdminRoute>
-                  </AdminErrorBoundary>
-                }
-              >
-                <Route index element={<Dashboard />} />
-                <Route path="orders" element={<Orders />} />
-                <Route path="products" element={<Products />} />
-                <Route path="product/:id" element={<EditProduct />} />
-                <Route path="users" element={<Users />} />
-                <Route path="customers" element={<Users />} />
-                <Route path="inventory" element={<Inventory />} />
-                <Route path="analytics" element={<Analytics />} />
-                <Route path="analytics/sales" element={<SalesAnalytics />} />
-                <Route path="categories" element={<Categories />} />
-                <Route path="payments" element={<Payments />} />
-                <Route path="settings" element={<Settings />} />
-                <Route path="settings/tracking" element={<TrackingIntegrations />} />
-                <Route path="tracking" element={<TrackingIntegrations />} />
-                <Route path="coupons" element={<Coupons />} />
-                <Route path="abandoned-carts" element={<AbandonedCarts />} />
-                {/* Placeholder for future routes */}
-                <Route
-                  path="*"
-                  element={
-                    <div style={{ padding: "40px" }}>
-                      <h2>Coming Soon</h2>
-                      <p>This module is under construction.</p>
-                    </div>
-                  }
-                />
-              </Route>
-
-              <Route path="/" element={<StorefrontLayout />}>
-                <Route index element={<Home />} />
-                <Route path="shop" element={<Shop key="shop" />} />
-                <Route path="about" element={<About />} />
-                <Route path="craft" element={<Craft />} />
-                <Route path="the-craft" element={<Craft />} />
-                <Route path="product/:id" element={<ProductDetail />} />
-                <Route path="checkout" element={<Checkout />} />
-                <Route path="payment/verify" element={<PaymentVerify />} />
-                <Route path="order-success" element={<OrderSuccess />} />
-                <Route path="one-of-one" element={<Shop key="one-of-one" />} />
-                <Route path="journey" element={<Journey />} />
-                <Route path="journal" element={<Journey />} />
-                <Route path="story" element={<About />} />
-                <Route path="our-story" element={<About />} />
-                <Route path="artisans" element={<Craft />} />
-                <Route path="care" element={<CareGuide />} />
-                <Route path="care-guide" element={<CareGuide />} />
-                <Route path="contact" element={<Contact />} />
-                <Route path="contact-us" element={<Contact />} />
-                <Route path="faq" element={<FAQ />} />
-                <Route path="faqs" element={<FAQ />} />
-                <Route path="archive" element={<Shop key="archive" />} />
-                <Route path="shipping" element={<PrivacyPolicy />} />
-                <Route path="shipping-policy" element={<PrivacyPolicy />} />
-                <Route path="privacy" element={<PrivacyPolicy />} />
-                <Route path="privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="terms" element={<TermsConditions />} />
-                <Route path="terms-conditions" element={<TermsConditions />} />
-                <Route path="terms-and-conditions" element={<TermsConditions />} />
-                <Route path="returns" element={<TermsConditions />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Route>
-            </Routes>
-          </Router>
+              <AppRoutes />
+            </Router>
           </CartProvider>
         </CurrencyProvider>
       </ProductProvider>
