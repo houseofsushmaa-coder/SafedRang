@@ -19,6 +19,7 @@ import {
   matchesAvailabilityFilter,
   sortProducts,
 } from "../utils/filterUtils";
+import { trackEvent, toAnalyticsItem } from "../lib/tracking";
 import "./Shop.css";
 
 // Re-export for any consumers or tests
@@ -145,7 +146,11 @@ export default function Shop() {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, []);
 
-  const categories = getAllCategories();
+  // Memoised: a fresh array on every render made the URL-sync effect below run
+  // after every render and loop ("Maximum update depth exceeded"), which froze
+  // the filters.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const categories = useMemo(() => getAllCategories(), [products]);
 
   /* ── Filter state with full multi-select support ── */
   const [selectedCrafts, setSelectedCrafts] = useState(() => {
@@ -185,6 +190,9 @@ export default function Shop() {
 
   // Synchronize URL search params with component state on navigation changes
   useEffect(() => {
+    // Keep the previous array when contents are unchanged so React can skip the re-render.
+    const sameList = (next) => (prev) => (prev.join("|") === next.join("|") ? prev : next);
+
     const urlCat = searchParams.get("category");
     if (urlCat) {
       const matched = categories.find((c) => matchesCategory(c, urlCat));
@@ -205,23 +213,23 @@ export default function Shop() {
 
     const urlCr = searchParams.get("craft");
     if (urlCr) {
-      setSelectedCrafts(urlCr.split(",").map((s) => s.trim()).filter(Boolean));
+      setSelectedCrafts(sameList(urlCr.split(",").map((s) => s.trim()).filter(Boolean)));
     } else {
-      setSelectedCrafts([]);
+      setSelectedCrafts(sameList([]));
     }
 
     const urlFab = searchParams.get("fabric");
     if (urlFab) {
-      setSelectedFabrics(urlFab.split(",").map((s) => s.trim()).filter(Boolean));
+      setSelectedFabrics(sameList(urlFab.split(",").map((s) => s.trim()).filter(Boolean)));
     } else {
-      setSelectedFabrics([]);
+      setSelectedFabrics(sameList([]));
     }
 
     const urlPr = searchParams.get("price");
     if (urlPr) {
-      setSelectedPriceRanges(urlPr.split(",").map((s) => s.trim()).filter(Boolean));
+      setSelectedPriceRanges(sameList(urlPr.split(",").map((s) => s.trim()).filter(Boolean)));
     } else {
-      setSelectedPriceRanges([]);
+      setSelectedPriceRanges(sameList([]));
     }
 
     const urlAv = searchParams.get("availability");
@@ -472,6 +480,27 @@ export default function Shop() {
     shopSortSettings,
   ]);
 
+  // Name of the list being browsed, for view_item_list / select_item.
+  const listName = isOneOfOneRoute
+    ? "One of One"
+    : isArchiveRoute
+    ? "Archive"
+    : activeCategory !== "All"
+    ? activeCategory
+    : "Shop";
+
+  // view_item_list once the shopper settles on a result set (first 24 items).
+  useEffect(() => {
+    if (filteredProducts.length === 0) return;
+    const t = setTimeout(() => {
+      trackEvent("view_item_list", {
+        item_list_name: listName,
+        items: filteredProducts.slice(0, 24).map((p, index) => toAnalyticsItem(p, { index, listName })),
+      });
+    }, 800);
+    return () => clearTimeout(t);
+  }, [filteredProducts, listName]);
+
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (urlSearch) count++;
@@ -520,7 +549,11 @@ export default function Shop() {
     [setSearchParams]
   );
 
+  const trackFilter = (filter_type, filter_value) =>
+    trackEvent("filter_apply", { filter_type, filter_value: String(filter_value) });
+
   const handleCategoryChange = (cat) => {
+    trackFilter("category", cat);
     setActiveCategory(cat);
     setActiveSubcategory("All");
     updateParams({
@@ -531,6 +564,7 @@ export default function Shop() {
   };
 
   const handleSubcategoryChange = (sub) => {
+    trackFilter("subcategory", sub);
     setActiveSubcategory(sub);
     updateParams({
       subcategory: sub !== "All" ? sub : null,
@@ -542,6 +576,7 @@ export default function Shop() {
     const next = selectedCrafts.includes(craft)
       ? selectedCrafts.filter((c) => c !== craft)
       : [...selectedCrafts, craft];
+    if (next.length > selectedCrafts.length) trackFilter("craft", craft);
     setSelectedCrafts(next);
     updateParams({ craft: next });
   };
@@ -550,6 +585,7 @@ export default function Shop() {
     const next = selectedFabrics.includes(fabric)
       ? selectedFabrics.filter((f) => f !== fabric)
       : [...selectedFabrics, fabric];
+    if (next.length > selectedFabrics.length) trackFilter("fabric", fabric);
     setSelectedFabrics(next);
     updateParams({ fabric: next });
   };
@@ -558,16 +594,19 @@ export default function Shop() {
     const next = selectedPriceRanges.includes(rangeId)
       ? selectedPriceRanges.filter((id) => id !== rangeId)
       : [...selectedPriceRanges, rangeId];
+    if (next.length > selectedPriceRanges.length) trackFilter("price", rangeId);
     setSelectedPriceRanges(next);
     updateParams({ price: next });
   };
 
   const handleAvailabilityChange = (val) => {
+    trackFilter("availability", val);
     setActiveAvailability(val);
     updateParams({ availability: val !== "All" ? val : null });
   };
 
   const handleSortChange = (newSort) => {
+    trackEvent("sort_change", { sort_option: newSort });
     setSortBy(newSort);
     updateParams({ sort: newSort !== "recommended" ? newSort : null });
   };
@@ -1041,8 +1080,14 @@ export default function Shop() {
 
             {filteredProducts.length > 0 ? (
               <div className="product-grid">
-                {filteredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                {filteredProducts.map((product, index) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    index={index}
+                    listName={listName}
+                    priority={index < 4}
+                  />
                 ))}
               </div>
             ) : (

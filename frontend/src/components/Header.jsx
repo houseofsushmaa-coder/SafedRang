@@ -18,6 +18,7 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useProducts } from "../context/ProductContext";
 import toast from "react-hot-toast";
+import { trackEvent } from "../lib/tracking";
 import "./Header.css";
 
 const POPULAR_SEARCH_TAGS = [
@@ -32,6 +33,8 @@ export default function Header() {
   const { currency, changeCurrency, supportedCurrencies, loadingRates, formatPrice } = useCurrency();
   const {
     cart,
+    cartLines,
+    cartSubtotal,
     cartCount,
     wishlist,
     wishlistCount,
@@ -132,12 +135,27 @@ export default function Header() {
   };
 
   const handleMoveToBag = (product) => {
-    addToCart(product, 1);
-    toast.success(`"${product.title}" added to your bag`, {
-      icon: "🛍️",
-      duration: 2500,
-    });
+    const result = addToCart(product, 1);
+    if (result.ok) {
+      toast.success(`"${product.title}" added to your bag`, { duration: 2500 });
+    } else if (result.reason === "needs_size") {
+      // Sized pieces need a size choice on the product page.
+      setIsWishlistOpen(false);
+      navigate(`/product/${product.id}`);
+    } else if (result.reason === "max_reached") {
+      toast("All available pieces are already in your bag.");
+    } else {
+      toast.error("This piece is no longer available.");
+    }
   };
+
+  // Record a search once the shopper pauses typing.
+  useEffect(() => {
+    const term = searchQuery.trim();
+    if (term.length < 3) return;
+    const t = setTimeout(() => trackEvent("search", { search_term: term }), 1200);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
 
   return (
     <>
@@ -282,12 +300,12 @@ export default function Header() {
                   <p className="empty-cart">Your shopping bag is currently empty.</p>
                 ) : (
                   <div className="cart-items">
-                    {cart.map((item) => {
+                    {cartLines.map((item) => {
                       const itemKey = item.cartItemId || item.id;
                       return (
                         <div key={itemKey} className="cart-item">
                           <img
-                            src={item.images?.[0] || item.image || "https://via.placeholder.com/60x80?text=SR"}
+                            src={item.images?.[0] || item.image || "/logo.png"}
                             alt={item.title}
                             onError={(e) => {
                               e.currentTarget.src = "/saree_category.jpeg";
@@ -301,7 +319,7 @@ export default function Header() {
                               </div>
                             )}
                             <div className="cart-item-price">
-                              {formatPrice(item.salePrice || item.price)} × {item.quantity}
+                              {formatPrice(item.unitPrice)} × {item.quantity}
                             </div>
                           </div>
                           <button
@@ -324,12 +342,7 @@ export default function Header() {
                       <div className="cart-subtotal">
                         <span>Subtotal</span>
                         <span>
-                          {formatPrice(
-                            cart.reduce(
-                              (acc, item) => acc + (item.salePrice || item.price) * item.quantity,
-                              0
-                            )
-                          )}
+                          {formatPrice(cartSubtotal)}
                         </span>
                       </div>
                       <Link to="/checkout" className="btn-primary checkout-btn-dropdown">

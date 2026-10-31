@@ -1,80 +1,70 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { CheckCircle2, XCircle, Loader2, Sparkles } from "lucide-react";
+import { XCircle, Loader2 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { useCart } from "../context/CartContext";
+import { trackEvent, toAnalyticsItem } from "../lib/tracking";
 
 export default function PaymentVerify() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { clearCart } = useCart();
-  
+
+  // verifying | pending | failed
   const [status, setStatus] = useState("verifying");
   const [error, setError] = useState("");
-  
+
   const orderId = searchParams.get("order_id");
+
+  // The redirect itself proves nothing — the server asks Cashfree for the real status.
+  const verifyPayment = useCallback(async () => {
+    setStatus("verifying");
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("cashfree-verify", {
+        body: { order_id: orderId },
+      });
+      if (fnError) throw new Error("We couldn't confirm your payment yet.");
+
+      const paymentStatus = data?.order_status || "";
+
+      if (paymentStatus === "PAID") {
+        trackEvent("purchase", {
+          transaction_id: orderId,
+          value: Number(data.order_amount) || 0,
+          shipping: 0,
+          payment_type: "Online",
+          items: (data.items || []).map((i) =>
+            toAnalyticsItem({ id: i.productId, title: i.title }, { price: i.price, quantity: i.quantity, variant: i.selectedSize })
+          ),
+        });
+        clearCart();
+        try { sessionStorage.removeItem("sr_checkout_details"); } catch {}
+
+        const params = new URLSearchParams({ order_id: orderId, method: "online" });
+        navigate(`/order-success?${params.toString()}`, { replace: true });
+      } else if (paymentStatus === "PENDING") {
+        setStatus("pending");
+      } else {
+        setStatus("failed");
+        setError(
+          paymentStatus === "AMOUNT_MISMATCH"
+            ? "We couldn't match your payment to this order. Please contact us — you will not be charged twice."
+            : "Your payment was not completed. No money has been taken for this order."
+        );
+      }
+    } catch (err) {
+      setStatus("failed");
+      setError(err.message || "Payment verification failed.");
+    }
+  }, [orderId, navigate, clearCart]);
 
   useEffect(() => {
     if (!orderId) {
       navigate("/");
       return;
     }
-
-    const verifyPayment = async () => {
-      try {
-        // Call the cashfree-verify edge function
-        const { data, error: fnError } = await supabase.functions.invoke("cashfree-verify", {
-          body: { order_id: orderId },
-        });
-
-        if (fnError) throw new Error(fnError.message);
-
-        const paymentStatus = data?.order_status || data?.paymentStatus || "";
-
-        if (paymentStatus === "PAID") {
-          clearCart();
-
-          // Fetch order details to get customer email for provisioning
-          const { data: orderRow } = await supabase
-            .from("orders")
-            .select("customer_email, customer_name, user_id")
-            .eq("id", orderId)
-            .maybeSingle();
-
-          // Provision customer account & send magic link (if not already a user)
-          let isNewUser = false;
-          if (orderRow?.customer_email && !orderRow?.user_id) {
-            try {
-              const { data: provData } = await supabase.functions.invoke("provision-customer", {
-                body: {
-                  email: orderRow.customer_email,
-                  fullName: orderRow.customer_name || "",
-                  orderId,
-                },
-              });
-              isNewUser = provData?.isNewUser ?? false;
-            } catch (provErr) {
-              console.warn("Account provisioning failed (non-fatal):", provErr);
-            }
-          }
-
-          // Redirect to success page
-          const params = new URLSearchParams({ order_id: orderId, method: "online" });
-          if (orderRow?.customer_email) params.set("email", orderRow.customer_email);
-          if (isNewUser) params.set("new_account", "1");
-          navigate(`/order-success?${params.toString()}`, { replace: true });
-        } else {
-          setStatus("failed");
-          setError("Payment was not completed successfully.");
-        }
-      } catch (err) {
-        setStatus("failed");
-        setError(err.message || "Payment verification failed.");
-      }
-    };
-
     verifyPayment();
-  }, [orderId, navigate, clearCart]);
+  }, [orderId, navigate, verifyPayment]);
 
   return (
     <div
@@ -130,6 +120,34 @@ export default function PaymentVerify() {
         </>
       )}
 
+      {status === "pending" && (
+        <>
+          <h2
+            style={{
+              fontFamily: "Cormorant Garamond, serif",
+              fontSize: "1.6rem",
+              fontWeight: 500,
+              color: "var(--color-dark-charcoal, #2A211D)",
+              marginBottom: 10,
+            }}
+          >
+            Your Payment Is Still Processing
+          </h2>
+          <p style={{ fontSize: "0.9rem", color: "#8B7863", marginBottom: 28, maxWidth: 420 }}>
+            If you approved the payment in your UPI or banking app, it can take a minute to confirm.
+            Please don't pay again — check the status below.
+          </p>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+            <button type="button" className="btn-primary" style={{ padding: "13px 28px" }} onClick={verifyPayment}>
+              Check Payment Status
+            </button>
+            <Link to="/contact" style={{ padding: "13px 28px", color: "var(--color-dark-charcoal, #2A211D)", fontWeight: 600 }}>
+              Contact Support
+            </Link>
+          </div>
+        </>
+      )}
+
       {status === "failed" && (
         <>
           <div
@@ -167,10 +185,10 @@ export default function PaymentVerify() {
               className="btn-primary"
               style={{ padding: "13px 28px", display: "inline-block" }}
             >
-              Try Again
+              Return to Checkout
             </Link>
             <Link
-              to="/about"
+              to="/contact"
               style={{
                 padding: "13px 28px",
                 display: "inline-block",

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useCart } from '../../../context/CartContext';
 
 // ─── Wishlist Tab ─────────────────────────────────────────────────────────────
@@ -11,6 +12,15 @@ export default function WishlistTab() {
   const { wishlist, toggleWishlist, addToCart } = useCart();
 
   const removeFromWishlist = toggleWishlist; // toggleWishlist removes if already in list
+
+  // Sized pieces need a size choice, so send those to the product page.
+  const moveToBag = (item) => {
+    const result = addToCart(item);
+    if (result.ok) toast.success('Added to your bag');
+    else if (result.reason === 'needs_size') navigate(`/product/${item.id}`);
+    else if (result.reason === 'max_reached') toast('All available pieces are already in your bag.');
+    else toast.error('This piece is no longer available.');
+  };
 
   const formatCurrency = (amount) =>
     new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount || 0);
@@ -91,7 +101,7 @@ export default function WishlistTab() {
                     <button
                       className="patron-btn-primary"
                       style={{ flex: 1, fontSize: '0.7rem', padding: '0.55rem 0.8rem' }}
-                      onClick={() => addToCart(item)}
+                      onClick={() => moveToBag(item)}
                     >
                       Move to Bag
                     </button>

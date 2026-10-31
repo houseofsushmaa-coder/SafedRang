@@ -1,6 +1,10 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import {
+  adminClient, cashfreeBase, cashfreeHeaders, confirmPaidOrder, corsHeaders, errorResponse, json, sendAccountLink, UserError,
+} from "../_shared/orders.ts"
 
+// Called by the storefront after Cashfree redirects back. The payment status is
+// always read from Cashfree's API — never from the redirect URL.
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -8,67 +12,45 @@ serve(async (req) => {
 
   try {
     const { order_id } = await req.json()
-    
-    if (!order_id) {
-      throw new Error('order_id is required')
-    }
+    if (!order_id || typeof order_id !== 'string') throw new UserError('order_id is required')
 
-    const appId = Deno.env.get('VITE_CASHFREE_APP_ID')
-    const secretKey = Deno.env.get('CASHFREE_SECRET_KEY')
-    const env = Deno.env.get('VITE_CASHFREE_ENV') || 'SANDBOX'
-    
-    const apiUrl = env === 'PRODUCTION' 
-      ? `https://api.cashfree.com/pg/orders/${order_id}` 
-      : `https://sandbox.cashfree.com/pg/orders/${order_id}`
-
-    const response = await fetch(apiUrl, {
+    const response = await fetch(`${cashfreeBase()}/orders/${encodeURIComponent(order_id)}`, {
       method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'x-api-version': '2022-09-01',
-        'x-client-id': appId!,
-        'x-client-secret': secretKey!
-      }
+      headers: cashfreeHeaders(),
     })
-    
     const data = await response.json()
-    
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to verify Cashfree order')
+      console.error('Cashfree verify failed:', data)
+      return json({ error: 'We could not confirm your payment yet. Please refresh in a moment.' }, 502)
     }
 
-    // Update order in Supabase
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-    )
+    const db = adminClient()
 
-    const statusMap: Record<string, string> = {
-      'PAID': 'PAID',
-      'ACTIVE': 'PENDING',
-      'EXPIRED': 'FAILED'
+    if (data.order_status === 'PAID') {
+      const result = await confirmPaidOrder(db, order_id, Number(data.order_amount))
+      if (result.status === 'PAID' && result.order) {
+        const { data: row } = await db.from('orders').select('customer_email, user_id').eq('id', order_id).maybeSingle()
+        if (result.transitioned && row?.customer_email) await sendAccountLink(db, row.customer_email, order_id)
+        return json({
+          order_status: 'PAID',
+          order_amount: Number(result.order.total),
+          items: result.order.items ?? [],
+          email: row?.customer_email ?? null,
+        })
+      }
+      return json({ order_status: result.status })
     }
 
-    const paymentStatus = statusMap[data.order_status] || data.order_status
-
-    await supabaseClient
-      .from('orders')
-      .update({ payment_status: paymentStatus })
-      .eq('id', order_id)
-
-    return new Response(
-      JSON.stringify({ order_status: paymentStatus }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    )
+    // ACTIVE = payment not finished yet (e.g. pending UPI approval); EXPIRED = abandoned/failed.
+    const status = data.order_status === 'ACTIVE' ? 'PENDING' : 'FAILED'
+    if (status === 'FAILED') {
+      await db.from('orders')
+        .update({ payment_status: 'FAILED', paymentStatus: 'FAILED', updated_at: new Date().toISOString() })
+        .eq('id', order_id)
+        .neq('payment_status', 'PAID')
+    }
+    return json({ order_status: status })
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 400,
-    })
+    return errorResponse(error)
   }
 })
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}

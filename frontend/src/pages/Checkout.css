@@ -51,6 +51,12 @@
   align-items: start;
 }
 
+/* Let columns shrink below their content width (long product titles use nowrap) */
+.checkout-form-col,
+.checkout-summary-col {
+  min-width: 0;
+}
+
 @media (max-width: 900px) {
   .checkout-grid {
     grid-template-columns: 1fr;
@@ -1141,3 +1147,123 @@
   color: var(--color-soft-blush);
 }
 
+
+/* ── Bag editing in the order summary ─────────────── */
+.summary-item-info h4 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.summary-item-info h4 a:hover {
+  color: var(--color-deep-wine);
+}
+
+.summary-qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.summary-qty-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  border: 1px solid var(--color-soft-blush);
+  background: var(--color-white);
+  color: var(--color-dark-charcoal);
+  cursor: pointer;
+}
+
+.summary-qty-controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.summary-qty-controls > span {
+  min-width: 20px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.summary-qty-controls .summary-remove-btn {
+  gap: 4px;
+  margin-left: auto;
+  padding: 0 8px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--color-warm-taupe);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.summary-qty-controls .summary-remove-btn:hover {
+  color: var(--color-deep-wine);
+}
+
+.summary-item-unavailable .summary-item-img {
+  opacity: 0.5;
+}
+
+.summary-item-warning {
+  color: var(--color-deep-wine) !important;
+  font-weight: 600;
+}
+
+.btn-continue:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.checkout-trust a {
+  color: var(--color-deep-wine);
+}
+
+/* ── Mobile: collapsible bag summary above the form ── */
+.mobile-summary-toggle {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .checkout-summary-col {
+    order: -1;
+  }
+
+  .mobile-summary-toggle {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--color-dark-charcoal);
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .mobile-summary-toggle span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-deep-wine);
+  }
+
+  .mobile-summary-toggle .is-flipped {
+    transform: rotate(180deg);
+  }
+
+  .checkout-summary-col:not(.is-open) .order-summary > :not(.mobile-summary-toggle) {
+    display: none;
+  }
+
+  .checkout-summary-col.is-open .mobile-summary-toggle {
+    margin-bottom: 16px;
+  }
+}

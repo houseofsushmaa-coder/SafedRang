@@ -436,7 +436,6 @@ export function initStorefrontTracking(integrations) {
     }
     if (window.pintrk) {
       window.pintrk("load", pinId);
-      window.pintrk("page");
     }
   }
 
@@ -485,19 +484,65 @@ export function initStorefrontTracking(integrations) {
 // UNIFIED EVENT TRACKING ENGINE
 // ─────────────────────────────────────────────────────────────────────────────
 
+const stripEmpty = (obj) =>
+  Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined && v !== null && v !== ""));
+
 /**
- * Dispatches an event across all active integrations respecting user toggles.
+ * Converts a storefront product (or cart line) into a GA4 ecommerce item.
+ * Only catalogue data is included — never customer information.
+ */
+export function toAnalyticsItem(product, { price, quantity = 1, variant, index, listName } = {}) {
+  const unit = price ?? (product?.salePrice > 0 ? product.salePrice : product?.price) ?? 0;
+  return stripEmpty({
+    item_id: String(product?.id ?? ""),
+    item_name: String(product?.title || product?.name || "").replace(/"/g, ""),
+    item_brand: "Safed Rang",
+    item_category: product?.category,
+    item_category2: product?.isOneOfOne ? "One of One" : undefined,
+    item_variant: variant,
+    item_list_name: listName,
+    index,
+    price: Number(unit) || 0,
+    quantity,
+  });
+}
+
+// GA4 events that can be switched off from Admin → Tracking.
+const GA4_TOGGLES = {
+  page_view: "track_page_view",
+  view_item: "track_view_item",
+  add_to_cart: "track_add_to_cart",
+  begin_checkout: "track_begin_checkout",
+  purchase: "track_purchase",
+  generate_lead: "track_form_submissions",
+};
+
+const ECOMMERCE_EVENTS = new Set([
+  "view_item_list", "select_item", "view_item", "add_to_wishlist", "add_to_cart",
+  "remove_from_cart", "view_cart", "begin_checkout", "add_shipping_info",
+  "add_payment_info", "purchase",
+]);
+
+const metaContents = (items = []) => ({
+  content_ids: items.map((i) => i.item_id),
+  contents: items.map((i) => ({ id: i.item_id, quantity: i.quantity || 1, item_price: i.price })),
+  content_type: "product",
+  num_items: items.reduce((s, i) => s + (i.quantity || 1), 0),
+});
+
+/**
+ * Dispatches an event to every enabled integration.
  *
- * Supported event names:
- * - 'page_view'
- * - 'view_item' (product view)
- * - 'add_to_cart'
- * - 'begin_checkout'
- * - 'purchase'
- * - 'lead'
+ * Event names follow the GA4 recommended ecommerce schema:
+ *   page_view, view_item_list, select_item, view_item, search, add_to_wishlist,
+ *   add_to_cart, remove_from_cart, view_cart, begin_checkout, add_shipping_info,
+ *   add_payment_info, purchase, generate_lead
+ * plus custom: filter_apply, sort_change, whatsapp_click.
  *
- * @param {string} eventName
- * @param {object} payload
+ * Payload: { value, currency, items: toAnalyticsItem()[], transaction_id,
+ *            shipping, payment_type, search_term, item_list_name, ... }
+ *
+ * `purchase` must only be sent after the server has confirmed the order.
  */
 export function trackEvent(eventName, payload = {}) {
   if (typeof window === "undefined") return;
@@ -505,144 +550,64 @@ export function trackEvent(eventName, payload = {}) {
   // Prevent tracking admin activity
   if (window.location.pathname.startsWith("/admin")) return;
 
+  const data = { currency: "INR", ...payload };
+  const items = Array.isArray(data.items) ? data.items : [];
+
+  // ── Purchase Deduplication (across reloads and tabs) ─────────
+  if (eventName === "purchase") {
+    const dedupeKey = data.transaction_id;
+    if (!dedupeKey) {
+      console.warn("[Tracking] purchase without transaction_id ignored");
+      return;
+    }
+    const storageKey = `sr_tracked_purchase_${dedupeKey}`;
+    let seen = firedPurchaseDeduplication.has(dedupeKey);
+    try {
+      seen = seen || Boolean(localStorage.getItem(storageKey));
+      localStorage.setItem(storageKey, "1");
+    } catch {}
+    if (seen) {
+      console.info(`[Tracking] Duplicate purchase suppressed for order: ${dedupeKey}`);
+      return;
+    }
+    firedPurchaseDeduplication.add(dedupeKey);
+  }
+
+  // Development audit trail — lets us verify events fire without live pixels.
+  if (import.meta.env.DEV) {
+    window.__srEvents = window.__srEvents || [];
+    window.__srEvents.push({ event: eventName, ...data });
+    console.debug("[Tracking]", eventName, data);
+  }
+
   const cfg = cachedIntegrations;
   if (!cfg) return;
 
-  const cleanPayload = { ...payload };
-
-  // ── Purchase Deduplication ──────────────────────────────────
-  if (eventName === "purchase") {
-    const dedupeKey = payload.orderId || payload.transactionId || payload.order_id;
-    if (dedupeKey) {
-      const storageKey = `sr_tracked_purchase_${dedupeKey}`;
-      if (firedPurchaseDeduplication.has(dedupeKey) || sessionStorage.getItem(storageKey)) {
-        console.info(`[Tracking] Duplicate purchase suppressed for order: ${dedupeKey}`);
-        return;
-      }
-      firedPurchaseDeduplication.add(dedupeKey);
-      try {
-        sessionStorage.setItem(storageKey, "1");
-      } catch {}
-    }
-  }
+  const pagePayload = {
+    page_path: window.location.pathname + window.location.search,
+    page_location: window.location.href,
+    page_title: document.title,
+  };
+  const ga4Params =
+    eventName === "page_view"
+      ? pagePayload
+      : stripEmpty({ ...data, items: items.length ? items : undefined });
 
   // 1. DataLayer / GTM
   if (cfg.gtm?.enabled && window.dataLayer) {
-    if (eventName === "page_view") {
-      window.dataLayer.push({
-        event: "page_view",
-        page_path: window.location.pathname,
-        page_title: document.title,
-      });
-    } else if (eventName === "view_item") {
-      window.dataLayer.push({
-        event: "view_item",
-        ecommerce: {
-          currency: cleanPayload.currency || "INR",
-          value: cleanPayload.price || cleanPayload.value || 0,
-          items: [
-            {
-              item_id: cleanPayload.productId || cleanPayload.id || "",
-              item_name: cleanPayload.productName || cleanPayload.name || "",
-              price: cleanPayload.price || 0,
-            },
-          ],
-        },
-      });
-    } else if (eventName === "add_to_cart") {
-      window.dataLayer.push({
-        event: "add_to_cart",
-        ecommerce: {
-          currency: cleanPayload.currency || "INR",
-          value: (cleanPayload.price || 0) * (cleanPayload.quantity || 1),
-          items: [
-            {
-              item_id: cleanPayload.productId || cleanPayload.id || "",
-              item_name: cleanPayload.productName || cleanPayload.name || "",
-              price: cleanPayload.price || 0,
-              quantity: cleanPayload.quantity || 1,
-            },
-          ],
-        },
-      });
-    } else if (eventName === "begin_checkout") {
-      window.dataLayer.push({
-        event: "begin_checkout",
-        ecommerce: {
-          currency: cleanPayload.currency || "INR",
-          value: cleanPayload.value || 0,
-        },
-      });
-    } else if (eventName === "purchase") {
-      window.dataLayer.push({
-        event: "purchase",
-        ecommerce: {
-          transaction_id: cleanPayload.orderId || cleanPayload.order_id || "",
-          value: cleanPayload.value || cleanPayload.total || 0,
-          currency: cleanPayload.currency || "INR",
-          items: cleanPayload.items || [],
-        },
-      });
-    } else if (eventName === "lead") {
-      window.dataLayer.push({
-        event: "generate_lead",
-        lead_type: cleanPayload.type || "contact",
-      });
+    if (ECOMMERCE_EVENTS.has(eventName)) {
+      window.dataLayer.push({ ecommerce: null });
+      window.dataLayer.push({ event: eventName, ecommerce: ga4Params });
+    } else {
+      window.dataLayer.push({ event: eventName, ...ga4Params });
     }
   }
 
   // 2. Google Analytics 4 (GA4)
   if (cfg.ga4?.enabled && window.gtag) {
-    const gaEvents = cfg.ga4.event_settings || {};
-
-    if (eventName === "page_view" && gaEvents.track_page_view !== false) {
-      window.gtag("event", "page_view", {
-        page_path: window.location.pathname + window.location.search,
-        page_location: window.location.href,
-        page_title: document.title,
-      });
-    } else if (eventName === "view_item" && gaEvents.track_view_item !== false) {
-      window.gtag("event", "view_item", {
-        currency: cleanPayload.currency || "INR",
-        value: cleanPayload.price || cleanPayload.value || 0,
-        items: [
-          {
-            item_id: cleanPayload.productId || cleanPayload.id,
-            item_name: cleanPayload.productName || cleanPayload.name,
-            price: cleanPayload.price || 0,
-          },
-        ],
-      });
-    } else if (eventName === "add_to_cart" && gaEvents.track_add_to_cart !== false) {
-      window.gtag("event", "add_to_cart", {
-        currency: cleanPayload.currency || "INR",
-        value: (cleanPayload.price || 0) * (cleanPayload.quantity || 1),
-        items: [
-          {
-            item_id: cleanPayload.productId || cleanPayload.id,
-            item_name: cleanPayload.productName || cleanPayload.name,
-            price: cleanPayload.price || 0,
-            quantity: cleanPayload.quantity || 1,
-          },
-        ],
-      });
-    } else if (eventName === "begin_checkout" && gaEvents.track_begin_checkout !== false) {
-      window.gtag("event", "begin_checkout", {
-        currency: cleanPayload.currency || "INR",
-        value: cleanPayload.value || 0,
-      });
-    } else if (eventName === "purchase" && gaEvents.track_purchase !== false) {
-      window.gtag("event", "purchase", {
-        transaction_id: cleanPayload.orderId || cleanPayload.order_id,
-        value: cleanPayload.value || cleanPayload.total || 0,
-        currency: cleanPayload.currency || "INR",
-        items: cleanPayload.items || [],
-      });
-    } else if (eventName === "lead" && gaEvents.track_form_submissions !== false) {
-      window.gtag("event", "generate_lead", {
-        event_category: "Engagement",
-        event_label: cleanPayload.type || "Form Submission",
-      });
+    const toggle = GA4_TOGGLES[eventName];
+    if (!toggle || (cfg.ga4.event_settings || {})[toggle] !== false) {
+      window.gtag("event", eventName, ga4Params);
     }
   }
 
@@ -650,171 +615,96 @@ export function trackEvent(eventName, payload = {}) {
   if (cfg.google_ads?.enabled && window.gtag) {
     const adsCfg = cfg.google_ads;
     const adsEvents = adsCfg.event_settings || {};
-    const sendTo = adsCfg.conversion_label
-      ? `${adsCfg.public_id}/${adsCfg.conversion_label}`
-      : adsCfg.public_id;
+    const sendTo = adsCfg.conversion_label ? `${adsCfg.public_id}/${adsCfg.conversion_label}` : adsCfg.public_id;
 
     if (eventName === "purchase" && adsEvents.track_purchase !== false) {
       window.gtag("event", "conversion", {
         send_to: sendTo,
-        value: cleanPayload.value || cleanPayload.total || Number(adsCfg.conversion_value) || 0,
-        currency: adsCfg.currency_code || "INR",
-        transaction_id: cleanPayload.orderId || cleanPayload.order_id || "",
+        value: data.value || 0,
+        currency: data.currency,
+        transaction_id: data.transaction_id,
       });
-    } else if (eventName === "lead" && adsEvents.track_lead !== false) {
-      window.gtag("event", "conversion", {
-        send_to: sendTo,
-      });
+    } else if (eventName === "generate_lead" && adsEvents.track_lead !== false) {
+      window.gtag("event", "conversion", { send_to: sendTo });
     }
   }
 
   // 4. Meta Pixel (Facebook & Instagram)
   if (cfg.meta_pixel?.enabled && window.fbq) {
-    const metaEvents = cfg.meta_pixel.event_settings || {};
-
-    if (eventName === "page_view" && metaEvents.track_page_view !== false) {
-      window.fbq("track", "PageView");
-    } else if (eventName === "view_item" && metaEvents.track_view_content !== false) {
-      window.fbq("track", "ViewContent", {
-        content_name: cleanPayload.productName || cleanPayload.name,
-        content_ids: [cleanPayload.productId || cleanPayload.id],
-        content_type: "product",
-        value: cleanPayload.price || cleanPayload.value || 0,
-        currency: cleanPayload.currency || "INR",
-      });
-    } else if (eventName === "add_to_cart" && metaEvents.track_add_to_cart !== false) {
-      window.fbq("track", "AddToCart", {
-        content_name: cleanPayload.productName || cleanPayload.name,
-        content_ids: [cleanPayload.productId || cleanPayload.id],
-        content_type: "product",
-        value: (cleanPayload.price || 0) * (cleanPayload.quantity || 1),
-        currency: cleanPayload.currency || "INR",
-      });
-    } else if (eventName === "begin_checkout" && metaEvents.track_initiate_checkout !== false) {
-      window.fbq("track", "InitiateCheckout", {
-        value: cleanPayload.value || 0,
-        currency: cleanPayload.currency || "INR",
-        num_items: cleanPayload.itemCount || 1,
-      });
-    } else if (eventName === "purchase" && metaEvents.track_purchase !== false) {
-      window.fbq("track", "Purchase", {
-        value: cleanPayload.value || cleanPayload.total || 0,
-        currency: cleanPayload.currency || "INR",
-        content_type: "product",
-        num_items: cleanPayload.itemCount || (cleanPayload.items ? cleanPayload.items.length : 1),
-        order_id: cleanPayload.orderId || cleanPayload.order_id,
-      });
-    } else if (eventName === "lead" && metaEvents.track_lead !== false) {
-      window.fbq("track", "Lead", {
-        content_category: cleanPayload.type || "Lead",
-      });
-    }
+    const m = cfg.meta_pixel.event_settings || {};
+    const value = { value: data.value || 0, currency: data.currency };
+    const map = {
+      page_view: m.track_page_view !== false && ["PageView"],
+      view_item: m.track_view_content !== false && ["ViewContent", { ...metaContents(items), ...value }],
+      add_to_cart: m.track_add_to_cart !== false && ["AddToCart", { ...metaContents(items), ...value }],
+      add_to_wishlist: ["AddToWishlist", { ...metaContents(items), ...value }],
+      begin_checkout: m.track_initiate_checkout !== false && ["InitiateCheckout", { ...metaContents(items), ...value }],
+      add_payment_info: ["AddPaymentInfo", { ...metaContents(items), ...value }],
+      purchase: m.track_purchase !== false && ["Purchase", { ...metaContents(items), ...value }, { eventID: data.transaction_id }],
+      search: ["Search", { search_string: data.search_term }],
+      whatsapp_click: ["Contact"],
+      generate_lead: m.track_lead !== false && ["Lead", { content_category: data.lead_type || "Lead" }],
+    }[eventName];
+    if (map) window.fbq("track", ...map);
   }
 
   // 5. TikTok Pixel
   if (cfg.tiktok?.enabled && window.ttq) {
-    const ttEvents = cfg.tiktok.event_settings || {};
-
-    if (eventName === "page_view" && ttEvents.track_page_view !== false) {
-      window.ttq.page();
-    } else if (eventName === "view_item" && ttEvents.track_view_content !== false) {
-      window.ttq.track("ViewContent", {
-        content_id: cleanPayload.productId || cleanPayload.id,
-        content_name: cleanPayload.productName || cleanPayload.name,
-        content_type: "product",
-        value: cleanPayload.price || 0,
-        currency: cleanPayload.currency || "INR",
-      });
-    } else if (eventName === "add_to_cart" && ttEvents.track_add_to_cart !== false) {
-      window.ttq.track("AddToCart", {
-        content_id: cleanPayload.productId || cleanPayload.id,
-        content_name: cleanPayload.productName || cleanPayload.name,
-        quantity: cleanPayload.quantity || 1,
-        value: cleanPayload.price || 0,
-        currency: cleanPayload.currency || "INR",
-      });
-    } else if (eventName === "begin_checkout" && ttEvents.track_initiate_checkout !== false) {
-      window.ttq.track("InitiateCheckout", {
-        value: cleanPayload.value || 0,
-        currency: cleanPayload.currency || "INR",
-      });
-    } else if (eventName === "purchase" && ttEvents.track_complete_payment !== false) {
-      window.ttq.track("CompletePayment", {
-        value: cleanPayload.value || cleanPayload.total || 0,
-        currency: cleanPayload.currency || "INR",
-        content_type: "product",
-      });
-    }
+    const t = cfg.tiktok.event_settings || {};
+    const params = {
+      contents: items.map((i) => ({ content_id: i.item_id, content_name: i.item_name, quantity: i.quantity || 1, price: i.price })),
+      content_type: "product",
+      value: data.value || 0,
+      currency: data.currency,
+    };
+    if (eventName === "page_view" && t.track_page_view !== false) window.ttq.page();
+    const name = {
+      view_item: t.track_view_content !== false && "ViewContent",
+      add_to_cart: t.track_add_to_cart !== false && "AddToCart",
+      add_to_wishlist: "AddToWishlist",
+      begin_checkout: t.track_initiate_checkout !== false && "InitiateCheckout",
+      add_payment_info: "AddPaymentInfo",
+      purchase: t.track_complete_payment !== false && "CompletePayment",
+      search: "Search",
+      whatsapp_click: "Contact",
+    }[eventName];
+    if (name) window.ttq.track(name, eventName === "search" ? { query: data.search_term } : params);
   }
 
   // 6. Pinterest Tag
   if (cfg.pinterest?.enabled && window.pintrk) {
-    const pinEvents = cfg.pinterest.event_settings || {};
-
-    if (eventName === "page_view" && pinEvents.track_page_visit !== false) {
-      window.pintrk("track", "PageVisit");
-    } else if (eventName === "add_to_cart" && pinEvents.track_add_to_cart !== false) {
-      window.pintrk("track", "AddToCart", {
-        value: cleanPayload.price || 0,
-        order_quantity: cleanPayload.quantity || 1,
-        currency: cleanPayload.currency || "INR",
-      });
-    } else if (eventName === "purchase" && pinEvents.track_checkout !== false) {
-      window.pintrk("track", "Checkout", {
-        value: cleanPayload.value || cleanPayload.total || 0,
-        order_quantity: cleanPayload.itemCount || 1,
-        currency: cleanPayload.currency || "INR",
-        order_id: cleanPayload.orderId || cleanPayload.order_id,
-      });
-    } else if (eventName === "lead" && pinEvents.track_lead !== false) {
-      window.pintrk("track", "Lead");
-    }
+    const p = cfg.pinterest.event_settings || {};
+    const qty = items.reduce((s, i) => s + (i.quantity || 1), 0) || 1;
+    if (eventName === "page_view" && p.track_page_visit !== false) window.pintrk("page");
+    else if (eventName === "add_to_cart" && p.track_add_to_cart !== false)
+      window.pintrk("track", "addtocart", { value: data.value || 0, order_quantity: qty, currency: data.currency });
+    else if (eventName === "purchase" && p.track_checkout !== false)
+      window.pintrk("track", "checkout", { value: data.value || 0, order_quantity: qty, currency: data.currency, order_id: data.transaction_id });
+    else if (eventName === "search") window.pintrk("track", "search", { search_query: data.search_term });
+    else if (eventName === "generate_lead" && p.track_lead !== false) window.pintrk("track", "lead");
   }
 
   // 7. Reddit Pixel
   if (cfg.reddit?.enabled && window.rdt) {
-    const rdtEvents = cfg.reddit.event_settings || {};
-
-    if (eventName === "page_view" && rdtEvents.track_page_visit !== false) {
-      window.rdt("track", "PageVisit");
-    } else if (eventName === "view_item" && rdtEvents.track_view_content !== false) {
-      window.rdt("track", "ViewContent", {
-        products: [
-          {
-            id: cleanPayload.productId || cleanPayload.id,
-            name: cleanPayload.productName || cleanPayload.name,
-          },
-        ],
-      });
-    } else if (eventName === "add_to_cart" && rdtEvents.track_add_to_cart !== false) {
-      window.rdt("track", "AddToCart", {
-        itemCount: cleanPayload.quantity || 1,
-        value: cleanPayload.price || 0,
-        currency: cleanPayload.currency || "INR",
-      });
-    } else if (eventName === "purchase" && rdtEvents.track_purchase !== false) {
-      window.rdt("track", "Purchase", {
-        transactionId: cleanPayload.orderId || cleanPayload.order_id,
-        value: cleanPayload.value || cleanPayload.total || 0,
-        currency: cleanPayload.currency || "INR",
-        itemCount: cleanPayload.itemCount || 1,
-      });
-    } else if (eventName === "lead" && rdtEvents.track_lead !== false) {
-      window.rdt("track", "Lead");
-    }
+    const r = cfg.reddit.event_settings || {};
+    const products = items.map((i) => ({ id: i.item_id, name: i.item_name }));
+    const itemCount = items.reduce((s, i) => s + (i.quantity || 1), 0);
+    if (eventName === "page_view" && r.track_page_visit !== false) window.rdt("track", "PageVisit");
+    else if (eventName === "view_item" && r.track_view_content !== false) window.rdt("track", "ViewContent", { products });
+    else if (eventName === "add_to_cart" && r.track_add_to_cart !== false)
+      window.rdt("track", "AddToCart", { products, itemCount, value: data.value || 0, currency: data.currency });
+    else if (eventName === "add_to_wishlist") window.rdt("track", "AddToWishlist", { products });
+    else if (eventName === "search") window.rdt("track", "Search");
+    else if (eventName === "purchase" && r.track_purchase !== false)
+      window.rdt("track", "Purchase", { products, itemCount, value: data.value || 0, currency: data.currency, conversionId: data.transaction_id });
+    else if (eventName === "generate_lead" && r.track_lead !== false) window.rdt("track", "Lead");
   }
 
   // 8. Microsoft Advertising UET
   if (cfg.microsoft_uet?.enabled && window.uetq) {
-    const uetEvents = cfg.microsoft_uet.event_settings || {};
-
-    if (eventName === "page_view" && uetEvents.track_page_view !== false) {
-      window.uetq.push("pageLoad");
-    } else if (eventName === "purchase" && uetEvents.track_conversions !== false) {
-      window.uetq.push("event", "purchase", {
-        revenue_value: cleanPayload.value || cleanPayload.total || 0,
-        currency: cleanPayload.currency || "INR",
-      });
-    }
+    const u = cfg.microsoft_uet.event_settings || {};
+    if (eventName === "page_view" && u.track_page_view !== false) window.uetq.push("pageLoad");
+    else if (eventName === "purchase" && u.track_conversions !== false)
+      window.uetq.push("event", "purchase", { revenue_value: data.value || 0, currency: data.currency, transaction_id: data.transaction_id });
   }
 }

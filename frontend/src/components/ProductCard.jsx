@@ -3,9 +3,11 @@ import { Link } from "react-router-dom";
 import { Heart } from "lucide-react";
 import { useCurrency } from "../context/CurrencyContext";
 import { useCart } from "../context/CartContext";
+import { trackEvent, toAnalyticsItem } from "../lib/tracking";
 import "./ProductCard.css";
 
-export default function ProductCard({ product }) {
+// `priority` cards (the first row) load their image eagerly; the rest lazily.
+export default function ProductCard({ product, index, listName, priority = false }) {
   const { formatPrice } = useCurrency();
   const { toggleWishlist, isInWishlist } = useCart();
 
@@ -60,6 +62,14 @@ export default function ProductCard({ product }) {
       <Link
         to={`/product/${product.id}`}
         className="product-card-link"
+        onClick={() => {
+          if (listName) {
+            trackEvent("select_item", {
+              item_list_name: listName,
+              items: [toAnalyticsItem(product, { index, listName })],
+            });
+          }
+        }}
       >
         <div
           className="image-wrapper"
@@ -73,7 +83,8 @@ export default function ProductCard({ product }) {
               src={imgSrc}
               alt={`${product.title} - angle ${idx + 1}`}
               className={`carousel-product-img ${idx === currentImageIndex ? "is-active" : ""}`}
-              loading={idx === 0 ? "eager" : "lazy"}
+              loading={idx === 0 && priority ? "eager" : "lazy"}
+              decoding="async"
             />
           ))}
 

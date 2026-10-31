@@ -1340,3 +1340,102 @@
   }
 }
 
+
+/* ── Entry band below the hero ─────────────────────── */
+.home-entry-band {
+  padding: 3.5rem 1.5rem 3rem;
+  text-align: center;
+  background: var(--color-warm-ivory);
+  border-bottom: 1px solid var(--color-soft-blush);
+}
+
+.home-entry-eyebrow {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-antique-gold);
+}
+
+.home-entry-title {
+  max-width: 760px;
+  margin: 0 auto 1.75rem;
+  font-family: var(--font-heading);
+  font-size: clamp(1.6rem, 2.5vw + 0.8rem, 2.6rem);
+  font-weight: 400;
+  line-height: 1.25;
+  color: var(--color-dark-charcoal);
+}
+
+.home-entry-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem 2rem;
+}
+
+.home-entry-btn {
+  display: inline-block;
+  padding: 1rem 2.25rem;
+  text-decoration: none;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.home-entry-link {
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-deep-wine);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 2px;
+}
+
+/* ── Featured Creations ────────────────────────────── */
+.home-featured {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+.home-featured-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.home-featured-head .section-title {
+  margin: 0;
+}
+
+.home-featured-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2rem 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .home-featured-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem 1rem;
+  }
+}
+
+@media (max-width: 680px) {
+  .hero-video-bg {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .home-entry-band {
+    padding: 2.5rem 1.25rem 2.25rem;
+  }
+
+  .home-featured {
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+  }
+}

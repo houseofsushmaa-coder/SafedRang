@@ -1,73 +1,51 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { adminClient, confirmPaidOrder, json, sendAccountLink } from "../_shared/orders.ts"
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-webhook-signature, x-webhook-timestamp',
+// Cashfree signs webhooks as base64(HMAC-SHA256(timestamp + rawBody, clientSecret)).
+async function isValidSignature(rawBody: string, timestamp: string, signature: string) {
+  const secret = Deno.env.get('CASHFREE_SECRET_KEY') ?? ''
+  if (!secret) return false
+  const key = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'],
+  )
+  const mac = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(timestamp + rawBody))
+  const expected = btoa(String.fromCharCode(...new Uint8Array(mac)))
+  if (expected.length !== signature.length) return false
+  let diff = 0
+  for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ signature.charCodeAt(i)
+  return diff === 0
 }
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+  if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405)
 
   try {
-    const signature = req.headers.get('x-webhook-signature')
-    const timestamp = req.headers.get('x-webhook-timestamp')
-    
-    if (!signature || !timestamp) {
-      throw new Error('Missing signature headers')
+    const signature = req.headers.get('x-webhook-signature') ?? ''
+    const timestamp = req.headers.get('x-webhook-timestamp') ?? ''
+    const rawBody = await req.text()
+
+    if (!signature || !timestamp || !(await isValidSignature(rawBody, timestamp, signature))) {
+      console.warn('Rejected webhook with missing/invalid signature')
+      return json({ error: 'Invalid signature' }, 401)
     }
 
-    const rawBody = await req.text()
     const payload = JSON.parse(rawBody)
-
     const orderId = payload?.data?.order?.order_id
-    const orderStatus = payload?.data?.payment?.payment_status
+    const paymentStatus = payload?.data?.payment?.payment_status
+    const paidAmount = Number(payload?.data?.payment?.payment_amount ?? payload?.data?.order?.order_amount)
 
-    if (orderId && orderStatus === 'SUCCESS') {
-      const supabaseAdmin = createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-        { auth: { autoRefreshToken: false, persistSession: false } }
-      )
-
-      // Update order payment status
-      const { data: orderRow } = await supabaseAdmin
-        .from('orders')
-        .update({ 
-          payment_status: 'PAID',
-          paymentStatus: 'PAID',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', orderId)
-        .select('customer_email, customer_name')
-        .single()
-
-      // Send magic link to customer for seamless account access
-      if (orderRow?.customer_email) {
-        const siteUrl = Deno.env.get('SITE_URL') || 'https://safedrang.com'
-        try {
-          await supabaseAdmin.auth.admin.generateLink({
-            type: 'magiclink',
-            email: orderRow.customer_email,
-            options: {
-              redirectTo: `${siteUrl}/account/orders`,
-            },
-          })
-        } catch (linkErr: any) {
-          console.warn('Magic link send failed (non-fatal):', linkErr.message)
-        }
+    if (orderId && paymentStatus === 'SUCCESS') {
+      const db = adminClient()
+      const result = await confirmPaidOrder(db, orderId, paidAmount)
+      if (result.transitioned) {
+        const { data: row } = await db.from('orders').select('customer_email').eq('id', orderId).maybeSingle()
+        if (row?.customer_email) await sendAccountLink(db, row.customer_email, orderId)
       }
     }
 
-    return new Response(JSON.stringify({ status: 'success' }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    })
-  } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 400,
-    })
+    return json({ status: 'ok' })
+  } catch (error) {
+    console.error('Webhook error:', error)
+    return json({ error: 'Webhook processing failed' }, 500)
   }
 })

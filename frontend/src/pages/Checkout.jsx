@@ -7,31 +7,85 @@ import { useAuth } from "../context/AuthContext";
 import {
   ChevronRight, ShieldCheck, Lock, AlertCircle, Truck,
   CreditCard, Banknote, X, CheckCircle2, Package, Sparkles,
-  Globe, ChevronDown,
+  Globe, ChevronDown, Minus, Plus, Trash2,
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { COUNTRIES, COUNTRY_MAP } from "../data/countries";
-import { trackEvent } from "../lib/tracking";
+import { trackEvent, toAnalyticsItem } from "../lib/tracking";
 import "./Checkout.css";
 
 const CF_ENV = import.meta.env.VITE_CASHFREE_ENV || "SANDBOX";
-const COD_SHIPPING_INR = 39;          // COD fee always in INR base
+const DEFAULT_COD_FEE_INR = 39;       // Fallback only — Admin → Settings → Shipping is the source of truth
 const DEFAULT_COUNTRY = COUNTRY_MAP["IN"]; // India default
+const FORM_STORAGE_KEY = "sr_checkout_details";
+
+const EMPTY_FORM = {
+  email: "", firstName: "", lastName: "", address: "", apartment: "",
+  city: "", state: "", pincode: "", phone: "",
+};
+
+// Keeps shopper details for this tab only, so a failed payment or a trip back
+// to the shop doesn't wipe the form.
+const loadSavedForm = () => {
+  try {
+    return JSON.parse(sessionStorage.getItem(FORM_STORAGE_KEY) || "null");
+  } catch {
+    return null;
+  }
+};
+
+const cartToAnalyticsItems = (lines) =>
+  lines.map((l) => toAnalyticsItem(l, { price: l.unitPrice, quantity: l.quantity, variant: l.selectedSize }));
 
 export default function Checkout() {
-  const { cart, cartCount, clearCart } = useCart();
+  const {
+    cartLines, cartSubtotal, cartCount, hasUnavailableItems,
+    clearCart, updateQuantity, removeFromCart,
+  } = useCart();
   const { formatPrice, changeCurrency, currency } = useCurrency();
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  const [saved] = useState(loadSavedForm);
+
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-    trackEvent("begin_checkout", { itemCount: cartCount, currency });
   }, []);
 
+  // begin_checkout once per visit, with the bag's real value.
+  const beganCheckout = useRef(false);
+  useEffect(() => {
+    if (beganCheckout.current || cartLines.length === 0) return;
+    beganCheckout.current = true;
+    trackEvent("begin_checkout", { value: cartSubtotal, items: cartToAnalyticsItems(cartLines) });
+  }, [cartLines, cartSubtotal]);
+
+  // ── COD rules (admin-controlled) ────────────────────
+  const [codRules, setCodRules] = useState({ enabled: true, fee: DEFAULT_COD_FEE_INR });
+  useEffect(() => {
+    supabase
+      .from("settings")
+      .select("key, value")
+      .eq("group", "shipping")
+      .in("key", ["cod_charge", "cod_enabled"])
+      .then(({ data }) => {
+        if (!data) return;
+        const byKey = Object.fromEntries(
+          data.map((r) => [r.key, typeof r.value === "string" ? JSON.parse(r.value) : r.value])
+        );
+        const fee = Number(byKey.cod_charge?.amount);
+        setCodRules({
+          enabled: byKey.cod_enabled?.enabled !== false,
+          fee: Number.isFinite(fee) && fee >= 0 ? fee : DEFAULT_COD_FEE_INR,
+        });
+      });
+  }, []);
+  const codFee = codRules.fee;
+
   // ── Country / dial-code state ───────────────────────
-  const [selectedCountry, setSelectedCountry] = useState(DEFAULT_COUNTRY);
-  const [dialCode, setDialCode] = useState(DEFAULT_COUNTRY.dialCode);
+  const initialCountry = COUNTRY_MAP[saved?.countryCode] || DEFAULT_COUNTRY;
+  const [selectedCountry, setSelectedCountry] = useState(initialCountry);
+  const [dialCode, setDialCode] = useState(saved?.dialCode || initialCountry.dialCode);
   const [countrySearch, setCountrySearch] = useState("");
   const [showCountryDrop, setShowCountryDrop] = useState(false);
   const [showDialDrop, setShowDialDrop] = useState(false);
@@ -67,29 +121,69 @@ export default function Checkout() {
   );
 
   // ── Form state ──────────────────────────────────────
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState(() => ({
+    ...EMPTY_FORM,
     email: user?.email || "",
     firstName: user?.user_metadata?.full_name?.split(" ")[0] || "",
     lastName: user?.user_metadata?.full_name?.split(" ").slice(1).join(" ") || "",
-    address: "",
-    apartment: "",
-    city: "",
-    state: "",
-    pincode: "",
-    phone: "",
-  });
+    ...(saved?.form || {}),
+  }));
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(
+        FORM_STORAGE_KEY,
+        JSON.stringify({ form: formData, countryCode: selectedCountry.code, dialCode })
+      );
+    } catch {}
+  }, [formData, selectedCountry, dialCode]);
 
   const [step, setStep] = useState("form");
+  // Mobile: the bag summary sits above the form, collapsed to one line.
+  const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [formErrors, setFormErrors] = useState({});
 
-  // ── Totals ──────────────────────────────────────────
-  const subtotal = cart.reduce(
-    (acc, item) => acc + (item.salePrice || item.price) * item.quantity,
-    0
-  );
+  const isIndia = selectedCountry.code === "IN";
+
+  // ── Validation ──────────────────────────────────────
+  const validateField = (name, data = formData) => {
+    const v = (data[name] || "").trim();
+    switch (name) {
+      case "email":
+        if (!v) return "Email is required";
+        return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) ? "" : "Please enter a valid email address";
+      case "firstName": return v ? "" : "First name is required";
+      case "lastName": return v ? "" : "Last name is required";
+      case "address": return v ? "" : "Address is required";
+      case "city": return v ? "" : "City is required";
+      case "state": return v ? "" : "State / Province is required";
+      case "pincode":
+        if (!v) return isIndia ? "PIN code is required" : "Postal / ZIP code is required";
+        return isIndia && !/^[1-9]\d{5}$/.test(v) ? "Please enter a valid 6-digit PIN code" : "";
+      case "phone": {
+        const digits = v.replace(/\D/g, "");
+        if (!digits) return "Phone number is required";
+        if (isIndia && dialCode === "+91") {
+          return /^[6-9]\d{9}$/.test(digits.replace(/^0/, ""))
+            ? "" : "Please enter a 10-digit mobile number";
+        }
+        return digits.length >= 6 && digits.length <= 15 ? "" : "Enter a valid phone number";
+      }
+      default: return "";
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {};
+    ["firstName", "lastName", "address", "city", "state", "pincode", "email", "phone"].forEach((f) => {
+      const msg = validateField(f);
+      if (msg) errors[f] = msg;
+    });
+    return errors;
+  };
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -98,19 +192,12 @@ export default function Checkout() {
     }
   };
 
-  const validateForm = () => {
-    const errors = {};
-    if (!formData.email) errors.email = "Email is required";
-    if (!formData.firstName) errors.firstName = "First name is required";
-    if (!formData.lastName) errors.lastName = "Last name is required";
-    if (!formData.address) errors.address = "Address is required";
-    if (!formData.city) errors.city = "City is required";
-    if (!formData.state) errors.state = "State / Province is required";
-    if (!formData.pincode) errors.pincode = "Postal / ZIP code is required";
-    const phone = formData.phone.replace(/\D/g, "");
-    if (!phone || phone.length < 6 || phone.length > 15)
-      errors.phone = "Enter a valid phone number";
-    return errors;
+  // Inline validation once the shopper leaves a field they've typed in.
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    if (!value) return;
+    const msg = validateField(name, { ...formData, [name]: value });
+    setFormErrors((prev) => ({ ...prev, [name]: msg }));
   };
 
   const handleContinueToPayment = (e) => {
@@ -119,61 +206,78 @@ export default function Checkout() {
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       // Scroll to first error
-      document.querySelector(".has-error input")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(() => {
+        document.querySelector(".has-error input, .has-error select")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 0);
       return;
     }
+    trackEvent("add_shipping_info", {
+      value: cartSubtotal,
+      items: cartToAnalyticsItems(cartLines),
+      shipping_tier: isIndia ? "India" : "International",
+    });
     setStep("payment");
     setPaymentMethod(null);
     setError("");
   };
 
   // Full phone number = dialCode + local number
-  const fullPhone = `${dialCode}${formData.phone}`;
+  const localPhone = formData.phone.replace(/\D/g, "").replace(/^0/, "");
+  const fullPhone = `${dialCode}${localPhone}`;
+  const customerName = `${formData.firstName} ${formData.lastName}`.trim();
+
+  const customerDetails = {
+    name: customerName,
+    email: formData.email.trim(),
+    phone: fullPhone,
+    address: {
+      address: formData.address,
+      apartment: formData.apartment || "",
+      city: formData.city,
+      state: formData.state,
+      pincode: formData.pincode.trim(),
+      country: selectedCountry.name,
+      country_code: selectedCountry.code,
+    },
+  };
+  const orderLines = cartLines.map((l) => ({
+    productId: l.id,
+    quantity: l.quantity,
+    selectedSize: l.selectedSize || null,
+  }));
+
+  // Edge-function errors carry a shopper-readable message in the JSON body.
+  const readFunctionError = async (fnError, data) => {
+    if (data?.error) return data.error;
+    try {
+      const body = await fnError?.context?.json?.();
+      if (body?.error) return body.error;
+    } catch {}
+    return "We couldn't place your order. Please try again.";
+  };
 
   // ── Online Payment via Cashfree ─────────────────────
   const handleOnlinePayment = async () => {
     setError("");
     setLoading(true);
     try {
-      const customerName = `${formData.firstName} ${formData.lastName}`.trim();
-
+      // The server prices the order from the catalogue — no amount is sent.
       const { data: edgeData, error: edgeError } =
         await supabase.functions.invoke("cashfree-order", {
           body: {
-            orderDetails: {
-              amount: subtotal,
-              currency: "INR", // Cashfree processes in INR
-              items: cart.map((item) => ({
-                productId: item.id,
-                title: item.title,
-                quantity: item.quantity,
-                price: item.salePrice || item.price,
-              })),
-            },
-            customerDetails: {
-              name: customerName,
-              email: formData.email,
-              phone: fullPhone,
-              address: {
-                address: `${formData.address}${formData.apartment ? ", " + formData.apartment : ""}`,
-                city: formData.city,
-                state: formData.state,
-                pincode: formData.pincode,
-                country: selectedCountry.name,
-              },
-            },
+            orderDetails: { items: orderLines },
+            customerDetails,
+            currencySelected: currency,
           },
         });
 
       if (edgeError || edgeData?.error) {
-        throw new Error(
-          edgeData?.error || edgeError?.message || "Payment initiation failed."
-        );
+        throw new Error(await readFunctionError(edgeError, edgeData));
       }
 
       const { payment_session_id } = edgeData;
       if (!payment_session_id)
-        throw new Error("No payment session ID received from Cashfree.");
+        throw new Error("We couldn't start the payment. Please try again.");
 
       const cashfree = await load({
         mode: CF_ENV === "PRODUCTION" ? "production" : "sandbox",
@@ -195,90 +299,28 @@ export default function Checkout() {
     setError("");
     setLoading(true);
     try {
-      const orderId = `SR_COD_${Date.now()}`;
-      const customerName = `${formData.firstName} ${formData.lastName}`.trim();
-      const orderTotal = subtotal + COD_SHIPPING_INR;
-      const orderItems = cart.map((item) => ({
-        productId: item.id,
-        title: item.title,
-        quantity: item.quantity,
-        price: item.salePrice || item.price,
-        selectedSize: item.selectedSize || null,
-      }));
-
-      const addressData = {
-        address: formData.address,
-        apartment: formData.apartment || "",
-        city: formData.city,
-        state: formData.state,
-        pincode: formData.pincode,
-        country: selectedCountry.name,
-        country_code: selectedCountry.code,
-        name: customerName,
-        phone: fullPhone,
-        email: formData.email,
-      };
-
-      // ── 1. Provision customer account (create if new, send magic link) ──
-      let isNewUser = false;
-      if (!user) {
-        try {
-          const { data: provData } = await supabase.functions.invoke("provision-customer", {
-            body: {
-              email: formData.email,
-              fullName: customerName,
-              orderId,
-            },
-          });
-          isNewUser = provData?.isNewUser ?? false;
-        } catch (provErr) {
-          console.warn("Account provisioning failed (non-fatal):", provErr);
-        }
+      const { data, error: fnError } = await supabase.functions.invoke("place-cod-order", {
+        body: { items: orderLines, customerDetails, currencySelected: currency },
+      });
+      if (fnError || data?.error || !data?.order_id) {
+        throw new Error(await readFunctionError(fnError, data));
       }
 
-      // ── 2. Insert COD order ──────────────────────────────────────────────
-      const { error: insertError } = await supabase.from("orders").insert([
-        {
-          id: orderId,
-          order_id: orderId,
-          orderNumber: orderId,
-          customer_name: customerName,
-          customer_email: formData.email,
-          customer_phone: fullPhone,
-          shipping_address: addressData,
-          shippingAddress: addressData,
-          billingAddress: addressData,
-          items: orderItems,
-          subtotal,
-          shipping_charge: COD_SHIPPING_INR,
-          shippingCharge: COD_SHIPPING_INR,
-          total: orderTotal,
-          total_amount: orderTotal,
-          payment_method: "COD",
-          paymentMethod: "COD",
-          payment_status: "PENDING",
-          paymentStatus: "PENDING",
-          order_status: "PROCESSING",
-          orderStatus: "PROCESSING",
-          currency_selected: currency,
-          user_id: user?.id || null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-      ]);
-
-      if (insertError) {
-        console.error("COD order insert error:", insertError);
-        throw new Error(insertError.message || "Unable to save your order. Please try again.");
-      }
+      // The order now exists server-side — this is a confirmed COD purchase.
+      trackEvent("purchase", {
+        transaction_id: data.order_id,
+        value: Number(data.total),
+        shipping: codFee,
+        payment_type: "COD",
+        items: (data.items || []).map((i) =>
+          toAnalyticsItem({ id: i.productId, title: i.title }, { price: i.price, quantity: i.quantity, variant: i.selectedSize })
+        ),
+      });
 
       clearCart();
-      const params = new URLSearchParams({
-        order_id: orderId,
-        method: "cod",
-        email: formData.email,
-      });
-      if (isNewUser) params.set("new_account", "1");
+      try { sessionStorage.removeItem(FORM_STORAGE_KEY); } catch {}
+      const params = new URLSearchParams({ order_id: data.order_id, method: "cod" });
+      if (data.isNewUser) params.set("new_account", "1");
       navigate(`/order-success?${params.toString()}`);
     } catch (err) {
       console.error("COD order failed:", err);
@@ -287,8 +329,12 @@ export default function Checkout() {
     }
   };
 
-
   const handlePaymentConfirm = () => {
+    trackEvent("add_payment_info", {
+      value: paymentMethod === "cod" ? cartSubtotal + codFee : cartSubtotal,
+      payment_type: paymentMethod === "cod" ? "COD" : "Online",
+      items: cartToAnalyticsItems(cartLines),
+    });
     if (paymentMethod === "online") handleOnlinePayment();
     else if (paymentMethod === "cod") handleCOD();
   };
@@ -310,7 +356,18 @@ export default function Checkout() {
     );
   }
 
-  const isIndia = selectedCountry.code === "IN";
+  const codAvailable = isIndia && codRules.enabled;
+
+  const fieldProps = (name) => ({
+    name,
+    value: formData[name],
+    onChange: handleChange,
+    onBlur: handleBlur,
+    "aria-invalid": Boolean(formErrors[name]),
+    "aria-describedby": formErrors[name] ? `co-${name}-error` : undefined,
+  });
+  const fieldError = (name) =>
+    formErrors[name] && <span className="field-error" id={`co-${name}-error`} role="alert">{formErrors[name]}</span>;
 
   return (
     <div className="checkout-page container">
@@ -318,7 +375,7 @@ export default function Checkout() {
       <div className="checkout-header">
         <h1>Checkout</h1>
         <div className="breadcrumb">
-          <Link to="/cart">Cart</Link>
+          <Link to="/shop">Continue Shopping</Link>
           <ChevronRight size={14} />
           <span className={step === "form" ? "bc-active" : ""}>Your Details</span>
           <ChevronRight size={14} />
@@ -342,15 +399,15 @@ export default function Checkout() {
               <div className="form-row">
                 <div className={`form-group ${formErrors.firstName ? "has-error" : ""}`}>
                   <label htmlFor="co-firstName">First Name</label>
-                  <input id="co-firstName" type="text" name="firstName"
-                    placeholder="First name" value={formData.firstName} onChange={handleChange} />
-                  {formErrors.firstName && <span className="field-error">{formErrors.firstName}</span>}
+                  <input id="co-firstName" type="text" autoComplete="given-name"
+                    placeholder="First name" {...fieldProps("firstName")} />
+                  {fieldError("firstName")}
                 </div>
                 <div className={`form-group ${formErrors.lastName ? "has-error" : ""}`}>
                   <label htmlFor="co-lastName">Last Name</label>
-                  <input id="co-lastName" type="text" name="lastName"
-                    placeholder="Last name" value={formData.lastName} onChange={handleChange} />
-                  {formErrors.lastName && <span className="field-error">{formErrors.lastName}</span>}
+                  <input id="co-lastName" type="text" autoComplete="family-name"
+                    placeholder="Last name" {...fieldProps("lastName")} />
+                  {fieldError("lastName")}
                 </div>
               </div>
 
@@ -403,14 +460,13 @@ export default function Checkout() {
               {/* Address lines */}
               <div className={`form-group ${formErrors.address ? "has-error" : ""}`}>
                 <label htmlFor="co-address">Street Address</label>
-                <input id="co-address" type="text" name="address"
-                  placeholder="House/flat no., street, area"
-                  value={formData.address} onChange={handleChange} />
-                {formErrors.address && <span className="field-error">{formErrors.address}</span>}
+                <input id="co-address" type="text" autoComplete="address-line1"
+                  placeholder="House/flat no., street, area" {...fieldProps("address")} />
+                {fieldError("address")}
               </div>
               <div className="form-group">
                 <label htmlFor="co-apartment">Apartment / Suite (optional)</label>
-                <input id="co-apartment" type="text" name="apartment"
+                <input id="co-apartment" type="text" name="apartment" autoComplete="address-line2"
                   placeholder="Apt, suite, floor, landmark…"
                   value={formData.apartment} onChange={handleChange} />
               </div>
@@ -419,9 +475,9 @@ export default function Checkout() {
               <div className="form-row form-row-3">
                 <div className={`form-group ${formErrors.city ? "has-error" : ""}`}>
                   <label htmlFor="co-city">City</label>
-                  <input id="co-city" type="text" name="city"
-                    placeholder="City" value={formData.city} onChange={handleChange} />
-                  {formErrors.city && <span className="field-error">{formErrors.city}</span>}
+                  <input id="co-city" type="text" autoComplete="address-level2"
+                    placeholder="City" {...fieldProps("city")} />
+                  {fieldError("city")}
                 </div>
 
                 {/* State: dropdown for countries with known states, text for others */}
@@ -432,10 +488,9 @@ export default function Checkout() {
                   {selectedCountry.states?.length > 0 ? (
                     <select
                       id="co-state"
-                      name="state"
-                      value={formData.state}
-                      onChange={handleChange}
                       className="state-select"
+                      autoComplete="address-level1"
+                      {...fieldProps("state")}
                     >
                       <option value="">Select…</option>
                       {selectedCountry.states.map((s) => (
@@ -443,21 +498,20 @@ export default function Checkout() {
                       ))}
                     </select>
                   ) : (
-                    <input id="co-state" type="text" name="state"
-                      placeholder="State / Province"
-                      value={formData.state} onChange={handleChange} />
+                    <input id="co-state" type="text" autoComplete="address-level1"
+                      placeholder="State / Province" {...fieldProps("state")} />
                   )}
-                  {formErrors.state && <span className="field-error">{formErrors.state}</span>}
+                  {fieldError("state")}
                 </div>
 
                 <div className={`form-group ${formErrors.pincode ? "has-error" : ""}`}>
                   <label htmlFor="co-pincode">
                     {isIndia ? "PIN Code" : "Postal / ZIP Code"}
                   </label>
-                  <input id="co-pincode" type="text" name="pincode"
-                    placeholder={isIndia ? "6-digit PIN" : "Postal code"}
-                    value={formData.pincode} onChange={handleChange} />
-                  {formErrors.pincode && <span className="field-error">{formErrors.pincode}</span>}
+                  <input id="co-pincode" type="text" autoComplete="postal-code"
+                    inputMode={isIndia ? "numeric" : "text"} maxLength={isIndia ? 6 : 12}
+                    placeholder={isIndia ? "6-digit PIN" : "Postal code"} {...fieldProps("pincode")} />
+                  {fieldError("pincode")}
                 </div>
               </div>
 
@@ -467,7 +521,7 @@ export default function Checkout() {
                   <Globe size={14} />
                   <span>
                     International orders are processed in INR (₹). Your bank may apply conversion charges.
-                    Delivery timeline: 10–21 business days.
+                    Delivery timeline: 7–12 business days after dispatch.
                   </span>
                 </div>
               )}
@@ -483,11 +537,15 @@ export default function Checkout() {
               <div className={`form-group ${formErrors.email ? "has-error" : ""}`}>
                 <label htmlFor="co-email">Email Address</label>
                 <input
-                  id="co-email" type="email" name="email"
-                  placeholder="you@example.com"
-                  value={formData.email} onChange={handleChange}
+                  id="co-email" type="email" autoComplete="email" inputMode="email"
+                  placeholder="you@example.com" {...fieldProps("email")}
                 />
-                {formErrors.email && <span className="field-error">{formErrors.email}</span>}
+                {fieldError("email")}
+                {!user && (
+                  <p className="currency-notice">
+                    No account needed — we'll email you a secure link to view your order.
+                  </p>
+                )}
               </div>
 
               {/* Phone with Dial Code */}
@@ -536,78 +594,124 @@ export default function Checkout() {
                     )}
                   </div>
                   <input
-                    id="co-phone" type="tel" name="phone"
-                    placeholder="Phone number"
-                    value={formData.phone} onChange={handleChange}
-                    className="phone-number-input"
+                    id="co-phone" type="tel" autoComplete="tel-national" inputMode="tel"
+                    placeholder={isIndia ? "10-digit mobile number" : "Phone number"}
+                    className="phone-number-input" {...fieldProps("phone")}
                   />
                 </div>
-                {formErrors.phone && <span className="field-error">{formErrors.phone}</span>}
+                {fieldError("phone")}
+                <p className="currency-notice">Used only for delivery updates from our courier.</p>
               </div>
             </section>
 
-            <button type="submit" className="btn-continue" id="continue-to-payment-btn">
+            {hasUnavailableItems && (
+              <div className="modal-error" role="alert" style={{ marginBottom: 16 }}>
+                <AlertCircle size={16} />
+                <span>Some pieces in your bag are no longer available in the quantity selected. Please update your bag to continue.</span>
+              </div>
+            )}
+
+            <button type="submit" className="btn-continue" id="continue-to-payment-btn" disabled={hasUnavailableItems}>
               <span>Continue to Payment</span>
               <ChevronRight size={18} />
             </button>
             <div className="secure-badge">
-              <Lock size={13} /> 256-bit SSL encrypted &amp; secure checkout
+              <Lock size={13} /> Secure checkout · Payments processed by Cashfree
             </div>
           </form>
         </div>
 
         {/* ── Right: Order Summary ── */}
-        <div className="checkout-summary-col">
+        <div className={`checkout-summary-col ${mobileSummaryOpen ? "is-open" : ""}`}>
           <div className="order-summary">
+            <button
+              type="button"
+              className="mobile-summary-toggle"
+              aria-expanded={mobileSummaryOpen}
+              onClick={() => setMobileSummaryOpen((v) => !v)}
+            >
+              <span>
+                {mobileSummaryOpen ? "Hide" : "Review"} your bag ({cartCount})
+                <ChevronDown size={14} className={mobileSummaryOpen ? "is-flipped" : ""} />
+              </span>
+              <strong>{formatPrice(cartSubtotal)}</strong>
+            </button>
             {/* Currency / Country tag */}
             <div className="summary-currency-tag">
               <span>{selectedCountry.flag} {selectedCountry.name}</span>
               <span className="summary-currency-badge">{currency}</span>
             </div>
 
-            <h2>Order Summary</h2>
+            <h2>Your Bag ({cartCount})</h2>
             <div className="summary-items">
-              {cart.map((item) => (
-                <div
-                  key={item.cartItemId || `${item.id}-${item.selectedSize || ""}`}
-                  className="summary-item"
-                >
-                  <div className="summary-item-img">
-                    <img src={item.images?.[0] || item.image} alt={item.title}
-                      onError={(e) => { e.target.src = "https://via.placeholder.com/60x80?text=SR"; }} />
-                    <span className="summary-item-qty">{item.quantity}</span>
+              {cartLines.map((item) => {
+                const lineId = item.cartItemId || item.id;
+                const atMax = item.quantity >= item.available;
+                return (
+                  <div key={lineId} className={`summary-item ${item.purchasable ? "" : "summary-item-unavailable"}`}>
+                    <Link to={`/product/${item.id}`} className="summary-item-img">
+                      <img src={item.images?.[0] || item.image} alt={item.title}
+                        onError={(e) => { e.currentTarget.src = "/logo.png"; }} />
+                      <span className="summary-item-qty">{item.quantity}</span>
+                    </Link>
+                    <div className="summary-item-info">
+                      <h4 style={{ textTransform: "capitalize" }}>
+                        <Link to={`/product/${item.id}`}>{item.title?.replace(/"/g, "")}</Link>
+                      </h4>
+                      {item.selectedSize && (
+                        <p className="size-tag">Size: {item.selectedSize}</p>
+                      )}
+                      {item.fabric && <p>{item.fabric}</p>}
+                      {!item.purchasable && (
+                        <p className="summary-item-warning">
+                          {item.available > 0 ? `Only ${item.available} available` : "No longer available"}
+                        </p>
+                      )}
+                      <div className="summary-qty-controls">
+                        <button type="button" aria-label={`Decrease quantity of ${item.title}`}
+                          disabled={item.quantity <= 1}
+                          onClick={() => updateQuantity(lineId, item.quantity - 1)}>
+                          <Minus size={12} />
+                        </button>
+                        <span aria-live="polite">{item.quantity}</span>
+                        <button type="button" aria-label={`Increase quantity of ${item.title}`}
+                          disabled={atMax}
+                          title={atMax ? "No more available" : undefined}
+                          onClick={() => updateQuantity(lineId, item.quantity + 1)}>
+                          <Plus size={12} />
+                        </button>
+                        <button type="button" className="summary-remove-btn"
+                          aria-label={`Remove ${item.title} from bag`}
+                          onClick={() => removeFromCart(lineId)}>
+                          <Trash2 size={13} /> Remove
+                        </button>
+                      </div>
+                    </div>
+                    <div className="summary-item-price">
+                      {formatPrice(item.unitPrice * item.quantity)}
+                    </div>
                   </div>
-                  <div className="summary-item-info">
-                    <h4 style={{ textTransform: "capitalize" }}>
-                      {item.title?.replace(/"/g, "")}
-                    </h4>
-                    {item.selectedSize && (
-                      <p className="size-tag">Size: {item.selectedSize}</p>
-                    )}
-                    {item.fabric && <p>{item.fabric}</p>}
-                  </div>
-                  <div className="summary-item-price">
-                    {formatPrice((item.salePrice || item.price) * item.quantity)}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="summary-totals">
               <div className="summary-row">
                 <span>Subtotal</span>
-                <span>{formatPrice(subtotal)}</span>
+                <span>{formatPrice(cartSubtotal)}</span>
               </div>
               <div className="summary-row shipping-row">
                 <span>Shipping</span>
-                <span className="shipping-free">Free (Online)</span>
+                <span className="shipping-free">Free with online payment</span>
               </div>
-              <div className="summary-row cod-note-row">
-                <span className="cod-note">or +{formatPrice(COD_SHIPPING_INR)} for COD</span>
-              </div>
+              {codAvailable && (
+                <div className="summary-row cod-note-row">
+                  <span className="cod-note">Cash on Delivery adds a {formatPrice(codFee)} handling fee</span>
+                </div>
+              )}
               <div className="summary-row total-row">
                 <span>Total</span>
-                <span>{formatPrice(subtotal)}</span>
+                <span>{formatPrice(cartSubtotal)}</span>
               </div>
             </div>
 
@@ -623,14 +727,17 @@ export default function Checkout() {
                 <Truck size={18} />
                 <div>
                   <h4>{isIndia ? "Pan-India Delivery" : "Worldwide Shipping"}</h4>
-                  <p>{isIndia ? "Free shipping on online payments" : "Ships from India · 10–21 business days"}</p>
+                  <p>{isIndia ? "Free shipping on online payments" : "Ships from Lucknow · 7–12 business days"}</p>
                 </div>
               </div>
               <div className="trust-item">
                 <Sparkles size={18} />
                 <div>
-                  <h4>SafedRang Quality Promise</h4>
-                  <p>Every piece curated with care</p>
+                  <h4>Questions before you order?</h4>
+                  <p>
+                    <a href="https://wa.me/919151566602?text=Hello%2C%20I%20have%20a%20question%20about%20my%20order."
+                      target="_blank" rel="noopener noreferrer">Chat with us on WhatsApp</a>
+                  </p>
                 </div>
               </div>
             </div>
@@ -642,7 +749,7 @@ export default function Checkout() {
           PAYMENT SELECTION MODAL
       ══════════════════════════════════════════════ */}
       {step === "payment" && (
-        <div className="payment-modal-overlay" onClick={() => setStep("form")}>
+        <div className="payment-modal-overlay" onClick={() => !loading && setStep("form")}>
           <div
             className="payment-modal"
             onClick={(e) => e.stopPropagation()}
@@ -652,12 +759,12 @@ export default function Checkout() {
               <div>
                 <h2 className="modal-title">How would you like to pay?</h2>
                 <p className="modal-subtitle">
-                  {cart.length} item{cart.length !== 1 ? "s" : ""} ·{" "}
-                  Subtotal {formatPrice(subtotal)} ·{" "}
+                  {cartCount} item{cartCount !== 1 ? "s" : ""} ·{" "}
+                  Subtotal {formatPrice(cartSubtotal)} ·{" "}
                   {selectedCountry.flag} {selectedCountry.name}
                 </p>
               </div>
-              <button className="modal-close" onClick={() => setStep("form")} aria-label="Close">
+              <button className="modal-close" onClick={() => setStep("form")} aria-label="Close" disabled={loading}>
                 <X size={20} />
               </button>
             </div>
@@ -679,20 +786,20 @@ export default function Checkout() {
                     UPI · Cards · Netbanking via Cashfree
                   </div>
                   <div className="payment-card-badges">
-                    <span className="badge badge-green">🎉 Free Shipping</span>
-                    <span className="badge badge-blue">🔒 Secure</span>
+                    <span className="badge badge-green">Free Shipping</span>
+                    <span className="badge badge-blue">Secure</span>
                   </div>
                 </div>
                 <div className="payment-card-amount">
                   <div className="amount-label">You Pay</div>
-                  <div className="amount-value">{formatPrice(subtotal)}</div>
+                  <div className="amount-value">{formatPrice(cartSubtotal)}</div>
                   <div className="amount-shipping">Shipping Free</div>
                 </div>
                 <div className="payment-card-check"><CheckCircle2 size={22} /></div>
               </label>
 
-              {/* COD — India only */}
-              {isIndia ? (
+              {/* COD — India only, when enabled in admin settings */}
+              {codAvailable ? (
                 <label
                   className={`payment-card ${paymentMethod === "cod" ? "selected" : ""}`}
                   htmlFor="pay-cod" id="pay-cod-card"
@@ -706,20 +813,24 @@ export default function Checkout() {
                     <div className="payment-card-title">Cash on Delivery</div>
                     <div className="payment-card-desc">Pay at your doorstep when delivered</div>
                     <div className="payment-card-badges">
-                      <span className="badge badge-amber">+₹{COD_SHIPPING_INR} Handling Fee</span>
+                      <span className="badge badge-amber">+{formatPrice(codFee)} Handling Fee</span>
                     </div>
                   </div>
                   <div className="payment-card-amount">
                     <div className="amount-label">You Pay</div>
-                    <div className="amount-value">{formatPrice(subtotal + COD_SHIPPING_INR)}</div>
-                    <div className="amount-shipping">Incl. ₹{COD_SHIPPING_INR} COD fee</div>
+                    <div className="amount-value">{formatPrice(cartSubtotal + codFee)}</div>
+                    <div className="amount-shipping">Incl. {formatPrice(codFee)} COD fee</div>
                   </div>
                   <div className="payment-card-check"><CheckCircle2 size={22} /></div>
                 </label>
               ) : (
                 <div className="cod-unavailable">
                   <Banknote size={18} />
-                  <span>Cash on Delivery is available for India only. Please pay online.</span>
+                  <span>
+                    {isIndia
+                      ? "Cash on Delivery is currently unavailable. Please pay online."
+                      : "Cash on Delivery is available for India only. Please pay online."}
+                  </span>
                 </div>
               )}
             </div>
@@ -728,18 +839,18 @@ export default function Checkout() {
               <div className="modal-total-banner">
                 <span>
                   {paymentMethod === "online"
-                    ? "✨ Free shipping — Pay online"
-                    : "📦 Cash on Delivery — Pay at doorstep"}
+                    ? "Free shipping — Pay online"
+                    : "Cash on Delivery — Pay at doorstep"}
                 </span>
                 <strong>
                   Total:{" "}
-                  {formatPrice(paymentMethod === "cod" ? subtotal + COD_SHIPPING_INR : subtotal)}
+                  {formatPrice(paymentMethod === "cod" ? cartSubtotal + codFee : cartSubtotal)}
                 </strong>
               </div>
             )}
 
             {error && (
-              <div className="modal-error">
+              <div className="modal-error" role="alert">
                 <AlertCircle size={16} />
                 <span>{error}</span>
               </div>
@@ -748,7 +859,7 @@ export default function Checkout() {
             <button
               className="btn-pay-now"
               onClick={handlePaymentConfirm}
-              disabled={!paymentMethod || loading}
+              disabled={!paymentMethod || loading || hasUnavailableItems}
               id="confirm-payment-btn"
             >
               {loading ? (
@@ -759,16 +870,16 @@ export default function Checkout() {
                   Processing…
                 </span>
               ) : paymentMethod === "online" ? (
-                <><Lock size={16} /> Pay {formatPrice(subtotal)} Securely</>
+                <><Lock size={16} /> Pay {formatPrice(cartSubtotal)} Securely</>
               ) : paymentMethod === "cod" ? (
-                <><Package size={16} /> Place COD Order · {formatPrice(subtotal + COD_SHIPPING_INR)}</>
+                <><Package size={16} /> Place COD Order · {formatPrice(cartSubtotal + codFee)}</>
               ) : (
                 "Select a Payment Method to Continue"
               )}
             </button>
 
             <p className="modal-footnote">
-              <Lock size={12} /> Your personal &amp; payment information is encrypted and secure.
+              <Lock size={12} /> Card and UPI details are entered on Cashfree's secure page — we never see or store them.
             </p>
           </div>
         </div>

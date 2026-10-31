@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { trackEvent } from "../lib/tracking";
 import "./Contact.css";
 
 const FAQ_ITEMS = [
@@ -42,8 +43,8 @@ export default function Contact() {
     subject: "Saree Consultation & Styling",
     message: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [sentMessage, setSentMessage] = useState(null);
   const [openFaq, setOpenFaq] = useState(null);
 
   useEffect(() => {
@@ -56,6 +57,9 @@ export default function Contact() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // There is no inbox behind this form, so the enquiry is handed to WhatsApp
+  // (our concierge channel) pre-filled, with email as an alternative. The old
+  // version only simulated sending, so messages never reached anyone.
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
@@ -63,23 +67,35 @@ export default function Contact() {
       return;
     }
 
-    setIsSubmitting(true);
+    const text = [
+      `Hello Safed Rang, this is ${formData.name.trim()}.`,
+      `Subject: ${formData.subject}`,
+      "",
+      formData.message.trim(),
+      "",
+      `Email: ${formData.email.trim()}`,
+      formData.phone.trim() ? `Phone: ${formData.phone.trim()}` : "",
+    ]
+      .filter((line, i, arr) => line !== "" || arr[i - 1] !== "")
+      .join("\n")
+      .trim();
 
-    // Simulate luxury inquiry dispatch
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-      toast.success(
-        "Thank you for contacting Safed Rang. Our atelier concierge will respond within 24 hours."
-      );
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        subject: "Saree Consultation & Styling",
-        message: "",
-      });
-    }, 900);
+    const message = {
+      whatsapp: `https://wa.me/919151566602?text=${encodeURIComponent(text)}`,
+      email: `mailto:contact@safedrang.com?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(text)}`,
+    };
+
+    window.open(message.whatsapp, "_blank", "noopener,noreferrer");
+    trackEvent("generate_lead", { lead_type: "contact_form" });
+    setSentMessage(message);
+    setIsSubmitted(true);
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      subject: "Saree Consultation & Styling",
+      message: "",
+    });
   };
 
   const toggleFaq = (index) => {
@@ -217,11 +233,17 @@ export default function Contact() {
                   <div className="success-icon-wrap">
                     <CheckCircle2 size={36} />
                   </div>
-                  <h3>Message Received</h3>
+                  <h3>Your Message Is Ready</h3>
                   <p>
-                    Thank you for reaching out to Safed Rang. Our concierge team has
-                    received your inquiry and will be in touch shortly via email or
-                    WhatsApp.
+                    We've opened WhatsApp with your message filled in — press send there to reach
+                    our concierge.{" "}
+                    {sentMessage && (
+                      <>
+                        WhatsApp didn't open?{" "}
+                        <a href={sentMessage.whatsapp} target="_blank" rel="noopener noreferrer">Open it here</a>{" "}
+                        or <a href={sentMessage.email}>send it by email instead</a>.
+                      </>
+                    )}
                   </p>
                   <button
                     type="button"
@@ -324,16 +346,9 @@ export default function Contact() {
                   <button
                     type="submit"
                     className="btn-primary contact-submit-btn"
-                    disabled={isSubmitting}
                   >
-                    {isSubmitting ? (
-                      <span>SENDING INQUIRY...</span>
-                    ) : (
-                      <>
-                        <span>TRANSMIT MESSAGE</span>
-                        <Send size={14} />
-                      </>
-                    )}
+                    <span>SEND VIA WHATSAPP</span>
+                    <Send size={14} />
                   </button>
                 </form>
               )}

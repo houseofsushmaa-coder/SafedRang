@@ -4,26 +4,23 @@ import {
   CheckCircle2, Package, Truck, Phone, Mail,
   ShoppingBag, User, Sparkles, ArrowRight, Star,
 } from "lucide-react";
-import { trackEvent } from "../lib/tracking";
 
 export default function OrderSuccess() {
   const [searchParams] = useSearchParams();
   const orderId = searchParams.get("order_id");
   const method = searchParams.get("method");       // "cod" | "online"
-  const email = searchParams.get("email") || "";
   const isNewAccount = searchParams.get("new_account") === "1";
 
   const isCOD = method === "cod";
 
-  // Confetti / entrance animation + Purchase tracking
+  // Entrance animation. The purchase event is sent where the order is
+  // confirmed (Checkout for COD, PaymentVerify for online) — not here, since
+  // anyone can open this URL.
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80);
-    if (orderId) {
-      trackEvent("purchase", { orderId, method, currency: "INR" });
-    }
     return () => clearTimeout(t);
-  }, [orderId, method]);
+  }, []);
 
   return (
     <div
@@ -130,7 +127,7 @@ export default function OrderSuccess() {
       </div>
 
       {/* ── New Account Banner ────────────────────────────────── */}
-      {isNewAccount && email && (
+      {isNewAccount && (
         <div
           style={{
             opacity: visible ? 1 : 0,
@@ -190,8 +187,8 @@ export default function OrderSuccess() {
                 Your Patron Account Is Ready
               </h3>
               <p style={{ fontSize: "0.83rem", color: "rgba(255,255,255,0.75)", lineHeight: 1.65, marginBottom: 14 }}>
-                We've created a <strong style={{ color: "#AE8A54" }}>Safed Rang Patron Account</strong> for{" "}
-                <strong style={{ color: "#E8DFD0" }}>{email}</strong>. Check your inbox — we've sent a{" "}
+                We've created a <strong style={{ color: "#AE8A54" }}>Safed Rang Patron Account</strong> for the
+                email you used at checkout. Check your inbox — we've sent a{" "}
                 <strong style={{ color: "#AE8A54" }}>magic sign-in link</strong> so you can access your orders, track
                 delivery, and manage your account — no password needed.
               </p>
@@ -205,7 +202,7 @@ export default function OrderSuccess() {
       )}
 
       {/* ── Existing User: Account CTA ───────────────────────── */}
-      {!isNewAccount && email && (
+      {!isNewAccount && (
         <div
           style={{
             opacity: visible ? 1 : 0,
@@ -265,8 +262,8 @@ export default function OrderSuccess() {
           }}
         >
           {[
-            { icon: <Package size={16} />, text: "Order prepared within 1–2 business days" },
-            { icon: <Truck size={16} />, text: "Delivered in 5–7 business days" },
+            { icon: <Package size={16} />, text: "Dispatched from Lucknow within 2–3 business days" },
+            { icon: <Truck size={16} />, text: "Delivered within 4–7 business days in India" },
             { icon: <Phone size={16} />, text: "Our team may call to confirm your address" },
             { icon: <Star size={16} />, text: "Payment collected at your doorstep" },
           ].map(({ icon, text }, i) => (
@@ -311,8 +308,8 @@ export default function OrderSuccess() {
           {[
             { icon: <CheckCircle2 size={16} />, text: "Payment confirmed & secured" },
             { icon: <Package size={16} />, text: "Atelier inspection underway" },
-            { icon: <Truck size={16} />, text: "Delivery in 5–7 business days" },
-            { icon: <Mail size={16} />, text: "Confirmation email on its way" },
+            { icon: <Truck size={16} />, text: "Delivered within 4–7 business days in India" },
+            { icon: <Mail size={16} />, text: "Sign-in link sent to your email" },
           ].map(({ icon, text }, i) => (
             <div
               key={i}

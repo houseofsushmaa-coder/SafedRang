@@ -1,39 +1,27 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
+import { trackEvent } from "../lib/tracking";
 import "./WhatsAppButton.css";
 
 const ONLINE_WHATSAPP_ICON =
   "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg";
+const WHATSAPP_NUMBER = "919151566602";
 
 export default function WhatsAppButton() {
   const location = useLocation();
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [whatsappUrl, setWhatsappUrl] = useState(
-    "https://web.whatsapp.com/send?phone=919151566602&text=Hello!"
-  );
-
-  useEffect(() => {
-    // Detect mobile touch screen vs desktop browser
-    const isMobile =
-      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
-      ) || (typeof window !== "undefined" && window.innerWidth <= 768);
-
-    if (isMobile) {
-      setWhatsappUrl(
-        "https://api.whatsapp.com/send?phone=919151566602&text=Hello!"
-      );
-    } else {
-      setWhatsappUrl(
-        "https://web.whatsapp.com/send?phone=919151566602&text=Hello!"
-      );
-    }
-  }, []);
 
   // Do not display over admin panel
   if (location.pathname.startsWith("/admin")) {
     return null;
   }
+
+  // wa.me opens the app on phones and WhatsApp Web / Desktop on computers.
+  // Include the page so the team knows what the shopper is looking at.
+  const message = location.pathname.startsWith("/product/")
+    ? `Hello Safed Rang, I have a question about this piece: ${window.location.origin}${location.pathname}`
+    : "Hello Safed Rang, I have a question.";
+  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 
   return (
     <a
@@ -43,6 +31,7 @@ export default function WhatsAppButton() {
       className="global-whatsapp-floating"
       aria-label="Chat with us on WhatsApp"
       title="Chat with us on WhatsApp"
+      onClick={() => trackEvent("whatsapp_click", { context: "floating_button", page_path: location.pathname })}
     >
       <span className="whatsapp-tooltip">Chat with us on WhatsApp</span>
       <div className="whatsapp-btn-pulse">

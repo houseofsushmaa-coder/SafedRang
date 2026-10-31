@@ -1,10 +1,8 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import {
+  adminClient, cashfreeBase, cashfreeHeaders, corsHeaders, errorResponse, json,
+  priceCart, provisionCustomer, requestUserId, validateCustomer,
+} from "../_shared/orders.ts"
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -12,134 +10,86 @@ serve(async (req) => {
   }
 
   try {
-    const { orderDetails, customerDetails } = await req.json()
-    
-    const appId = Deno.env.get('VITE_CASHFREE_APP_ID')
-    const secretKey = Deno.env.get('CASHFREE_SECRET_KEY')
-    const env = Deno.env.get('VITE_CASHFREE_ENV') || 'SANDBOX'
-    
-    const apiUrl = env === 'PRODUCTION' 
-      ? 'https://api.cashfree.com/pg/orders' 
-      : 'https://sandbox.cashfree.com/pg/orders'
+    const { orderDetails, customerDetails, currencySelected } = await req.json()
+    const db = adminClient()
 
-    const orderId = `order_${Date.now()}_${Math.floor(Math.random() * 1000)}`
-    
-    const cashfreePayload = {
-      order_id: orderId,
-      order_amount: orderDetails.amount,
-      order_currency: "INR",
-      customer_details: {
-        customer_id: `cust_${Date.now()}`,
-        customer_name: customerDetails.name,
-        customer_email: customerDetails.email,
-        customer_phone: customerDetails.phone || "9999999999"
-      },
-      order_meta: {
-        return_url: `${req.headers.get('origin')}/payment/verify?order_id=${orderId}`,
-        notify_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/cashfree-webhook`
-      }
-    }
+    // Amount is computed server-side; any client-sent amount is ignored.
+    const customer = validateCustomer(customerDetails)
+    const { items, subtotal } = await priceCart(db, orderDetails?.items)
 
-    const response = await fetch(apiUrl, {
+    const orderId = `order_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`
+    const siteUrl = req.headers.get('origin') || Deno.env.get('SITE_URL') || 'https://safedrang.com'
+    const phoneDigits = customer.phone.replace(/\D/g, '')
+
+    const response = await fetch(`${cashfreeBase()}/orders`, {
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'x-api-version': '2022-09-01',
-        'Content-Type': 'application/json',
-        'x-client-id': appId!,
-        'x-client-secret': secretKey!
-      },
-      body: JSON.stringify(cashfreePayload)
+      headers: cashfreeHeaders(),
+      body: JSON.stringify({
+        order_id: orderId,
+        order_amount: subtotal,
+        order_currency: 'INR',
+        customer_details: {
+          customer_id: `cust_${phoneDigits || Date.now()}`,
+          customer_name: customer.name,
+          customer_email: customer.email,
+          customer_phone: phoneDigits.length > 10 && phoneDigits.startsWith('91') ? phoneDigits.slice(-10) : phoneDigits,
+        },
+        order_meta: {
+          return_url: `${siteUrl}/payment/verify?order_id=${orderId}`,
+          notify_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/cashfree-webhook`,
+        },
+      }),
     })
-    
     const data = await response.json()
-    
     if (!response.ok) {
-      throw new Error(data.message || 'Failed to create Cashfree order')
+      console.error('Cashfree order creation failed:', data)
+      return json({ error: 'Our payment partner could not start the payment. Please try again in a moment.' }, 502)
     }
 
-    // ── Provision customer account (create/find user) ──────────────────────
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    )
+    const userId = (await requestUserId(db, req)) ?? (await provisionCustomer(db, customer.email, customer.name)).userId
+    const address = { ...customer.address, name: customer.name, phone: customer.phone, email: customer.email }
+    const now = new Date().toISOString()
 
-    // Find or create user by email
-    let userId: string | null = null
-    try {
-      const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
-      const existingUser = existingUsers?.users?.find(
-        (u: any) => u.email?.toLowerCase() === customerDetails.email.toLowerCase()
-      )
-
-      if (existingUser) {
-        userId = existingUser.id
-      } else {
-        const { data: newUser } = await supabaseAdmin.auth.admin.createUser({
-          email: customerDetails.email,
-          email_confirm: true,
-          user_metadata: {
-            full_name: customerDetails.name,
-            name: customerDetails.name,
-            role: 'customer',
-            signup_source: 'checkout',
-          },
-          app_metadata: { role: 'customer' },
-        })
-        userId = newUser?.user?.id ?? null
-      }
-    } catch (userErr: any) {
-      console.warn('User provisioning failed (non-fatal):', userErr.message)
-    }
-
-    // ── Save order to Supabase ─────────────────────────────────────────────
-    const supabaseAnon = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
-    )
-
-    const { error: dbError } = await supabaseAnon.from('orders').insert({
+    const { error: dbError } = await db.from('orders').insert({
       id: orderId,
       order_id: orderId,
       orderNumber: orderId,
-      subtotal: orderDetails.amount,
-      total: orderDetails.amount,
-      total_amount: orderDetails.amount,
+      subtotal,
+      shipping_charge: 0,
+      shippingCharge: 0,
+      total: subtotal,
+      total_amount: subtotal,
       payment_method: 'CASHFREE',
       paymentMethod: 'CASHFREE',
       payment_status: 'PENDING',
       paymentStatus: 'PENDING',
       order_status: 'PROCESSING',
       orderStatus: 'PROCESSING',
-      customer_email: customerDetails.email,
-      customer_name: customerDetails.name,
-      customer_phone: customerDetails.phone,
-      shipping_address: customerDetails.address,
-      shippingAddress: customerDetails.address,
-      billingAddress: customerDetails.address,
-      items: orderDetails.items,
+      customer_email: customer.email,
+      customer_name: customer.name,
+      customer_phone: customer.phone,
+      shipping_address: address,
+      shippingAddress: address,
+      billingAddress: address,
+      items,
+      currency_selected: currencySelected || 'INR',
       user_id: userId,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      created_at: now,
+      updated_at: now,
     })
-
     if (dbError) {
-      console.error("Failed to save order to Supabase:", dbError)
+      // Without a stored order we could not reconcile the payment — do not let the shopper pay.
+      console.error('Failed to save order:', dbError)
+      return json({ error: 'We could not save your order. Please try again.' }, 500)
     }
 
-    return new Response(
-      JSON.stringify({ 
-        payment_session_id: data.payment_session_id,
-        order_id: orderId,
-        user_provisioned: !!userId,
-      }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    )
-  } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 400,
+    return json({
+      payment_session_id: data.payment_session_id,
+      order_id: orderId,
+      amount: subtotal,
+      items,
     })
+  } catch (error) {
+    return errorResponse(error)
   }
 })

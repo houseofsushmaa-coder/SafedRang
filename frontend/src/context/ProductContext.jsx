@@ -87,6 +87,8 @@ const formatProduct = (p) => {
     isArchived,
     needsReview,
     sku: p.sku || "",
+    weight: p.weight ?? null,
+    featured: Boolean(p.featured),
     displayOrder: isNaN(displayOrderVal) ? 0 : displayOrderVal,
     createdAt: p.createdAt || p.created_at || null,
     // Variation support
@@ -166,7 +168,7 @@ export const ProductProvider = ({ children }) => {
       let { data, error } = await supabase
         .from("products")
         .select("*")
-        .order("created_at", { ascending: false })
+        .order("createdAt", { ascending: false })
         .limit(1000);
 
       if (error) {

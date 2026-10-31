@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import ProductCard from "../components/ProductCard";
+import { useProducts } from "../context/ProductContext";
 import {
   ArrowRight,
   Star,
@@ -101,7 +103,38 @@ const REVIEWS = [
   },
 ];
 
+const HERO_VIDEOS = ["/videos/video1.mp4", "/videos/video2.mp4", "/videos/video3.mp4", "/videos/video4.mp4"];
+// Phones get the two lightest clips (~4.5 MB) instead of all four (~38 MB).
+const MOBILE_HERO_VIDEOS = ["/videos/video1.mp4", "/videos/video3.mp4"];
+const MOBILE_QUERY = "(max-width: 680px)";
+
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(MOBILE_QUERY).matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE_QUERY);
+    const onChange = (e) => setIsMobile(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return isMobile;
+};
+
 export default function Home() {
+  const isMobile = useIsMobile();
+  const { products } = useProducts();
+
+  // Admin-flagged featured pieces, in the admin-controlled display order.
+  const featuredProducts = useMemo(
+    () =>
+      products
+        .filter((p) => p.featured && !p.isArchived && (p.stock ?? 0) > 0)
+        .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+        .slice(0, 8),
+    [products]
+  );
+
   const promiseRef = useScrollReveal();
   const categoryRef = useScrollReveal({ threshold: 0.08 });
   const oooRef = useScrollReveal({ threshold: 0.1 });
@@ -115,10 +148,19 @@ export default function Home() {
       {/* 1. Hero Section */}
       <section className="hero">
         <div className="hero-video-bg">
-          <video autoPlay loop muted playsInline src="/videos/video1.mp4" />
-          <video autoPlay loop muted playsInline src="/videos/video2.mp4" />
-          <video autoPlay loop muted playsInline src="/videos/video3.mp4" />
-          <video autoPlay loop muted playsInline src="/videos/video4.mp4" />
+          {(isMobile ? MOBILE_HERO_VIDEOS : HERO_VIDEOS).map((src) => (
+            <video key={src} autoPlay loop muted playsInline src={src} />
+          ))}
+        </div>
+      </section>
+
+      {/* Entry band — tells a first-time visitor what we make and where to start */}
+      <section className="home-entry-band">
+        <p className="home-entry-eyebrow">Handcrafted in Lucknow</p>
+        <h1 className="home-entry-title">Heirloom Chikankari &amp; Zardozi, hand-embroidered by our karigars</h1>
+        <div className="home-entry-ctas">
+          <Link to="/shop" className="btn-primary home-entry-btn">Shop the Collection</Link>
+          <Link to="/one-of-one" className="home-entry-link">The One of One Edit</Link>
         </div>
       </section>
 
@@ -207,6 +249,26 @@ export default function Home() {
           </Link>
         </div>
       </section>
+
+      {/* Featured Creations — admin-flagged products */}
+      {featuredProducts.length > 0 && (
+        <section className="home-featured container">
+          <div className="home-featured-head">
+            <h2 className="section-title">FEATURED CREATIONS</h2>
+            <Link to="/shop" className="link-explore">View all</Link>
+          </div>
+          <div className="product-grid home-featured-grid">
+            {featuredProducts.map((product, index) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                index={index}
+                listName="Home Featured"
+              />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* 4. One-of-One Immersive Banner */}
       <section className="ooo-immersive reveal-section" ref={oooRef}>

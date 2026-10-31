@@ -24,10 +24,13 @@ DROP POLICY IF EXISTS "Allow public select on tracking_integrations" ON public.t
 CREATE POLICY "Allow public select on tracking_integrations" 
   ON public.tracking_integrations FOR SELECT USING (true);
 
--- Allow admins / service role to modify tracking configs
+-- Only admins may modify tracking configs (service role bypasses RLS)
 DROP POLICY IF EXISTS "Allow all on tracking_integrations" ON public.tracking_integrations;
-CREATE POLICY "Allow all on tracking_integrations" 
-  ON public.tracking_integrations FOR ALL USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Allow admin write on tracking_integrations" ON public.tracking_integrations;
+CREATE POLICY "Allow admin write on tracking_integrations"
+  ON public.tracking_integrations FOR ALL
+  USING (EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = auth.uid() AND p.role IN ('admin', 'super_admin', 'manager')))
+  WITH CHECK (EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = auth.uid() AND p.role IN ('admin', 'super_admin', 'manager')));
 
 -- Reload schema cache
 NOTIFY pgrst, 'reload schema';

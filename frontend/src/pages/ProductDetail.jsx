@@ -1,25 +1,35 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   ChevronRight,
   Heart,
   Share2,
-  Star,
   Truck,
   ShieldCheck,
   RefreshCw,
+  MessageCircle,
 } from "lucide-react";
 import { useProducts } from "../context/ProductContext";
 import { useCurrency } from "../context/CurrencyContext";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { trackEvent } from "../lib/tracking";
+import { trackEvent, toAnalyticsItem } from "../lib/tracking";
 import "./ProductDetail.css";
+
+// Product descriptions are admin-authored plain text (sometimes with simple
+// HTML from imports). Keep line breaks and strip anything executable.
+const formatDescription = (raw = "") =>
+  String(raw)
+    .replace(/<\s*(script|style|iframe|object|embed)[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, "")
+    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+    .replace(/(href|src)\s*=\s*(["']?)\s*javascript:[^"'\s>]*\2/gi, "")
+    .replace(/\r?\\n|\r?\n/g, "<br />")
+    .replace(/(<br \/>\s*){3,}/g, "<br /><br />");
 
 export default function ProductDetail() {
   const { id } = useParams();
-  const { products } = useProducts();
+  const { products, loading: productsLoading } = useProducts();
   const { formatPrice } = useCurrency();
   const { addToCart, toggleWishlist, isInWishlist } = useCart();
   const navigate = useNavigate();
@@ -35,9 +45,11 @@ export default function ProductDetail() {
     product?.image || product?.images?.[0],
   );
   const [activeTab, setActiveTab] = useState("details");
-  const [pincode, setPincode] = useState("");
-  const [pincodeStatus, setPincodeStatus] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
+
+  // Mobile sticky bar: shown only while the main purchase buttons are off-screen.
+  const actionsRef = useRef(null);
+  const [showStickyBar, setShowStickyBar] = useState(false);
 
   const isVariable = product?.productType === "variable" && Array.isArray(product?.variations) && product.variations.length > 0;
   const selectedVariation = isVariable ? product.variations.find((v) => v.size === selectedSize) : null;
@@ -62,28 +74,59 @@ export default function ProductDetail() {
     return product.stock !== undefined && product.stock !== null && Number(product.stock) <= 0;
   }, [product, isVariable, selectedVariation]);
 
-  const availableUnits = useMemo(() => {
-    if (!product) return 0;
-    if (isVariable && selectedVariation) {
-      return Math.max(0, selectedVariation.stock ?? 0);
-    }
-    return Math.max(0, product.stock ?? 0);
-  }, [product, isVariable, selectedVariation]);
-
   // Always reset scroll to top on product change
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     if (product) {
       setActiveImage(product.image || product.images?.[0]);
-      setPincodeStatus(null);
       setSelectedSize(null);
-      trackEvent("view_item", {
-        productId: product.id,
-        productName: product.name,
-        price: effectivePrice,
-      });
     }
-  }, [id, product]);
+    // product is re-created when the catalogue refreshes; key on its id
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, product?.id]);
+
+  useEffect(() => {
+    const el = actionsRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyBar(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [product?.id, product?.isArchived]);
+
+  useEffect(() => {
+    document.body.classList.toggle("has-pdp-sticky-bar", showStickyBar);
+    return () => document.body.classList.remove("has-pdp-sticky-bar");
+  }, [showStickyBar]);
+
+  // view_item once per product page view.
+  useEffect(() => {
+    if (!product) return;
+    trackEvent("view_item", { value: basePrice, items: [toAnalyticsItem(product, { price: basePrice })] });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product?.id]);
+
+  // Adds the selected piece; returns true when it is in the bag afterwards.
+  const addSelectedToBag = ({ announce }) => {
+    const result = addToCart({ ...product, selectedSize });
+    if (result.ok) {
+      if (result.capped) toast(`Only ${result.available} available — your bag has been updated.`);
+      else if (announce) toast.success("Added to your bag");
+      return true;
+    }
+    if (result.reason === "max_reached") {
+      toast("All available pieces are already in your bag.");
+      return true;
+    }
+    if (result.reason === "needs_size") {
+      toast.error(`Please select a ${product.attributeName || "Size"} first.`);
+      return false;
+    }
+    toast.error("This piece has just sold out.");
+    return false;
+  };
 
   const handleAddToCart = () => {
     if (product?.isArchived) {
@@ -98,14 +141,7 @@ export default function ProductDetail() {
       toast.error(`Please select a ${product.attributeName || 'Size'} first.`);
       return;
     }
-    addToCart({ ...product, selectedSize, price: effectivePrice });
-    trackEvent("add_to_cart", {
-      productId: product.id,
-      productName: product.name,
-      price: effectivePrice,
-      quantity: 1,
-    });
-    toast.success("Added to cart!");
+    addSelectedToBag({ announce: true });
   };
 
   const handleBuyNow = () => {
@@ -121,31 +157,16 @@ export default function ProductDetail() {
       toast.error(`Please select a ${product.attributeName || 'Size'} first.`);
       return;
     }
-    addToCart({ ...product, selectedSize, price: effectivePrice });
-    trackEvent("add_to_cart", {
-      productId: product.id,
-      productName: product.name,
-      price: effectivePrice,
-      quantity: 1,
-    });
-    navigate("/checkout");
+    if (addSelectedToBag({ announce: false })) navigate("/checkout");
   };
 
-  const handleCheckPincode = (e) => {
-    if (e) e.preventDefault();
-    const cleanPin = pincode.trim();
-    if (!/^\d{6}$/.test(cleanPin)) {
-      setPincodeStatus({
-        success: false,
-        text: "Please enter a valid 6-digit Indian PIN code.",
-      });
-      return;
-    }
-    setPincodeStatus({
-      success: true,
-      text: `Delivery available to PIN ${cleanPin}! Estimated within 3–5 business days · Free insured delivery.`,
-    });
-  };
+  const whatsappEnquiryUrl = product
+    ? `https://wa.me/919151566602?text=${encodeURIComponent(
+        `Hello Safed Rang, I'd like to know more about "${product.title.replace(/"/g, "")}"${
+          selectedSize ? ` (size ${selectedSize})` : ""
+        }: ${window.location.origin}/product/${product.id}`
+      )}`
+    : "";
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -167,6 +188,16 @@ export default function ProductDetail() {
       toast.success("Link: " + window.location.href);
     }
   };
+
+  if (!product && productsLoading) {
+    return (
+      <div className="pdp-container container" style={{ padding: "120px 20px", textAlign: "center" }} aria-busy="true">
+        <p style={{ color: "var(--color-warm-taupe)", letterSpacing: "0.12em", textTransform: "uppercase", fontSize: "0.8rem" }}>
+          Loading this creation…
+        </p>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -292,36 +323,17 @@ export default function ProductDetail() {
             )}
           </div>
 
-          <div className="product-reviews">
-            <div className="stars">
-              <Star
-                size={14}
-                fill="var(--color-antique-gold)"
-                color="var(--color-antique-gold)"
-              />
-              <Star
-                size={14}
-                fill="var(--color-antique-gold)"
-                color="var(--color-antique-gold)"
-              />
-              <Star
-                size={14}
-                fill="var(--color-antique-gold)"
-                color="var(--color-antique-gold)"
-              />
-              <Star
-                size={14}
-                fill="var(--color-antique-gold)"
-                color="var(--color-antique-gold)"
-              />
-              <Star
-                size={14}
-                fill="var(--color-antique-gold)"
-                color="var(--color-antique-gold)"
-              />
-            </div>
-            <span>(Customer Reviews)</span>
-          </div>
+          {(product.fabric || product.craft) && (
+            <p className="pdp-fabric-craft">
+              {[product.fabric, product.craft].filter(Boolean).join(" · ")}
+            </p>
+          )}
+
+          {product.isOneOfOne && (
+            <p className="pdp-one-of-one-note">
+              A One of One creation — a single combination of fabric, dye and hand embroidery. Once sold, this design is retired.
+            </p>
+          )}
 
           {/* Availability Status */}
           <div className="pdp-stock-status-wrap" style={{ marginTop: "10px", marginBottom: "14px" }}>
@@ -357,7 +369,7 @@ export default function ProductDetail() {
                 }}
               >
                 <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#16a34a" }} />
-                In Stock {availableUnits > 0 && `(${availableUnits} available)`}
+                In Stock
               </span>
             )}
           </div>
@@ -424,7 +436,7 @@ export default function ProductDetail() {
               </p>
             </div>
           ) : (
-            <div className="product-actions">
+            <div className="product-actions" ref={actionsRef}>
               <button
                 className="btn-primary btn-add-to-cart"
                 disabled={isOutOfStock || (isVariable && !selectedSize)}
@@ -448,36 +460,28 @@ export default function ProductDetail() {
             </div>
           )}
 
-          <form className="pincode-checker" onSubmit={handleCheckPincode}>
+          <div className="pdp-delivery-info">
             <div className="pincode-header">
-               <Truck size={16} /> <span>Check Delivery Options</span>
+              <Truck size={16} /> <span>Delivery &amp; Payment</span>
             </div>
-            <div className="pincode-input-group">
-               <input
-                 type="text"
-                 placeholder="Enter 6-digit Pincode"
-                 maxLength="6"
-                 value={pincode}
-                 onChange={(e) => setPincode(e.target.value.replace(/\D/g, ""))}
-               />
-               <button type="submit" className="btn-pincode">Check</button>
-            </div>
-            {pincodeStatus && (
-              <p
-                style={{
-                  marginTop: "8px",
-                  fontSize: "0.82rem",
-                  color: pincodeStatus.success ? "#2e7d32" : "#c62828",
-                  fontFamily: "var(--font-body)",
-                }}
-              >
-                {pincodeStatus.text}
-              </p>
-            )}
-          </form>
+            <ul>
+              <li>Dispatched from our Lucknow atelier within 2–3 business days; delivered across India in 4–7 business days.</li>
+              <li>Free shipping with online payment (UPI, cards, netbanking). Cash on Delivery available in India for a small handling fee.</li>
+              <li>International shipping: 7–12 business days after dispatch.</li>
+            </ul>
+            <a
+              className="pdp-whatsapp-enquiry"
+              href={whatsappEnquiryUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackEvent("whatsapp_click", { context: "product", item_id: product.id })}
+            >
+              <MessageCircle size={16} /> Ask about this piece on WhatsApp
+            </a>
+          </div>
 
           <div className="product-description">
-            <div dangerouslySetInnerHTML={{ __html: product.description?.replace(/\\n/g, ' ') || '' }} />
+            <div dangerouslySetInnerHTML={{ __html: formatDescription(product.description) }} />
           </div>
 
           <div className="product-share">
@@ -487,6 +491,37 @@ export default function ProductDetail() {
           </div>
         </div>
       </div>
+
+      {/* Mobile sticky purchase bar */}
+      {!product.isArchived && (
+        <div className={`pdp-sticky-bar ${showStickyBar ? "is-visible" : ""}`} aria-hidden={!showStickyBar}>
+          <div className="pdp-sticky-info">
+            <span className="pdp-sticky-title">{product.title.replace(/"/g, "")}</span>
+            <span className="pdp-sticky-price">
+              {isVariable && !selectedVariation ? `From ${formatPrice(basePrice)}` : formatPrice(effectivePrice)}
+            </span>
+          </div>
+          <button
+            type="button"
+            className="btn-primary pdp-sticky-btn"
+            tabIndex={showStickyBar ? 0 : -1}
+            disabled={isOutOfStock}
+            onClick={() => {
+              if (isVariable && !selectedSize) {
+                actionsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                return;
+              }
+              handleAddToCart();
+            }}
+          >
+            {isOutOfStock
+              ? "SOLD OUT"
+              : isVariable && !selectedSize
+              ? `SELECT ${(product.attributeName || "SIZE").toUpperCase()}`
+              : "ADD TO BAG"}
+          </button>
+        </div>
+      )}
 
       {/* Bottom Tabs */}
       <div className="product-tabs container">
@@ -498,109 +533,61 @@ export default function ProductDetail() {
             Details
           </button>
           <button
-            className={activeTab === "additional" ? "active" : ""}
-            onClick={() => setActiveTab("additional")}
+            className={activeTab === "shipping" ? "active" : ""}
+            onClick={() => setActiveTab("shipping")}
           >
-            Additional Information
+            Shipping &amp; Exchange
           </button>
           <button
-            className={activeTab === "reviews" ? "active" : ""}
-            onClick={() => setActiveTab("reviews")}
+            className={activeTab === "care" ? "active" : ""}
+            onClick={() => setActiveTab("care")}
           >
-            Client Reviews (4)
-          </button>
-          <button
-            className={activeTab === "terms" ? "active" : ""}
-            onClick={() => setActiveTab("terms")}
-          >
-            Terms &amp; Conditions
+            Care
           </button>
         </div>
         <div className="tabs-content">
           {activeTab === "details" && (
             <div className="tab-pane">
-              <p>
-                <strong>Fabric:</strong> {product.fabric || "Pure Mulberry Silk"}
-              </p>
-              <p>
-                <strong>Craft:</strong> {product.craft || "Lucknowi Hand Chikankari"}
-              </p>
-              <p>
-                <strong>SKU:</strong> {product.sku || "SR-LUX-001"}
-              </p>
+              {[
+                ["Category", product.category],
+                ["Fabric", product.fabric],
+                ["Craft", product.craft],
+                ["Weight", product.weight ? `${product.weight} kg` : ""],
+                ["SKU", product.sku],
+              ]
+                .filter(([, value]) => value)
+                .map(([label, value]) => (
+                  <p key={label}>
+                    <strong>{label}:</strong> {value}
+                  </p>
+                ))}
             </div>
           )}
-          {activeTab === "additional" && (
-            <div className="tab-pane">
-              <p>
-                <strong>Weight:</strong> {product.weight || "0.650 kg"}
-              </p>
-              <p>
-                <strong>Dimensions:</strong> {product.dimensions || "30 × 25 × 5 cm"}
-              </p>
-            </div>
-          )}
-          {activeTab === "reviews" && (
-            <div className="tab-pane">
-              <div style={{ display: "flex", flexDirection: "column", gap: "1.2rem" }}>
-                <div style={{ borderBottom: "1px solid #eee", paddingBottom: "1rem" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "4px" }}>
-                    <div style={{ display: "flex", gap: "2px" }}>
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={14} fill="#AE8A54" color="#AE8A54" />
-                      ))}
-                    </div>
-                    <strong style={{ fontSize: "0.9rem" }}>Pooja Verma</strong>
-                    <span style={{ fontSize: "0.75rem", color: "#2e7d32", fontWeight: "600" }}>✓ Verified Buyer · Lucknow</span>
-                  </div>
-                  <p style={{ fontSize: "0.88rem", color: "#555", margin: 0, fontStyle: "italic" }}>
-                    &ldquo;The stitching perfection is extraordinary. You can tell this took weeks of artisan hands. Absolutely royal drape.&rdquo;
-                  </p>
-                </div>
-
-                <div style={{ borderBottom: "1px solid #eee", paddingBottom: "1rem" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "4px" }}>
-                    <div style={{ display: "flex", gap: "2px" }}>
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={14} fill="#AE8A54" color="#AE8A54" />
-                      ))}
-                    </div>
-                    <strong style={{ fontSize: "0.9rem" }}>Kavita Singhal</strong>
-                    <span style={{ fontSize: "0.75rem", color: "#2e7d32", fontWeight: "600" }}>✓ Verified Buyer · Delhi NCR</span>
-                  </div>
-                  <p style={{ fontSize: "0.88rem", color: "#555", margin: 0, fontStyle: "italic" }}>
-                    &ldquo;The luxury unboxing experience blew me away. Worth every rupee for an authentic heirloom piece.&rdquo;
-                  </p>
-                </div>
-
-                <div style={{ borderBottom: "1px solid #eee", paddingBottom: "1rem" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "4px" }}>
-                    <div style={{ display: "flex", gap: "2px" }}>
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={14} fill="#AE8A54" color="#AE8A54" />
-                      ))}
-                    </div>
-                    <strong style={{ fontSize: "0.9rem" }}>Natasha Batra</strong>
-                    <span style={{ fontSize: "0.75rem", color: "#2e7d32", fontWeight: "600" }}>✓ Verified Buyer · Mumbai</span>
-                  </div>
-                  <p style={{ fontSize: "0.88rem", color: "#555", margin: 0, fontStyle: "italic" }}>
-                    &ldquo;So rare to find real one-of-one pieces online. Beautiful weight and exquisite Mukaish highlights.&rdquo;
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-          {activeTab === "terms" && (
+          {activeTab === "shipping" && (
             <div className="tab-pane">
               <ul className="terms-list">
                 <li>
-                  <ShieldCheck size={16} /> Authentic handcrafted creation guarantee.
+                  <Truck size={16} /> Dispatched within 2–3 business days. Delivery in 4–7 business days within India; 7–12 business days internationally.
                 </li>
                 <li>
-                  <RefreshCw size={16} /> Exchange available for damaged products with 360&deg; unboxing video.
+                  <ShieldCheck size={16} /> Authentic handcrafted creation from our Lucknow atelier.
                 </li>
-                <li>Dry clean only to preserve delicate zari and mukaish work.</li>
+                <li>
+                  <RefreshCw size={16} /> Exchange available for damaged products with a 360&deg; unboxing video.
+                </li>
               </ul>
+              <p style={{ marginTop: 12 }}>
+                Questions? <Link to="/faq">Read our FAQ</Link> or{" "}
+                <a href={whatsappEnquiryUrl} target="_blank" rel="noopener noreferrer">message us on WhatsApp</a>.
+              </p>
+            </div>
+          )}
+          {activeTab === "care" && (
+            <div className="tab-pane">
+              <p>Dry clean only to preserve delicate zari and mukaish work.</p>
+              <p style={{ marginTop: 8 }}>
+                See our <Link to="/care-guide">Care Guide</Link> for storing and caring for hand-embroidered pieces.
+              </p>
             </div>
           )}
         </div>

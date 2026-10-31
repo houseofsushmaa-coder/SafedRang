@@ -12,10 +12,7 @@ export const AuthProvider = ({ children }) => {
   const resolveUserProfile = async (authUser) => {
     if (!authUser) return null;
 
-    let role =
-      authUser.app_metadata?.role ||
-      authUser.user_metadata?.role ||
-      null;
+    let role = authUser.app_metadata?.role || null;
     let fullName =
       authUser.user_metadata?.full_name ||
       authUser.user_metadata?.name ||
@@ -37,18 +34,14 @@ export const AuthProvider = ({ children }) => {
       console.warn("Could not fetch profile:", err);
     }
 
+    // Admin access is decided by the profile role only — the same rule the
+    // database RLS policies enforce (public.is_admin()).
     const cleanRole = (role || "customer").toLowerCase();
-    const emailLower = (authUser.email || "").toLowerCase();
-    const isAdminEmail =
-      emailLower.includes("admin") ||
-      emailLower.endsWith("@safedrang.com") ||
-      emailLower === "safedrang@gmail.com";
-    const isRoleAdmin = ["admin", "super_admin", "manager", "staff"].includes(cleanRole);
-    const isAdmin = isRoleAdmin || isAdminEmail;
+    const isAdmin = ["admin", "super_admin", "manager"].includes(cleanRole);
 
     return {
       ...authUser,
-      role: isRoleAdmin ? cleanRole : isAdminEmail ? "admin" : cleanRole,
+      role: cleanRole,
       name: fullName,
       isAdmin,
     };
