@@ -40,21 +40,35 @@ export const SAREE_SUBCATEGORIES = [
 
 export const CRAFT_DISPLAY_ORDER = [
   "Lucknowi Chikankari",
-  "Handcrafted",
+  "Zardozi",
+  "Mukaish",
+  "Bead & Sequin Work",
   "Gota Patti",
-  "Handcrafted Chikankari",
+  "Plain",
+  "Handcrafted",
 ];
 
 export const FABRIC_DISPLAY_ORDER = [
-  "Silk",
   "Mul Chanderi",
   "Chanderi Silk",
-  "Cotton",
+  "Chanderi Cotton",
   "Organza",
+  "Tissue",
   "Georgette",
+  "Chiffon",
+  "Crepe",
+  "Tussar Silk",
+  "Silk",
+  "Muslin",
+  "Mul Cotton",
+  "Cotton",
+  "Khadi",
+  "Linen",
   "Kota",
-  "Viscose Georgette",
-  "Muslin Cotton",
+  "Viscose",
+  "Modal",
+  "Satin",
+  "Semi-precious Stone",
   "Mixed",
 ];
 
@@ -205,17 +219,9 @@ export function matchesFabricFilter(product, selectedFabrics) {
     const sf = (f || "").trim().toLowerCase();
     if (!sf || sf === "all") return true;
 
-    if (pFabric === sf) return true;
-
-    // Supported fabric variations and compound fabrics
-    if (sf === "chanderi silk" && (pFabric === "mul chanderi" || pFabric === "chanderi")) return true;
-    if (sf === "mul chanderi" && (pFabric === "chanderi silk" || pFabric === "mul chanderi")) return true;
-    if (sf === "georgette" && (pFabric === "viscose georgette" || pFabric === "georgette")) return true;
-    if (sf === "viscose georgette" && (pFabric === "viscose georgette" || pFabric === "georgette")) return true;
-    if (sf === "cotton" && (pFabric === "cotton" || pFabric === "muslin cotton")) return true;
-    if (sf === "muslin cotton" && (pFabric === "muslin cotton" || pFabric === "cotton")) return true;
-
-    return false;
+    // Fabric families are curated (see FABRIC_DISPLAY_ORDER), so match exactly:
+    // ticking "Chanderi Silk" should not also show Mul Chanderi pieces.
+    return pFabric === sf;
   });
 }
 
