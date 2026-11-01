@@ -109,6 +109,7 @@ const Dashboard = () => {
       setError(null);
       try {
         const res = await adminService.getDashboard(period);
+        if (res && res.success === false) throw new Error(res.error || "Dashboard query failed");
         if (res && res.data) {
           setData(res.data);
           setLastUpdated(new Date());
@@ -223,8 +224,9 @@ const Dashboard = () => {
       value: formatCurrency(stats?.revenue?.total ?? stats?.metrics?.revenue?.value ?? 0),
       icon: <IndianRupee size={20} />,
       iconClass: "revenue",
-      trend: stats?.revenue?.change ?? stats?.metrics?.revenue?.change ?? 0,
-      trendLabel: `${Math.abs(stats?.revenue?.change ?? stats?.metrics?.revenue?.change ?? 0)}%`,
+      // Real change vs the previous period; hidden when there's nothing to compare.
+      trend: typeof stats.revenue.change === "number" ? stats.revenue.change : null,
+      trendLabel: `${Math.abs(stats.revenue.change ?? 0)}% vs previous`,
       meta: (stats?.revenue?.refunded ?? 0) > 0 ? `\u21a9 ${formatCurrency(stats.revenue.refunded)} refunded` : null,
     },
     {
@@ -237,11 +239,13 @@ const Dashboard = () => {
     {
       key: "orders",
       label: `Orders (${periodLabel})`,
-      value: stats?.orders?.total ?? stats?.metrics?.orders?.value ?? 0,
+      value: stats?.orders?.total ?? 0,
       icon: <ShoppingBag size={20} />,
       iconClass: "orders",
+      trend: typeof stats.orders.change === "number" ? stats.orders.change : null,
+      trendLabel: `${Math.abs(stats.orders.change ?? 0)}% vs previous`,
       pills: [
-        { label: `${stats?.orders?.pending ?? stats?.metrics?.pendingOrders?.value ?? 0} pending`, cls: "pill--yellow" },
+        { label: `${stats?.orders?.pending ?? 0} to process`, cls: "pill--yellow" },
         { label: `${stats?.orders?.delivered ?? 0} delivered`, cls: "pill--green" },
         { label: `${stats?.orders?.cancelled ?? 0} cancelled`, cls: "pill--red" },
       ],
@@ -249,7 +253,7 @@ const Dashboard = () => {
     {
       key: "customers",
       label: "Total Customers",
-      value: stats?.customers?.total ?? stats?.metrics?.customers?.value ?? 1,
+      value: stats?.customers?.total ?? 0,
       icon: <Users size={20} />,
       iconClass: "customers",
       trend: (stats?.customers?.new ?? 0) > 0 ? 1 : null,
@@ -262,8 +266,9 @@ const Dashboard = () => {
       value: stats?.products?.total ?? stats?.totalProducts ?? 0,
       icon: <Package size={20} />,
       iconClass: "products",
-      trend: (stats?.products?.lowStock ?? stats?.metrics?.lowStock?.value ?? 0) > 0 ? -1 : null,
-      trendLabel: `${stats?.products?.lowStock ?? stats?.metrics?.lowStock?.value ?? 0} low stock`,
+      trend: (stats?.products?.lowStock ?? 0) > 0 ? -1 : null,
+      trendLabel: `${stats?.products?.lowStock ?? 0} low stock`,
+      meta: (stats?.products?.outOfStock ?? 0) > 0 ? `${stats.products.outOfStock} sold out` : null,
     },
     {
       key: "refunds",
@@ -377,7 +382,7 @@ const Dashboard = () => {
                   <div className={`stat-icon ${card.iconClass}`}>{card.icon}</div>
                   {card.trend !== null && card.trend !== undefined ? (
                     <span className={`stat-trend ${card.trend > 0 ? "positive" : card.trend < 0 ? "warning" : ""}`}>
-                      {card.trend > 0 ? <ArrowUpRight size={13} /> : <AlertTriangle size={13} />}
+                      {card.trend > 0 ? <ArrowUpRight size={13} /> : card.key === "products" ? <AlertTriangle size={13} /> : <ArrowDownRight size={13} />}
                       {card.trendLabel}
                     </span>
                   ) : null}

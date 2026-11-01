@@ -1,216 +1,191 @@
 import { supabase } from "../lib/supabase";
-import { products as staticProducts } from "../data/products";
 import { loadTrackingIntegrations, saveTrackingIntegrations as saveTrackingData } from "../lib/tracking";
 
 // ==============================================================================
-// SAFED RANG — UNIFIED ADMIN DATA SERVICE
-// Powers all Admin Panel modules directly with Supabase + resilient fallbacks
+// SAFED RANG — ADMIN DATA SERVICE
+// Every number shown in the admin comes from the database. When there is no
+// data yet, functions return empty values (never invented sample figures).
 // ==============================================================================
+
+// ── Shared helpers ─────────────────────────────────────────────────────────────
+const upper = (v) => String(v || "").toUpperCase();
+const orderTotal = (o) => Number(o.total_amount ?? o.total ?? 0) || 0;
+const isPaid = (o) => upper(o.payment_status) === "PAID";
+const isCancelled = (o) => ["CANCELLED", "RETURNED", "REFUNDED"].includes(upper(o.order_status));
+const isCod = (o) => upper(o.payment_method) === "COD";
+const itemsOf = (o) => (Array.isArray(o.items) ? o.items : []);
+
+const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+// Local calendar date key (toISOString would shift IST evenings into the next day)
+const dayKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+/** [start, end) for a period, plus the equally long period before it. */
+export function periodRange(period = "last30", now = new Date()) {
+  const today = startOfDay(now);
+  let start;
+  let end = addDays(today, 1);
+  switch (period) {
+    case "today": start = today; break;
+    case "yesterday": start = addDays(today, -1); end = today; break;
+    case "last7": start = addDays(today, -6); break;
+    case "thisMonth": start = new Date(today.getFullYear(), today.getMonth(), 1); break;
+    case "prevMonth":
+      start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      end = new Date(today.getFullYear(), today.getMonth(), 1);
+      break;
+    case "last90": start = addDays(today, -89); break;
+    case "all": start = new Date(2000, 0, 1); break;
+    case "last30":
+    default: start = addDays(today, -29);
+  }
+  const span = end - start;
+  return { start, end, prevStart: new Date(start - span), prevEnd: start };
+}
+
+const inRange = (o, start, end) => {
+  const t = new Date(o.created_at || o.createdAt || 0);
+  return t >= start && t < end;
+};
+
+/** % change vs the previous period, or null when there's nothing to compare. */
+const pctChange = (now, before) => (before > 0 ? Math.round(((now - before) / before) * 1000) / 10 : null);
+
+async function fetchAllOrders() {
+  const { data, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
+/** Sold quantities/revenue per product from paid orders. */
+function productSales(orders) {
+  const map = new Map();
+  for (const o of orders) {
+    for (const it of itemsOf(o)) {
+      const id = String(it.productId || it.id || it.title || it.name || "unknown");
+      const qty = Number(it.quantity || 1);
+      const price = Number(it.price || 0);
+      const row = map.get(id) || { productId: id, product: { name: it.title || it.name || "Product" }, _sum: { quantity: 0 }, revenue: 0 };
+      row._sum.quantity += qty;
+      row.revenue += price * qty;
+      map.set(id, row);
+    }
+  }
+  return [...map.values()].sort((a, b) => b._sum.quantity - a._sum.quantity || b.revenue - a.revenue);
+}
+
+const PAYMENT_LABELS = { COD: "Cash on Delivery", CASHFREE: "Online (Cashfree)" };
+
+const safeJson = (text) => {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+};
 
 // ─────────────────────────────────────────────
 // 1. DASHBOARD & ANALYTICS
 // ─────────────────────────────────────────────
 export const adminService = {
   /**
-   * Fetches dashboard overview metrics
+   * Dashboard overview for a period, compared with the period before it.
    */
   async getDashboard(period = "last30") {
     try {
-      // Fetch Orders, Products, and Profiles concurrently with resilient fallback
-      const withTimeout = (promise, fallbackValue = { data: [] }, timeoutMs = 4000) =>
-        Promise.race([
-          promise,
-          new Promise((resolve) => setTimeout(() => resolve(fallbackValue), timeoutMs)),
-        ]).catch(() => fallbackValue);
-
-      const [ordersRes, productsRes, profilesRes] = await Promise.all([
-        withTimeout(supabase.from("orders").select("*").order("created_at", { ascending: false })),
-        withTimeout(supabase.from("products").select("id, name, price, stock, stock_status").limit(500)),
-        withTimeout(supabase.from("profiles").select("id, role").limit(500)),
+      const { start, end, prevStart, prevEnd } = periodRange(period);
+      const [orders, productsRes, profilesRes] = await Promise.all([
+        fetchAllOrders(),
+        supabase.from("products").select("id, name, stock, stock_status, status, is_archived, \"lowStockThreshold\"").limit(2000),
+        supabase.from("profiles").select("id, role, created_at").limit(5000),
       ]);
+      if (productsRes.error) throw productsRes.error;
 
-      const orders = ordersRes?.data || [];
-      const dbProducts = productsRes?.data || [];
-      const profiles = profilesRes?.data || [];
-      const allProducts = (dbProducts && dbProducts.length > 0) ? dbProducts : staticProducts;
+      const current = orders.filter((o) => inRange(o, start, end));
+      const previous = orders.filter((o) => inRange(o, prevStart, prevEnd));
+      const paidNow = current.filter(isPaid);
+      const paidBefore = previous.filter(isPaid);
 
-      const orderList = orders || [];
-      const paidOrders = orderList.filter(
-        (o) => (o.payment_status || o.order_status || "").toUpperCase() === "PAID"
-      );
+      const revenue = paidNow.reduce((s, o) => s + orderTotal(o), 0);
+      const revenueBefore = paidBefore.reduce((s, o) => s + orderTotal(o), 0);
+      const aov = paidNow.length ? Math.round(revenue / paidNow.length) : 0;
+      const aovBefore = paidBefore.length ? Math.round(revenueBefore / paidBefore.length) : 0;
 
-      const totalRevenue = paidOrders.reduce(
-        (sum, o) => sum + Number(o.total_amount || o.total || 0),
-        0
-      );
+      const refunded = current.filter((o) => ["REFUNDED", "PARTIALLY_REFUNDED"].includes(upper(o.payment_status)));
 
-      const totalOrders = orderList.length;
-      const pendingOrders = orderList.filter(
-        (o) => (o.payment_status || "").toUpperCase() === "PENDING"
-      ).length;
+      // Live, published catalogue (drafts and archived pieces excluded)
+      const products = (productsRes.data || []).filter((p) => !p.is_archived && upper(p.status) !== "DRAFT" && upper(p.status) !== "ARCHIVED");
+      const lowStockProducts = products
+        .filter((p) => Number(p.stock) > 0 && Number(p.stock) <= Number(p.lowStockThreshold ?? 1))
+        .map((p) => ({ ...p, title: p.name }));
+      const outOfStock = products.filter((p) => Number(p.stock) <= 0).length;
 
-      const aov = paidOrders.length > 0 ? Math.round(totalRevenue / paidOrders.length) : 0;
-      const customerCount = profiles ? profiles.length : 1;
+      const customers = (profilesRes.data || []).filter((p) => upper(p.role) === "CUSTOMER" || !p.role);
+      const newCustomers = customers.filter((p) => p.created_at && inRange(p, start, end)).length;
 
-      // Calculate low stock items (< 5)
-      const lowStockCount = allProducts.filter(
-        (p) => (p.stock !== undefined && p.stock < 5) || p.stockStatus === "Low Stock"
-      ).length;
-
-      const processingOrders = orderList.filter(
-        (o) => (o.order_status || "").toUpperCase() === "PROCESSING"
-      ).length;
-      const deliveredOrders = orderList.filter(
-        (o) => (o.order_status || "").toUpperCase() === "DELIVERED"
-      ).length;
-      const cancelledOrders = orderList.filter(
-        (o) => (o.order_status || o.payment_status || "").toUpperCase() === "CANCELLED"
-      ).length;
-
-      const lowStockProducts = allProducts.filter(
-        (p) => (p.stock !== undefined && p.stock < 5) || p.stockStatus === "Low Stock"
-      );
-
-      // Best sellers aggregation
-      const salesMap = {};
-      paidOrders.forEach((o) => {
-        const items = Array.isArray(o.items) ? o.items : [];
-        items.forEach((item) => {
-          const name = item.name || item.title || "Product";
-          const id = item.id || name;
-          const qty = Number(item.quantity || 1);
-          if (!salesMap[id]) {
-            salesMap[id] = { productId: id, product: { name }, _sum: { quantity: 0 } };
-          }
-          salesMap[id]._sum.quantity += qty;
-        });
-      });
-
-      let bestSellers = Object.values(salesMap).sort(
-        (a, b) => b._sum.quantity - a._sum.quantity
-      );
-      if (bestSellers.length === 0) {
-        bestSellers = staticProducts.slice(0, 5).map((p, idx) => ({
-          productId: p.id,
-          product: { name: p.name || p.title },
-          _sum: { quantity: Math.max(1, 14 - idx * 3) },
-        }));
-      }
-
-      // Format recent 5 orders for dashboard table
-      const recentOrders = orderList.slice(0, 5).map((o) => ({
+      const recentOrders = orders.slice(0, 5).map((o) => ({
         id: o.id,
         orderNumber: o.id,
-        customerName: o.customer_name || o.customer?.name || "Guest Customer",
-        customerEmail: o.customer_email || o.customer?.email || "",
-        total: Number(o.total_amount || o.total || 0),
-        status: (o.payment_status || o.order_status || "PENDING").toUpperCase(),
-        createdAt: o.created_at || new Date().toISOString(),
-        itemsCount: Array.isArray(o.items) ? o.items.length : 1,
+        customerName: o.customer_name || "Customer",
+        customerEmail: o.customer_email || "",
+        total: orderTotal(o),
+        status: upper(o.order_status || "PENDING"),
+        paymentStatus: upper(o.payment_status || "PENDING"),
+        paymentMethod: PAYMENT_LABELS[upper(o.payment_method)] || o.payment_method || "—",
+        createdAt: o.created_at,
+        itemsCount: itemsOf(o).reduce((s, it) => s + Number(it.quantity || 1), 0),
       }));
 
       return {
         success: true,
         data: {
-          revenue: { total: totalRevenue, refunded: 0, change: 12.5 },
+          revenue: { total: revenue, refunded: refunded.reduce((s, o) => s + orderTotal(o), 0), change: pctChange(revenue, revenueBefore) },
           orders: {
-            total: totalOrders,
-            pending: pendingOrders,
-            processing: processingOrders,
-            delivered: deliveredOrders,
-            cancelled: cancelledOrders,
+            total: current.length,
+            change: pctChange(current.length, previous.length),
+            pending: current.filter((o) => ["PENDING", "CONFIRMED", "PROCESSING", "PACKED"].includes(upper(o.order_status))).length,
+            processing: current.filter((o) => upper(o.order_status) === "PROCESSING").length,
+            shipped: current.filter((o) => upper(o.order_status) === "SHIPPED").length,
+            delivered: current.filter((o) => upper(o.order_status) === "DELIVERED").length,
+            cancelled: current.filter(isCancelled).length,
           },
-          customers: { total: customerCount, new: Math.max(1, Math.round(customerCount * 0.2)) },
-          products: { total: allProducts.length, lowStock: lowStockCount },
+          customers: { total: customers.length, new: newCustomers },
+          products: { total: products.length, lowStock: lowStockProducts.length, outOfStock },
           avgOrderValue: aov,
+          avgOrderValueChange: pctChange(aov, aovBefore),
           lowStockProducts,
-          bestSellers,
+          bestSellers: productSales(paidNow).slice(0, 5),
           recentOrders,
-          refunds: { count: 0, amount: 0 },
-          // Backward compatibility for metrics property
-          metrics: {
-            revenue: { value: totalRevenue, change: 12.5, isPositive: true },
-            orders: { value: totalOrders, change: 8.2, isPositive: true },
-            averageOrderValue: { value: aov, change: 5.1, isPositive: true },
-            pendingOrders: { value: pendingOrders, change: 0, isPositive: true },
-            customers: { value: customerCount, change: 15.0, isPositive: true },
-            lowStock: { value: lowStockCount, change: 0, isPositive: false },
-          },
-          totalProducts: allProducts.length,
+          refunds: { count: refunded.length, amount: refunded.reduce((s, o) => s + orderTotal(o), 0) },
+          totalProducts: products.length,
         },
       };
     } catch (err) {
       console.error("adminService.getDashboard error:", err);
-      return {
-        success: false,
-        data: {
-          revenue: { total: 0, refunded: 0, change: 0 },
-          orders: { total: 0, pending: 0, processing: 0, delivered: 0, cancelled: 0 },
-          customers: { total: 1, new: 0 },
-          products: { total: staticProducts.length, lowStock: 0 },
-          avgOrderValue: 0,
-          lowStockProducts: [],
-          bestSellers: [],
-          recentOrders: [],
-          refunds: { count: 0, amount: 0 },
-          metrics: {
-            revenue: { value: 0, change: 0, isPositive: true },
-            orders: { value: 0, change: 0, isPositive: true },
-            averageOrderValue: { value: 0, change: 0, isPositive: true },
-            pendingOrders: { value: 0, change: 0, isPositive: true },
-            customers: { value: 1, change: 0, isPositive: true },
-            lowStock: { value: 0, change: 0, isPositive: true },
-          },
-          totalProducts: staticProducts.length,
-        },
-      };
+      return { success: false, error: err.message, data: null };
     }
   },
 
   /**
-   * Generates sales chart time-series data
+   * Daily revenue/orders series for the period (paid orders).
    */
   async getSalesChart(period = "last30") {
     try {
-      const days = period === "last7" ? 7 : 30;
-      const { data: orders } = await Promise.race([
-        supabase
-          .from("orders")
-          .select("total_amount, payment_status, created_at")
-          .order("created_at", { ascending: true }),
-        new Promise((resolve) => setTimeout(() => resolve({ data: [] }), 4000)),
-      ]).catch(() => ({ data: [] }));
-
-      const points = [];
-      const now = new Date();
-
-      for (let i = days - 1; i >= 0; i--) {
-        const d = new Date(now);
-        d.setDate(d.getDate() - i);
-        const dateStr = d.toISOString().split("T")[0];
-
-        // Sum revenue on this date
-        const dayOrders = (orders || []).filter((o) => {
-          if (!o.created_at) return false;
-          const orderDate = new Date(o.created_at).toISOString().split("T")[0];
-          return (
-            orderDate === dateStr &&
-            (o.payment_status || "").toUpperCase() === "PAID"
-          );
-        });
-
-        const dayRevenue = dayOrders.reduce(
-          (sum, o) => sum + Number(o.total_amount || 0),
-          0
-        );
-
-        points.push({
-          date: dateStr,
-          revenue: dayRevenue,
-          orders: dayOrders.length,
-        });
+      const { start, end } = periodRange(period);
+      const orders = (await fetchAllOrders()).filter((o) => inRange(o, start, end) && isPaid(o));
+      const byDay = new Map();
+      for (const o of orders) {
+        const k = dayKey(new Date(o.created_at));
+        const row = byDay.get(k) || { revenue: 0, orders: 0 };
+        row.revenue += orderTotal(o);
+        row.orders += 1;
+        byDay.set(k, row);
       }
-
+      const points = [];
+      for (let d = new Date(start); d < end; d = addDays(d, 1)) {
+        const k = dayKey(d);
+        points.push({ date: k, revenue: byDay.get(k)?.revenue || 0, orders: byDay.get(k)?.orders || 0 });
+      }
       return points;
     } catch (err) {
       console.error("adminService.getSalesChart error:", err);
@@ -219,355 +194,150 @@ export const adminService = {
   },
 
   /**
-   * Fetches full analytics metrics for the Overview Analytics dashboard (Funnel, Traffic, Growth KPIs)
+   * Overview analytics from real orders. Traffic and funnel data need a
+   * connected analytics tool (GA4), so they are not estimated here.
    */
   async getAnalytics(period = "last30") {
-    try {
-      const withTimeout = (p, fb = { data: [] }, ms = 4000) =>
-        Promise.race([p, new Promise((res) => setTimeout(() => res(fb), ms))]).catch(() => fb);
+    const { start, end, prevStart, prevEnd } = periodRange(period);
+    const [orders, profilesRes] = await Promise.all([
+      fetchAllOrders(),
+      supabase.from("profiles").select("id, role, created_at").limit(5000),
+    ]);
+    const current = orders.filter((o) => inRange(o, start, end));
+    const previous = orders.filter((o) => inRange(o, prevStart, prevEnd));
+    const paid = current.filter(isPaid);
+    const paidBefore = previous.filter(isPaid);
+    const revenue = paid.reduce((s, o) => s + orderTotal(o), 0);
+    const revenueBefore = paidBefore.reduce((s, o) => s + orderTotal(o), 0);
 
-      const [ordersRes, profilesRes] = await Promise.all([
-        withTimeout(supabase.from("orders").select("*").order("created_at", { ascending: false })),
-        withTimeout(supabase.from("profiles").select("id")),
-      ]);
-
-      const orderList = ordersRes?.data || [];
-      const paidOrders = orderList.filter(
-        (o) => (o.payment_status || o.order_status || "").toUpperCase() === "PAID"
-      );
-
-      const totalRevenue = paidOrders.reduce(
-        (sum, o) => sum + Number(o.total_amount || o.total || 0),
-        0
-      );
-
-      const pendingOrders = orderList.filter(
-        (o) => (o.payment_status || o.order_status || "").toUpperCase() === "PENDING"
-      ).length;
-      const processingOrders = orderList.filter(
-        (o) => (o.order_status || "").toUpperCase() === "PROCESSING"
-      ).length;
-      const deliveredOrders = orderList.filter(
-        (o) => (o.order_status || "").toUpperCase() === "DELIVERED"
-      ).length;
-      const cancelledOrders = orderList.filter(
-        (o) => (o.order_status || o.payment_status || "").toUpperCase() === "CANCELLED"
-      ).length;
-
-      const aov = paidOrders.length > 0 ? Math.round(totalRevenue / paidOrders.length) : (totalRevenue > 0 ? totalRevenue : 2850);
-      const customerCount = Math.max(1, (profilesRes?.data || []).length);
-
-      // Best sellers aggregation
-      const salesMap = {};
-      paidOrders.forEach((o) => {
-        const items = Array.isArray(o.items) ? o.items : [];
-        items.forEach((item) => {
-          const name = item.name || item.title || "Product";
-          const id = item.id || name;
-          const qty = Number(item.quantity || 1);
-          if (!salesMap[id]) {
-            salesMap[id] = { productId: id, product: { name }, _sum: { quantity: 0 } };
-          }
-          salesMap[id]._sum.quantity += qty;
-        });
-      });
-
-      let bestSellers = Object.values(salesMap).sort(
-        (a, b) => b._sum.quantity - a._sum.quantity
-      );
-
-      if (bestSellers.length === 0) {
-        bestSellers = staticProducts.slice(0, 5).map((p, idx) => ({
-          productId: p.id,
-          product: { name: p.name || p.title },
-          _sum: { quantity: Math.max(1, 14 - idx * 3) },
-        }));
-      }
-
-      // Funnel metrics calculation
-      const ordersCount = Math.max(1, paidOrders.length || orderList.length || 8);
-      const visitorsCount = Math.max(250, Math.round(ordersCount / 0.028)); // ~2.8% conversion
-      const productViews = Math.round(visitorsCount * 0.68);
-      const addedToCart = Math.round(visitorsCount * 0.155);
-      const initiatedCheckout = Math.round(visitorsCount * 0.068);
-      const completedPurchases = ordersCount;
-
-      const conversionRate = ((completedPurchases / visitorsCount) * 100).toFixed(2);
-      const cartAbandonmentRate = (((addedToCart - completedPurchases) / addedToCart) * 100).toFixed(1);
-      const repeatCustomerRate = 26.4;
-
-      const funnel = [
-        { stage: "Store Visitors", count: visitorsCount, pct: 100, drop: 0, note: "Top of Funnel" },
-        { stage: "Product Views", count: productViews, pct: Math.round((productViews / visitorsCount) * 100), drop: (100 - (productViews / visitorsCount) * 100).toFixed(1), note: "Catalog Exploration" },
-        { stage: "Added to Cart", count: addedToCart, pct: Math.round((addedToCart / visitorsCount) * 100), drop: (((productViews - addedToCart) / productViews) * 100).toFixed(1), note: "High Intent" },
-        { stage: "Initiated Checkout", count: initiatedCheckout, pct: Math.round((initiatedCheckout / visitorsCount) * 100), drop: (((addedToCart - initiatedCheckout) / addedToCart) * 100).toFixed(1), note: "Checkout Screen" },
-        { stage: "Completed Orders", count: completedPurchases, pct: Math.round((completedPurchases / visitorsCount) * 100), drop: (((initiatedCheckout - completedPurchases) / initiatedCheckout) * 100).toFixed(1), note: "Paid Conversions" },
-      ];
-
-      const trafficSources = [
-        { channel: "Instagram & Social", visitors: Math.round(visitorsCount * 0.44), share: 44, revenue: Math.round(totalRevenue * 0.46) || 18400, color: "#E1306C" },
-        { channel: "Organic Search (Google)", visitors: Math.round(visitorsCount * 0.26), share: 26, revenue: Math.round(totalRevenue * 0.28) || 11200, color: "#10b981" },
-        { channel: "Direct Brand Traffic", visitors: Math.round(visitorsCount * 0.18), share: 18, revenue: Math.round(totalRevenue * 0.16) || 6400, color: "#6366f1" },
-        { channel: "Meta / Paid Ads", visitors: Math.round(visitorsCount * 0.08), share: 8, revenue: Math.round(totalRevenue * 0.07) || 2800, color: "#f59e0b" },
-        { channel: "Referral & WhatsApp", visitors: Math.round(visitorsCount * 0.04), share: 4, revenue: Math.round(totalRevenue * 0.03) || 1200, color: "#25D366" },
-      ];
-
-      const growthRecommendations = [
-        {
-          id: 1,
-          title: "Implement AOV Escalator (Free Gift at ₹3,999)",
-          impact: "+18% Revenue Potential",
-          tag: "AOV Boost",
-          action: "Current AOV is around ₹" + aov.toLocaleString("en-IN") + ". Offering an embroidered Chikankari pouch on orders over ₹3,999 will incentivize buyers to add an extra dupatta or accessory.",
-        },
-        {
-          id: 2,
-          title: "Automate 1-Hour WhatsApp Cart Recovery",
-          impact: "Recover ~14% Abandoned Carts",
-          tag: "Conversion",
-          action: "Cart abandonment is currently at " + cartAbandonmentRate + "%. Sending a personalized WhatsApp reminder within 60 minutes with a 5% instant checkout code captures high-intent buyers.",
-        },
-        {
-          id: 3,
-          title: "Elevate Artisan Heritage Trust Signals",
-          impact: "+12% Checkout Completion",
-          tag: "Trust & Brand",
-          action: "Highlight '100% Handcrafted by Lucknow Artisans · 30-Day Pure Fabric Guarantee' right below the Add to Cart and Payment buttons to eliminate hesitant buyer friction.",
-        },
-        {
-          id: 4,
-          title: "Promote High-Margin Dupattas as Add-ons",
-          impact: "+22% Basket Size",
-          tag: "Cross-Selling",
-          action: "When customers view Sarees or Kurtas, show a 1-click 'Complete the Royal Ensemble' matching dupatta recommendation on product and cart pages.",
-        },
-      ];
-
-      return {
-        revenue: { total: totalRevenue, change: 14.8 },
-        orders: {
-          total: orderList.length,
-          pending: pendingOrders,
-          processing: processingOrders,
-          delivered: deliveredOrders,
-          cancelled: cancelledOrders,
-        },
-        avgOrderValue: aov,
-        conversionRate,
-        cartAbandonmentRate,
-        repeatCustomerRate,
-        funnel,
-        trafficSources,
-        growthRecommendations,
-        customers: {
-          total: customerCount,
-          new: Math.max(1, Math.round(customerCount * 0.3)),
-        },
-        bestSellers,
-      };
-    } catch (err) {
-      console.error("adminService.getAnalytics error:", err);
-      return {
-        revenue: { total: 0, change: 0 },
-        orders: { total: 0, pending: 0, processing: 0, delivered: 0, cancelled: 0 },
-        avgOrderValue: 2850,
-        conversionRate: "2.80",
-        cartAbandonmentRate: "64.2",
-        repeatCustomerRate: 25.0,
-        funnel: [],
-        trafficSources: [],
-        growthRecommendations: [],
-        customers: { total: 1, new: 0 },
-        bestSellers: [],
-      };
+    // Repeat customers: emails with 2+ paid orders, across all time.
+    const paidAll = orders.filter(isPaid);
+    const perCustomer = new Map();
+    for (const o of paidAll) {
+      const key = String(o.customer_email || o.user_id || "").toLowerCase();
+      if (key) perCustomer.set(key, (perCustomer.get(key) || 0) + 1);
     }
+    const buyers = perCustomer.size;
+    const repeatBuyers = [...perCustomer.values()].filter((n) => n > 1).length;
+
+    // Online checkouts started vs completed in the period (COD orders are placed directly).
+    const online = current.filter((o) => !isCod(o));
+    const onlinePaid = online.filter(isPaid).length;
+
+    const customers = (profilesRes.data || []).filter((p) => upper(p.role) === "CUSTOMER" || !p.role);
+
+    return {
+      revenue: { total: revenue, change: pctChange(revenue, revenueBefore) },
+      orders: {
+        total: current.length,
+        paid: paid.length,
+        change: pctChange(current.length, previous.length),
+        cod: current.filter(isCod).length,
+        online: online.length,
+        cancelled: current.filter(isCancelled).length,
+      },
+      avgOrderValue: paid.length ? Math.round(revenue / paid.length) : 0,
+      onlineCheckout: { started: online.length, paid: onlinePaid, rate: online.length ? Math.round((onlinePaid / online.length) * 100) : null },
+      repeatCustomerRate: buyers ? Math.round((repeatBuyers / buyers) * 100) : null,
+      buyers,
+      repeatBuyers,
+      customers: { total: customers.length, new: customers.filter((p) => p.created_at && inRange(p, start, end)).length },
+      bestSellers: productSales(paid).slice(0, 8),
+    };
   },
 
   /**
-   * Fetches deep sales & merchandising intelligence for the Sales Analytics dashboard
+   * Sales report: category, product, time-of-day and payment breakdowns.
    */
   async getSalesAnalytics(period = "last30") {
-    try {
-      const withTimeout = (p, fb = { data: [] }, ms = 4000) =>
-        Promise.race([p, new Promise((res) => setTimeout(() => res(fb), ms))]).catch(() => fb);
+    const { start, end } = periodRange(period);
+    const [orders, productsRes] = await Promise.all([
+      fetchAllOrders(),
+      supabase.from("products").select("id, name, price, salePrice, stock, category_name, status, is_archived").limit(2000),
+    ]);
+    if (productsRes.error) throw productsRes.error;
+    const products = productsRes.data || [];
+    const productById = new Map(products.map((p) => [String(p.id), p]));
 
-      const [ordersRes, productsRes] = await Promise.all([
-        withTimeout(supabase.from("orders").select("*").order("created_at", { ascending: false })),
-        withTimeout(supabase.from("products").select("*").limit(500)),
-      ]);
+    const current = orders.filter((o) => inRange(o, start, end));
+    const paid = current.filter(isPaid);
+    const netSales = paid.reduce((s, o) => s + orderTotal(o), 0);
+    const grossSales = current.filter((o) => !isCancelled(o)).reduce((s, o) => s + orderTotal(o), 0);
+    const cancelledValue = current.filter(isCancelled).reduce((s, o) => s + orderTotal(o), 0);
+    const unitsSold = paid.reduce((s, o) => s + itemsOf(o).reduce((n, it) => n + Number(it.quantity || 1), 0), 0);
 
-      const orderList = ordersRes?.data || [];
-      const dbProducts = productsRes?.data || [];
-      const allProducts = dbProducts.length > 0 ? dbProducts : staticProducts;
-
-      const paidOrders = orderList.filter(
-        (o) => (o.payment_status || o.order_status || "").toUpperCase() === "PAID"
-      );
-
-      const netSales = paidOrders.reduce(
-        (sum, o) => sum + Number(o.total_amount || o.total || 0),
-        0
-      );
-
-      const grossSales = orderList.reduce(
-        (sum, o) => sum + Number(o.total_amount || o.total || 0),
-        0
-      ) || (netSales > 0 ? Math.round(netSales * 1.15) : 38000);
-
-      const refundsAmount = orderList
-        .filter((o) => (o.order_status || o.payment_status || "").toUpperCase() === "CANCELLED")
-        .reduce((sum, o) => sum + Number(o.total_amount || o.total || 0), 0);
-
-      const discountsTotal = Math.round((grossSales - netSales) * 0.4);
-      const unitsSold = paidOrders.reduce((sum, o) => {
-        const items = Array.isArray(o.items) ? o.items : [];
-        const count = items.reduce((s, it) => s + Number(it.quantity || 1), 0);
-        return sum + (count > 0 ? count : 1);
-      }, 0) || Math.max(1, paidOrders.length * 1.4);
-
-      const upt = (unitsSold / Math.max(1, paidOrders.length || 1)).toFixed(2);
-      const aov = paidOrders.length > 0 ? Math.round(netSales / paidOrders.length) : Math.round(netSales || 2850);
-
-      // Category breakdown
-      const categoryMap = {
-        Sarees: { revenue: 0, units: 0, color: "#6E1E2A" },
-        Dupattas: { revenue: 0, units: 0, color: "#AE8A54" },
-        Kurtas: { revenue: 0, units: 0, color: "#10b981" },
-        Fabrics: { revenue: 0, units: 0, color: "#6366f1" },
-        Sets: { revenue: 0, units: 0, color: "#f59e0b" },
-      };
-
-      paidOrders.forEach((o) => {
-        const items = Array.isArray(o.items) ? o.items : [];
-        items.forEach((it) => {
-          const title = (it.name || it.title || "").toLowerCase();
-          const q = Number(it.quantity || 1);
-          const p = Number(it.price || (netSales / Math.max(1, items.length)));
-          if (title.includes("saree")) {
-            categoryMap.Sarees.revenue += p * q;
-            categoryMap.Sarees.units += q;
-          } else if (title.includes("dupatta")) {
-            categoryMap.Dupattas.revenue += p * q;
-            categoryMap.Dupattas.units += q;
-          } else if (title.includes("kurta") || title.includes("tunic")) {
-            categoryMap.Kurtas.revenue += p * q;
-            categoryMap.Kurtas.units += q;
-          } else if (title.includes("fabric") || title.includes("unstitched")) {
-            categoryMap.Fabrics.revenue += p * q;
-            categoryMap.Fabrics.units += q;
-          } else {
-            categoryMap.Sets.revenue += p * q;
-            categoryMap.Sets.units += q;
-          }
-        });
-      });
-
-      // If categories empty, synthesize realistic merchandising distribution from net sales
-      if (categoryMap.Sarees.revenue === 0) {
-        const base = netSales || 45000;
-        categoryMap.Sarees.revenue = Math.round(base * 0.48);
-        categoryMap.Sarees.units = 9;
-        categoryMap.Dupattas.revenue = Math.round(base * 0.24);
-        categoryMap.Dupattas.units = 16;
-        categoryMap.Kurtas.revenue = Math.round(base * 0.16);
-        categoryMap.Kurtas.units = 8;
-        categoryMap.Fabrics.revenue = Math.round(base * 0.08);
-        categoryMap.Fabrics.units = 4;
-        categoryMap.Sets.revenue = Math.round(base * 0.04);
-        categoryMap.Sets.units = 2;
+    // Category breakdown from the product each line belongs to
+    const categories = new Map();
+    for (const o of paid) {
+      for (const it of itemsOf(o)) {
+        const p = productById.get(String(it.productId || it.id));
+        const cat = p?.category_name || "Uncategorised";
+        const row = categories.get(cat) || { name: cat, revenue: 0, units: 0 };
+        row.revenue += Number(it.price || 0) * Number(it.quantity || 1);
+        row.units += Number(it.quantity || 1);
+        categories.set(cat, row);
       }
-
-      const categoryData = Object.entries(categoryMap).map(([name, val]) => ({
-        name,
-        revenue: val.revenue,
-        units: val.units,
-        share: netSales > 0 ? Math.round((val.revenue / netSales) * 100) : 20,
-        color: val.color,
-      }));
-
-      // Hourly Shopping Trends (24h)
-      const hourlyDistribution = [
-        { hour: "00-04h", label: "Late Night", orders: 1, revenuePct: 3 },
-        { hour: "04-08h", label: "Early Morning", orders: 2, revenuePct: 5 },
-        { hour: "08-12h", label: "Morning", orders: 6, revenuePct: 18 },
-        { hour: "12-16h", label: "Afternoon", orders: 8, revenuePct: 22 },
-        { hour: "16-20h", label: "Evening Peak", orders: 14, revenuePct: 34 },
-        { hour: "20-24h", label: "Night Shopping", orders: 9, revenuePct: 18 },
-      ];
-
-      // Day of Week Trends
-      const dayOfWeekTrends = [
-        { day: "Mon", orders: 3, revenue: Math.round((netSales || 30000) * 0.10) },
-        { day: "Tue", orders: 4, revenue: Math.round((netSales || 30000) * 0.12) },
-        { day: "Wed", orders: 4, revenue: Math.round((netSales || 30000) * 0.11) },
-        { day: "Thu", orders: 5, revenue: Math.round((netSales || 30000) * 0.14) },
-        { day: "Fri", orders: 8, revenue: Math.round((netSales || 30000) * 0.21) },
-        { day: "Sat", orders: 7, revenue: Math.round((netSales || 30000) * 0.17) },
-        { day: "Sun", orders: 6, revenue: Math.round((netSales || 30000) * 0.15) },
-      ];
-
-      // Payment method share
-      const paymentMethods = [
-        { method: "UPI (GPay / PhonePe / Paytm)", share: 72, orders: Math.round(ordersCount * 0.72) || 18, color: "#10b981" },
-        { method: "Credit & Debit Cards", share: 18, orders: Math.round(ordersCount * 0.18) || 5, color: "#6366f1" },
-        { method: "Netbanking & Wallets", share: 7, orders: Math.round(ordersCount * 0.07) || 2, color: "#f59e0b" },
-        { method: "Cash on Delivery", share: 3, orders: Math.round(ordersCount * 0.03) || 1, color: "#64748b" },
-      ];
-
-      // Product BCG Matrix
-      const starProducts = allProducts.slice(0, 4).map((p, idx) => ({
-        id: p.id,
-        name: p.name || p.title,
-        price: p.price,
-        sales: 24 - idx * 4,
-        revenue: (p.price || 3500) * (24 - idx * 4),
-        tag: "Star Performer",
-        cls: "tag-star",
-      }));
-
-      const slowMovers = allProducts.slice(-3).map((p) => ({
-        id: p.id,
-        name: p.name || p.title,
-        price: p.price,
-        stock: p.stock || 12,
-        suggestion: "Create 15% clearance flash bundle or feature in Instagram Reel",
-        tag: "Slow Mover",
-        cls: "tag-slow",
-      }));
-
-      return {
-        grossSales,
-        netSales,
-        refundsAmount,
-        discountsTotal,
-        unitsSold,
-        upt,
-        aov,
-        categoryData,
-        hourlyDistribution,
-        dayOfWeekTrends,
-        paymentMethods,
-        starProducts,
-        slowMovers,
-      };
-    } catch (err) {
-      console.error("adminService.getSalesAnalytics error:", err);
-      return {
-        grossSales: 0,
-        netSales: 0,
-        refundsAmount: 0,
-        discountsTotal: 0,
-        unitsSold: 0,
-        upt: "1.00",
-        aov: 0,
-        categoryData: [],
-        hourlyDistribution: [],
-        dayOfWeekTrends: [],
-        paymentMethods: [],
-        starProducts: [],
-        slowMovers: [],
-      };
     }
+    const categoryData = [...categories.values()]
+      .sort((a, b) => b.revenue - a.revenue)
+      .map((c) => ({ ...c, share: netSales ? Math.round((c.revenue / netSales) * 100) : 0 }));
+
+    // When orders are placed (local time)
+    const buckets = [["00–06", 0, 6], ["06–10", 6, 10], ["10–14", 10, 14], ["14–18", 14, 18], ["18–22", 18, 22], ["22–24", 22, 24]];
+    const hourlyDistribution = buckets.map(([hour, from, to]) => {
+      const list = paid.filter((o) => {
+        const h = new Date(o.created_at).getHours();
+        return h >= from && h < to;
+      });
+      return { hour, orders: list.length, revenue: list.reduce((s, o) => s + orderTotal(o), 0) };
+    });
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const dayOfWeekTrends = [1, 2, 3, 4, 5, 6, 0].map((d) => {
+      const list = paid.filter((o) => new Date(o.created_at).getDay() === d);
+      return { day: dayNames[d], orders: list.length, revenue: list.reduce((s, o) => s + orderTotal(o), 0) };
+    });
+
+    // Payment methods across all orders placed in the period
+    const methods = new Map();
+    for (const o of current.filter((x) => !isCancelled(x))) {
+      const label = PAYMENT_LABELS[upper(o.payment_method)] || o.payment_method || "Other";
+      methods.set(label, (methods.get(label) || 0) + 1);
+    }
+    const methodTotal = [...methods.values()].reduce((a, b) => a + b, 0);
+    const paymentMethods = [...methods.entries()].map(([method, count]) => ({
+      method,
+      orders: count,
+      share: methodTotal ? Math.round((count / methodTotal) * 100) : 0,
+    }));
+
+    const sales = productSales(paid);
+    const topProducts = sales.slice(0, 8).map((s) => {
+      const p = productById.get(s.productId);
+      return { id: s.productId, name: p?.name || s.product.name, units: s._sum.quantity, revenue: s.revenue, stock: p?.stock ?? null };
+    });
+
+    // Live, in-stock products with no sales in the period
+    const soldIds = new Set(sales.map((s) => s.productId));
+    const unsoldInStock = products
+      .filter((p) => !p.is_archived && upper(p.status) === "PUBLISHED" && Number(p.stock) > 0 && !soldIds.has(String(p.id)))
+      .length;
+
+    return {
+      grossSales,
+      netSales,
+      cancelledValue,
+      paidOrders: paid.length,
+      ordersPlaced: current.length,
+      unitsSold,
+      upt: paid.length ? (unitsSold / paid.length).toFixed(2) : null,
+      aov: paid.length ? Math.round(netSales / paid.length) : 0,
+      categoryData,
+      hourlyDistribution,
+      dayOfWeekTrends,
+      paymentMethods,
+      topProducts,
+      unsoldInStock,
+    };
   },
 
   // ─────────────────────────────────────────────
@@ -575,36 +345,29 @@ export const adminService = {
   // ─────────────────────────────────────────────
   async getOrders() {
     try {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-
-      return (data || []).map((o) => {
-        const rawName = o.customer_name || o.shipping_address?.name || o.shippingAddress?.name || (o.customer ? `${o.customer.firstName || ""} ${o.customer.lastName || ""}` : "") || "Customer";
-        const email = o.customer_email || o.shipping_address?.email || o.shippingAddress?.email || o.customer?.email || "";
-        const phone = o.customer_phone || o.shipping_address?.phone || o.shippingAddress?.phone || o.customer?.phone || "";
+      const data = await fetchAllOrders();
+      return data.map((o) => {
+        const rawName = o.customer_name || o.shipping_address?.name || o.shippingAddress?.name || "Customer";
         const nameParts = rawName.trim().split(" ");
-        const firstName = nameParts[0] || "Customer";
-        const lastName = nameParts.slice(1).join(" ") || "";
-
         return {
           id: o.id,
           orderNumber: o.order_id || o.orderNumber || o.id,
-          createdAt: o.created_at || o.createdAt || new Date().toISOString(),
+          createdAt: o.created_at || o.createdAt,
           customer: {
-            firstName,
-            lastName,
-            email,
-            phone,
+            firstName: nameParts[0] || "Customer",
+            lastName: nameParts.slice(1).join(" "),
+            email: o.customer_email || o.shipping_address?.email || "",
+            phone: o.customer_phone || o.shipping_address?.phone || "",
           },
           shippingAddress: o.shipping_address || o.shippingAddress || {},
-          items: Array.isArray(o.items) ? o.items : [],
-          paymentMethod: o.payment_method || o.paymentMethod || "Cashfree / UPI",
-          total: Number(o.total_amount || o.total || 0),
-          orderStatus: (o.order_status || o.orderStatus || o.payment_status || o.paymentStatus || "PENDING").toUpperCase(),
+          items: itemsOf(o),
+          paymentMethod: PAYMENT_LABELS[upper(o.payment_method)] || o.payment_method || "—",
+          paymentMethodCode: upper(o.payment_method),
+          total: orderTotal(o),
+          shippingCharge: Number(o.shipping_charge ?? o.shippingCharge ?? 0),
+          // Fulfilment and payment are separate: an order can be SHIPPED and still PENDING payment (COD).
+          orderStatus: upper(o.order_status || o.orderStatus || "PENDING"),
+          paymentStatus: upper(o.payment_status || o.paymentStatus || "PENDING"),
         };
       });
     } catch (err) {
@@ -613,106 +376,88 @@ export const adminService = {
     }
   },
 
+  /**
+   * Changes the fulfilment status only. Payment status follows the rules:
+   *  - a COD order marked DELIVERED is now PAID (cash collected)
+   *  - cancelling returns the items to stock (once)
+   */
   async updateOrderStatus(orderId, newStatus) {
-    const statusUpper = newStatus.toUpperCase();
-    const validPaymentStatuses = ["PENDING", "PAID", "FAILED", "PARTIALLY_REFUNDED", "REFUNDED"];
-    const validOrderStatuses = ["PENDING", "CONFIRMED", "PROCESSING", "PACKED", "SHIPPED", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED", "RETURNED", "REFUNDED"];
+    const status = upper(newStatus);
+    const allowed = ["PENDING", "CONFIRMED", "PROCESSING", "PACKED", "SHIPPED", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED", "RETURNED"];
+    if (!allowed.includes(status)) throw new Error(`Unknown order status: ${newStatus}`);
 
-    const updates = {
-      payment_status: statusUpper,
-      order_status: statusUpper,
-      updated_at: new Date().toISOString(),
-    };
-    if (validPaymentStatuses.includes(statusUpper)) {
-      updates.paymentStatus = statusUpper;
-    }
-    if (validOrderStatuses.includes(statusUpper)) {
-      updates.orderStatus = statusUpper;
+    const { data: order, error: readError } = await supabase.from("orders").select("*").eq("id", orderId).maybeSingle();
+    if (readError) throw readError;
+    if (!order) throw new Error("Order not found.");
+
+    const updates = { order_status: status, orderStatus: status, updated_at: new Date().toISOString() };
+    if (status === "DELIVERED" && isCod(order) && upper(order.payment_status) === "PENDING") {
+      updates.payment_status = "PAID";
+      updates.paymentStatus = "PAID";
     }
 
-    const { data, error } = await supabase
-      .from("orders")
-      .update(updates)
-      .eq("id", orderId)
-      .select();
-
+    const { data, error } = await supabase.from("orders").update(updates).eq("id", orderId).select();
     if (error) throw error;
+
+    const wasCancelled = isCancelled(order);
+    const stockWasTaken = isCod(order) || isPaid(order);
+    if (["CANCELLED", "RETURNED"].includes(status) && !wasCancelled && stockWasTaken) {
+      await this.restockItems(itemsOf(order));
+    }
     return data;
   },
 
+  /** Returns order lines to stock (used when an order is cancelled). */
+  async restockItems(items) {
+    for (const item of items) {
+      const { data: p } = await supabase.from("products").select("id, stock, product_type, variations").eq("id", item.productId).maybeSingle();
+      if (!p) continue;
+      const qty = Number(item.quantity || 1);
+      const variations = Array.isArray(p.variations) ? p.variations : [];
+      if (p.product_type === "variable" && variations.length && item.selectedSize) {
+        const next = variations.map((v) => (String(v.size) === String(item.selectedSize) ? { ...v, stock: Number(v.stock || 0) + qty } : v));
+        await supabase.from("products").update({ variations: next, stock: next.reduce((s, v) => s + (Number(v.stock) || 0), 0), stock_status: "In Stock" }).eq("id", p.id);
+      } else {
+        await supabase.from("products").update({ stock: Number(p.stock || 0) + qty, stock_status: "In Stock" }).eq("id", p.id);
+      }
+    }
+  },
+
+  /**
+   * Online checkouts that were started but not paid (30+ minutes old).
+   * COD orders are excluded — they are real orders awaiting delivery.
+   */
   async getAbandonedCarts() {
     try {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-
-      const pendingOrders = (data || []).filter(
-        (o) => (o.payment_status || o.order_status || "").toUpperCase() === "PENDING"
-      );
-
-      if (pendingOrders.length > 0) {
-        return pendingOrders.map((o) => {
-          const items = Array.isArray(o.items) ? o.items : [];
-          const itemNames = items.map((it) => it.title || it.name || "Chikankari Handcraft").join(", ") || "Handcrafted Heritage Piece";
-          const customerName = o.customer_name || "Valued Customer";
+      const cutoff = Date.now() - 30 * 60 * 1000;
+      const orders = await fetchAllOrders();
+      return orders
+        .filter((o) => !isCod(o) && ["PENDING", "FAILED"].includes(upper(o.payment_status)) && !isCancelled(o))
+        .filter((o) => new Date(o.created_at).getTime() < cutoff)
+        .map((o) => {
+          const items = itemsOf(o);
+          const itemNames = items.map((it) => it.title || it.name).filter(Boolean).join(", ");
+          const customerName = o.customer_name || "there";
           const phone = o.customer_phone || "";
-          const cleanPhone = phone.replace(/[^0-9]/g, "").slice(-10);
-          const total = Number(o.total_amount || o.total || 0);
-
-          const waMessage = `Namaste ${customerName} ji! 🙏 We noticed you left the exquisite "${itemNames}" in your Safed Rang shopping bag.\n\nAs a special royal gesture, use coupon code *ROYAL5* for an extra 5% off if you complete your order today: https://safedrang.com/checkout\n\nIf you have any questions about size, fabric or styling, reply right here to chat with our team! ✨`;
-          const waLink = cleanPhone ? `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(waMessage)}` : null;
-
+          const digits = phone.replace(/\D/g, "");
+          const waNumber = digits.length === 10 ? `91${digits}` : digits.length === 12 && digits.startsWith("91") ? digits : "";
+          const waMessage = `Namaste ${customerName} ji, this is Safed Rang. We noticed your order for "${itemNames || "your selection"}" wasn't completed. If anything went wrong with the payment or you have a question about the piece, just reply here — we're happy to help.`;
           return {
             id: o.id,
             orderId: o.id,
-            customerName,
-            customerEmail: o.customer_email || "customer@example.com",
-            customerPhone: phone || "Not provided",
-            cleanPhone,
+            customerName: o.customer_name || "Customer",
+            customerEmail: o.customer_email || "",
+            customerPhone: phone,
+            cleanPhone: waNumber,
             items,
             itemNames,
-            total,
+            total: orderTotal(o),
             createdAt: o.created_at,
-            waLink,
+            paymentStatus: upper(o.payment_status),
+            waLink: waNumber ? `https://wa.me/${waNumber}?text=${encodeURIComponent(waMessage)}` : null,
             recovered: false,
           };
         });
-      }
-
-      // Default sample abandoned checkouts if no pending orders exist yet
-      return [
-        {
-          id: "AB_1042",
-          orderId: "SR_PENDING_1042",
-          customerName: "Aaradhya Sharma",
-          customerEmail: "aaradhya.s@gmail.com",
-          customerPhone: "+91 98765 43210",
-          cleanPhone: "9876543210",
-          items: [{ title: "Chanderi Chikankari Dupatta Green", quantity: 1, price: 3499 }],
-          itemNames: "Chanderi Chikankari Dupatta Green",
-          total: 3499,
-          createdAt: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
-          waLink: `https://wa.me/919876543210?text=${encodeURIComponent("Namaste Aaradhya ji! 🙏 We noticed you left the exquisite 'Chanderi Chikankari Dupatta Green' in your Safed Rang shopping bag.\n\nAs a royal gesture, use code *ROYAL5* for 5% off today: https://safedrang.com/checkout ✨")}`,
-          recovered: false,
-        },
-        {
-          id: "AB_1039",
-          orderId: "SR_PENDING_1039",
-          customerName: "Priyanka Verma",
-          customerEmail: "priyanka.verma@yahoo.com",
-          customerPhone: "+91 98112 23344",
-          cleanPhone: "9811223344",
-          items: [{ title: "Pure Georgette Chikankari Saree Ivory", quantity: 1, price: 8999 }],
-          itemNames: "Pure Georgette Chikankari Saree Ivory",
-          total: 8999,
-          createdAt: new Date(Date.now() - 140 * 60 * 1000).toISOString(),
-          waLink: `https://wa.me/919811223344?text=${encodeURIComponent("Namaste Priyanka ji! 🙏 We noticed you left the exquisite 'Pure Georgette Chikankari Saree Ivory' in your Safed Rang shopping bag.\n\nAs a royal gesture, use code *ROYAL5* for 5% off today: https://safedrang.com/checkout ✨")}`,
-          recovered: false,
-        },
-      ];
     } catch (err) {
       console.error("adminService.getAbandonedCarts error:", err);
       return [];
@@ -756,10 +501,9 @@ export const adminService = {
       console.warn("categories table error:", e);
     }
 
-    // Fallback: extract distinct categories from static products
-    const uniqueCats = Array.from(
-      new Set(staticProducts.map((p) => p.category).filter(Boolean))
-    );
+    // Fallback: categories actually used by live products
+    const { data: rows } = await supabase.from("products").select("category_name").limit(2000);
+    const uniqueCats = Array.from(new Set((rows || []).map((p) => p.category_name).filter(Boolean))).sort();
 
     return uniqueCats.map((name, idx) => ({
       id: `cat_${idx + 1}`,
@@ -863,194 +607,88 @@ export const adminService = {
   },
 
   // ─────────────────────────────────────────────
-  // 5. COUPONS & PROMOTIONS
+  // 5. COUPONS
+  // Note: checkout does not apply coupon codes yet (see Coupons page notice).
   // ─────────────────────────────────────────────
   async getCoupons() {
-    try {
-      const { data, error } = await supabase
-        .from("coupons")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (!error && data && data.length > 0) return data;
-    } catch (e) {
-      console.warn("coupons table error:", e);
-    }
-
-    // LocalStorage fallback for instant persistence
-    const local = localStorage.getItem("safedrang_coupons");
-    if (local) {
-      try {
-        return JSON.parse(local);
-      } catch {}
-    }
-
-    // Default seed coupon
-    const defaultCoupons = [
-      {
-        id: "cpn_1",
-        code: "WELCOME10",
-        discountType: "PERCENTAGE",
-        discountValue: 10,
-        minOrderAmount: 2000,
-        usageLimit: 500,
-        usedCount: 14,
-        status: "ACTIVE",
-        expiresAt: "2027-12-31",
-      },
-      {
-        id: "cpn_2",
-        code: "SAFEDFESTIVE",
-        discountType: "FIXED",
-        discountValue: 500,
-        minOrderAmount: 4999,
-        usageLimit: 200,
-        usedCount: 8,
-        status: "ACTIVE",
-        expiresAt: "2027-12-31",
-      },
-    ];
-    localStorage.setItem("safedrang_coupons", JSON.stringify(defaultCoupons));
-    return defaultCoupons;
+    const { data, error } = await supabase.from("coupons").select("*").order("created_at", { ascending: false });
+    if (error) throw error;
+    return data || [];
   },
 
   async saveCoupon(coupon) {
-    try {
-      if (coupon.id && !coupon.id.startsWith("cpn_")) {
-        const { error } = await supabase
-          .from("coupons")
-          .update(coupon)
-          .eq("id", coupon.id);
-        if (!error) return;
-      } else {
-        const { error } = await supabase.from("coupons").insert([coupon]);
-        if (!error) return;
-      }
-    } catch {}
-
-    // Update LocalStorage fallback
-    const list = await this.getCoupons();
-    let updated;
-    if (coupon.id) {
-      updated = list.map((c) => (c.id === coupon.id ? { ...c, ...coupon } : c));
-    } else {
-      updated = [
-        { ...coupon, id: `cpn_${Date.now()}`, usedCount: 0, status: "ACTIVE" },
-        ...list,
-      ];
-    }
-    localStorage.setItem("safedrang_coupons", JSON.stringify(updated));
+    const { id, ...fields } = coupon;
+    const { error } = id
+      ? await supabase.from("coupons").update(fields).eq("id", id)
+      : await supabase.from("coupons").insert([fields]);
+    if (error) throw error;
   },
 
   async deleteCoupon(id) {
-    try {
-      await supabase.from("coupons").delete().eq("id", id);
-    } catch {}
-
-    const list = await this.getCoupons();
-    const updated = list.filter((c) => c.id !== id);
-    localStorage.setItem("safedrang_coupons", JSON.stringify(updated));
+    const { error } = await supabase.from("coupons").delete().eq("id", id);
+    if (error) throw error;
   },
 
   // ─────────────────────────────────────────────
   // 6. PAYMENTS & TRANSACTIONS
   // ─────────────────────────────────────────────
   async getPayments() {
-    const { data: orders } = await supabase
-      .from("orders")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    return (orders || []).map((o) => ({
+    const orders = await fetchAllOrders();
+    return orders.map((o) => ({
       id: o.id,
-      transactionId: o.cashfree_order_id || o.id,
+      transactionId: o.id,
       orderNumber: o.id,
       customerName: o.customer_name || "Customer",
       customerEmail: o.customer_email || "—",
-      amount: Number(o.total_amount || o.total || 0),
+      amount: orderTotal(o),
       currency: "INR",
-      paymentMethod: o.payment_method || "UPI / Net Banking",
-      gateway: "Cashfree",
-      status: (o.payment_status || "PENDING").toUpperCase(),
-      createdAt: o.created_at || new Date().toISOString(),
+      paymentMethod: PAYMENT_LABELS[upper(o.payment_method)] || o.payment_method || "—",
+      gateway: isCod(o) ? "Cash on Delivery" : "Cashfree",
+      status: upper(o.payment_status || "PENDING"),
+      createdAt: o.created_at,
     }));
   },
 
   // ─────────────────────────────────────────────
   // 7. SETTINGS
+  // Stored as JSON values in `settings` (group, key) — the same shape the
+  // checkout and the order functions read, e.g. shipping.cod_charge = {"amount": 50}.
   // ─────────────────────────────────────────────
   async getSettings() {
-    try {
-      const { data, error } = await supabase
-        .from("settings")
-        .select("*");
-
-      if (!error && data && data.length > 0) {
-        const result = {};
-        data.forEach((row) => {
-          if (!result[row.group]) result[row.group] = {};
-          result[row.group][row.key] = row.value;
-        });
-        return result;
-      }
-    } catch (e) {
-      console.warn("settings table error:", e);
+    const { data, error } = await supabase.from("settings").select("group, key, value");
+    if (error) throw error;
+    const raw = {};
+    for (const row of data || []) {
+      raw[`${row.group}.${row.key}`] = typeof row.value === "string" ? safeJson(row.value) : row.value;
     }
-
-    const local = localStorage.getItem("safedrang_store_settings");
-    if (local) {
-      try {
-        return JSON.parse(local);
-      } catch {}
-    }
-
-    const defaults = {
-      general: {
-        store_name: "Safedrang",
-        store_email: "contact@safedrang.com",
-        store_phone: "+91 98765 43210",
-        currency: "INR",
+    const text = (k, fallback = "") => {
+      const v = raw[k];
+      return v && typeof v === "object" ? v.text ?? fallback : v ?? fallback;
+    };
+    const fee = Number(raw["shipping.cod_charge"]?.amount ?? raw["shipping.cod_charge"]);
+    return {
+      store: {
+        name: text("general.site_name", "Safed Rang"),
+        email: text("general.store_email"),
+        phone: text("general.store_phone"),
       },
-      shipping: {
-        free_shipping_threshold: "999",
-        default_shipping_charge: "99",
-      },
-      tax: {
-        tax_rate: "5",
-        include_tax: "false",
-      },
-      notifications: {
-        order_email: "true",
-        low_stock_email: "true",
-        low_stock_threshold: "5",
-      },
-      seo: {
-        meta_title: "Safedrang – Lucknow's Finest Handcrafted Chikankari Sarees",
-        meta_description:
-          "Preserving the heritage of handcrafted Chikankari, Zardozi, and Kamdani.",
+      cod: {
+        enabled: raw["shipping.cod_enabled"]?.enabled ?? raw["shipping.cod_enabled"] !== false,
+        fee: Number.isFinite(fee) ? fee : 39,
       },
     };
-
-    localStorage.setItem("safedrang_store_settings", JSON.stringify(defaults));
-    return defaults;
   },
 
-  async saveSettings(settingsObj) {
-    try {
-      const rows = [];
-      Object.entries(settingsObj).forEach(([group, keys]) => {
-        Object.entries(keys || {}).forEach(([key, value]) => {
-          rows.push({ group, key, value: String(value) });
-        });
-      });
-
-      await supabase.from("settings").upsert(rows, { onConflict: "group,key" });
-    } catch {}
-
-    localStorage.setItem(
-      "safedrang_store_settings",
-      JSON.stringify(settingsObj)
-    );
+  async saveSettings({ store, cod }) {
+    const rows = [
+      { group: "general", key: "site_name", value: { text: String(store.name || "").trim() } },
+      { group: "general", key: "store_email", value: { text: String(store.email || "").trim() } },
+      { group: "general", key: "store_phone", value: { text: String(store.phone || "").trim() } },
+      { group: "shipping", key: "cod_enabled", value: { enabled: Boolean(cod.enabled) } },
+      { group: "shipping", key: "cod_charge", value: { amount: Math.max(0, Number(cod.fee) || 0) } },
+    ];
+    const { error } = await supabase.from("settings").upsert(rows, { onConflict: "group,key" });
+    if (error) throw error;
   },
 
   // ─────────────────────────────────────────────

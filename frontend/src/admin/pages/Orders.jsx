@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import toast from "react-hot-toast";
 import {
   Eye,
   Edit,
@@ -18,12 +20,31 @@ import { formatINR } from "../../config/api.js";
 import { adminService } from "../adminService";
 import Papa from "papaparse";
 
-const STATUS_OPTIONS = ["ALL", "PENDING", "PAID", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"];
+const STATUS_OPTIONS = ["ALL", "PENDING", "PROCESSING", "PACKED", "SHIPPED", "DELIVERED", "CANCELLED", "RETURNED"];
+
+// Fulfilment steps an admin can set. Payment status is separate (set by
+// Cashfree for online orders; a COD order becomes PAID when marked Delivered).
+const FULFILMENT_STATUSES = [
+  ["PENDING", "Pending"],
+  ["PROCESSING", "Processing"],
+  ["PACKED", "Packed"],
+  ["SHIPPED", "Shipped"],
+  ["OUT_FOR_DELIVERY", "Out for delivery"],
+  ["DELIVERED", "Delivered"],
+  ["CANCELLED", "Cancelled"],
+  ["RETURNED", "Returned"],
+];
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
+  // Header search (/admin/orders?q=…) updates the filter.
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q !== null) setSearchTerm(q);
+  }, [searchParams]);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [editingOrder, setEditingOrder] = useState(null);
@@ -55,11 +76,15 @@ const Orders = () => {
       case "PENDING":
         return "status-pending";
       case "PROCESSING":
+      case "PACKED":
       case "SHIPPED":
+      case "OUT_FOR_DELIVERY":
         return "status-processing";
       case "CANCELLED":
+      case "RETURNED":
       case "REFUNDED":
       case "FAILED":
+      case "AMOUNT_MISMATCH":
         return "status-cancelled";
       default:
         return "status-processing";
@@ -76,7 +101,7 @@ const Orders = () => {
       setEditingOrder(null);
       fetchOrders();
     } catch (err) {
-      alert("Failed to update status: " + err.message);
+      toast.error("Could not update the order: " + err.message);
     } finally {
       setUpdating(false);
     }
@@ -92,6 +117,8 @@ const Orders = () => {
         Phone: o.customer?.phone || "",
         Total: o.total,
         Status: o.orderStatus,
+        "Payment Status": o.paymentStatus,
+        "Payment Method": o.paymentMethod,
         Payment: o.paymentMethod,
         Items: o.items?.map((it) => `${it.title} (x${it.quantity})`).join(", ") || "",
       }));
@@ -216,8 +243,13 @@ const Orders = () => {
                         </div>
                       </td>
                       <td>
-                        <span className="category-badge">
-                          {order.paymentMethod || "Cashfree / UPI"}
+                        <span className="category-badge">{order.paymentMethod}</span>
+                        <span
+                          className={`status-badge ${getStatusClass(order.paymentStatus)}`}
+                          style={{ marginLeft: 6 }}
+                          title="Payment status"
+                        >
+                          {order.paymentStatus === "PAID" ? "Paid" : order.paymentStatus === "PENDING" ? (order.paymentMethodCode === "COD" ? "Due on delivery" : "Unpaid") : order.paymentStatus}
                         </span>
                       </td>
                       <td className="font-medium">
@@ -227,7 +259,7 @@ const Orders = () => {
                         <span
                           className={`status-badge ${getStatusClass(order.orderStatus)}`}
                         >
-                          {order.orderStatus}
+                          {order.orderStatus.replace(/_/g, " ")}
                         </span>
                       </td>
                       <td className="text-right">
@@ -295,7 +327,7 @@ const Orders = () => {
                 <div>
                   <h4 style={{ fontSize: "0.85rem", color: "var(--admin-text-muted)", textTransform: "uppercase" }}>Payment & Status</h4>
                   <p style={{ marginTop: "4px" }}>
-                    Status: <span className={`status-badge ${getStatusClass(selectedOrder.orderStatus)}`}>{selectedOrder.orderStatus}</span>
+                    Status: <span className={`status-badge ${getStatusClass(selectedOrder.orderStatus)}`}>{selectedOrder.orderStatus}</span>{" "}· Payment: <span className={`status-badge ${getStatusClass(selectedOrder.paymentStatus)}`}>{selectedOrder.paymentStatus}</span> ({selectedOrder.paymentMethod})
                   </p>
                   <p style={{ fontSize: "0.85rem", marginTop: "4px" }}>Method: {selectedOrder.paymentMethod}</p>
                   <p style={{ fontSize: "0.85rem", fontWeight: 700, marginTop: "4px" }}>Total: {formatINR(selectedOrder.total)}</p>
@@ -370,13 +402,16 @@ const Orders = () => {
                   value={newStatus}
                   onChange={(e) => setNewStatus(e.target.value)}
                 >
-                  <option value="PENDING">PENDING</option>
-                  <option value="PAID">PAID</option>
-                  <option value="PROCESSING">PROCESSING</option>
-                  <option value="SHIPPED">SHIPPED</option>
-                  <option value="DELIVERED">DELIVERED</option>
-                  <option value="CANCELLED">CANCELLED</option>
+                  {FULFILMENT_STATUSES.map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
                 </select>
+                <p className="field-hint" style={{ marginTop: 8, fontSize: "0.78rem", color: "var(--admin-text-muted)" }}>
+                  {editingOrder.paymentMethodCode === "COD"
+                    ? "Marking a Cash on Delivery order as Delivered records the cash as paid. "
+                    : ""}
+                  Cancelling or marking returned puts the items back in stock.
+                </p>
               </div>
               <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
                 <button

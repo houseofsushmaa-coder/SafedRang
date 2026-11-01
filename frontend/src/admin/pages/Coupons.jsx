@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import "./AdminPages.css";
 import "./Settings.css";
+import { Notice } from "../components/AdminUI";
 
 import { formatINR } from "../../config/api.js";
 import { adminService } from "../adminService";
@@ -49,13 +50,17 @@ const Coupons = () => {
     });
   };
 
+  const [loadError, setLoadError] = useState("");
+
   const fetchCoupons = useCallback(async () => {
     setLoading(true);
+    setLoadError("");
     try {
       const data = await adminService.getCoupons();
       setCoupons(data ?? []);
     } catch (err) {
       console.error("Coupons fetch failed:", err);
+      setLoadError(err.message || "Could not load coupons.");
       setCoupons([]);
     } finally {
       setLoading(false);
@@ -131,7 +136,7 @@ const Coupons = () => {
       showToast("Coupon deleted.");
       fetchCoupons();
     } catch (err) {
-      alert(err.message ?? "Failed to delete coupon.");
+      setLoadError(err.message ?? "Failed to delete coupon.");
     } finally {
       setDeleting(null);
     }
@@ -152,12 +157,20 @@ const Coupons = () => {
       <div className="page-header">
         <div>
           <h2>Coupons & Discounts</h2>
-          <p className="page-subtitle">Manage promo codes for your store</p>
+          <p className="page-subtitle">Promo codes saved for future use</p>
         </div>
         <button className="admin-btn icon-left" onClick={openCreate} id="add-coupon-btn">
           <Plus size={16} /> Create Coupon
         </button>
       </div>
+
+      <div style={{ marginBottom: 20 }}>
+        <Notice tone="warning">
+          <strong>Checkout doesn't accept coupon codes yet.</strong> Codes saved here are not applied to any order,
+          so don't share them with customers until coupon support is added to checkout.
+        </Notice>
+      </div>
+      {loadError && <div className="aui-error" style={{ marginBottom: 20 }}>{loadError}</div>}
 
       {/* Stats Row */}
       <div className="dashboard-stats-grid" style={{ marginBottom: 24 }}>

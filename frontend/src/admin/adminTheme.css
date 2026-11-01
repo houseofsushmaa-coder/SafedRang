@@ -1,0 +1,284 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   SAFED RANG ADMIN — THEME TOKENS
+   Two themes, set on .admin-container[data-theme]:
+     light — "Ivory":       off-white canvas, white cards, gold & wine accents
+     dark  — "Royal Night": walnut surfaces, champagne gold, faint jaali lattice
+   Every admin colour should come from these tokens. Legacy names used across
+   the admin (--ivory, --gold, --wine, --charcoal…) are re-pointed here so
+   older styles follow the theme too. Scoped to the admin only.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.admin-container[data-theme="light"] {
+  color-scheme: light;
+
+  --admin-bg: #faf7f2;
+  --admin-surface: #ffffff;
+  --admin-surface-2: #f7f2ea;
+  --admin-surface-3: #efe7da;
+  --admin-border: #e8dfd2;
+  --admin-border-light: #f1ebe2;
+  --admin-border-subtle: #f1ebe2;
+
+  --admin-text-main: #241b17;
+  --admin-text-muted: #7d6b5a;
+  --admin-text-light: #a8988a;
+
+  --admin-primary: #a47e45;
+  --admin-primary-hover: #8c6a38;
+  --admin-primary-rgb: 164 126 69;
+  --admin-primary-soft: #f6eedf;
+  --admin-on-primary: #ffffff;
+
+  --admin-accent: #6e1e2a;
+  --admin-accent-rgb: 110 30 42;
+  --admin-accent-text: #6e1e2a;
+  --admin-accent-soft: #f7e9eb;
+  --admin-on-accent: #ffffff;
+
+  /* "Strong" = the dark button / emphasis colour of this theme */
+  --admin-strong: #241b17;
+  --admin-on-strong: #ffffff;
+  --admin-ink-rgb: 36 27 23;
+
+  --admin-success: #2e7d4f;
+  --admin-success-rgb: 46 125 79;
+  --admin-success-soft: #e8f3ec;
+  --admin-success-border: #bfdcc9;
+  --admin-warning: #a8670f;
+  --admin-warning-rgb: 168 103 15;
+  --admin-warning-soft: #fcf2e0;
+  --admin-warning-border: #efd6a8;
+  --admin-danger: #b42318;
+  --admin-danger-rgb: 180 35 24;
+  --admin-danger-soft: #fdecea;
+  --admin-danger-border: #f4c7c2;
+  --admin-info: #2f5f8a;
+  --admin-info-rgb: 47 95 138;
+  --admin-info-soft: #e9f0f7;
+  --admin-info-border: #c7d8ea;
+
+  --admin-card-bg: var(--admin-surface);
+  --admin-shadow: 0 1px 2px rgb(36 27 23 / 0.04), 0 4px 16px rgb(36 27 23 / 0.04);
+  --admin-shadow-lg: 0 12px 40px rgb(36 27 23 / 0.12);
+
+  /* Sidebar & top bar */
+  --sidebar-bg: #f4eee5;
+  --sidebar-bg-2: #efe7dc;
+  --sidebar-border: #e6dccd;
+  --sidebar-text: #6b5a4b;
+  --sidebar-heading: #a8988a;
+  --sidebar-hover: rgb(164 126 69 / 0.10);
+  --sidebar-active: #ffffff;
+  --sidebar-active-text: #6e1e2a;
+  --sidebar-glass: rgb(36 27 23 / 0.03);
+  --admin-sidebar-bg: var(--sidebar-bg);
+  --topbar-bg: rgb(250 247 242 / 0.88);
+
+  --admin-pattern: none;
+}
+
+.admin-container[data-theme="dark"] {
+  color-scheme: dark;
+
+  --admin-bg: #120d0b;
+  --admin-surface: #1b1411;
+  --admin-surface-2: #221915;
+  --admin-surface-3: #2b201b;
+  --admin-border: rgb(201 168 118 / 0.16);
+  --admin-border-light: rgb(201 168 118 / 0.09);
+  --admin-border-subtle: rgb(201 168 118 / 0.09);
+
+  --admin-text-main: #f2e8da;
+  --admin-text-muted: #bba68c;
+  --admin-text-light: #8b7764;
+
+  --admin-primary: #c9a876;
+  --admin-primary-hover: #dcbe8f;
+  --admin-primary-rgb: 201 168 118;
+  --admin-primary-soft: rgb(201 168 118 / 0.12);
+  --admin-on-primary: #1b1411;
+
+  --admin-accent: #8e2a3a;
+  --admin-accent-rgb: 196 92 110;
+  --admin-accent-text: #e2a0ab;
+  --admin-accent-soft: rgb(196 92 110 / 0.14);
+  --admin-on-accent: #fbefe3;
+
+  --admin-strong: #e9dcc6;
+  --admin-on-strong: #1b1411;
+  --admin-ink-rgb: 242 232 218;
+
+  --admin-success: #6cc394;
+  --admin-success-rgb: 108 195 148;
+  --admin-success-soft: rgb(108 195 148 / 0.12);
+  --admin-success-border: rgb(108 195 148 / 0.28);
+  --admin-warning: #e4ad5c;
+  --admin-warning-rgb: 228 173 92;
+  --admin-warning-soft: rgb(228 173 92 / 0.12);
+  --admin-warning-border: rgb(228 173 92 / 0.28);
+  --admin-danger: #ec7a6e;
+  --admin-danger-rgb: 236 122 110;
+  --admin-danger-soft: rgb(236 122 110 / 0.12);
+  --admin-danger-border: rgb(236 122 110 / 0.28);
+  --admin-info: #8ab4dc;
+  --admin-info-rgb: 138 180 220;
+  --admin-info-soft: rgb(138 180 220 / 0.12);
+  --admin-info-border: rgb(138 180 220 / 0.28);
+
+  --admin-card-bg: var(--admin-surface);
+  --admin-shadow: 0 1px 0 rgb(201 168 118 / 0.06) inset, 0 8px 24px rgb(0 0 0 / 0.35);
+  --admin-shadow-lg: 0 24px 60px rgb(0 0 0 / 0.55);
+
+  --sidebar-bg: #0d0907;
+  --sidebar-bg-2: #140e0b;
+  --sidebar-border: rgb(201 168 118 / 0.12);
+  --sidebar-text: #b9a68f;
+  --sidebar-heading: #7e6b58;
+  --sidebar-hover: rgb(201 168 118 / 0.10);
+  --sidebar-active: rgb(201 168 118 / 0.16);
+  --sidebar-active-text: #e2c89c;
+  --sidebar-glass: rgb(255 255 255 / 0.03);
+  --admin-sidebar-bg: var(--sidebar-bg);
+  --topbar-bg: rgb(18 13 11 / 0.86);
+
+  /* Faint jaali (lattice) motif for the "premium ethnic" canvas */
+  --admin-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cg fill='none' stroke='%23c9a876' stroke-opacity='0.055' stroke-width='1'%3E%3Cpath d='M24 4 L44 24 L24 44 L4 24 Z'/%3E%3Ccircle cx='24' cy='24' r='5'/%3E%3Cpath d='M0 0 L8 8 M48 0 L40 8 M0 48 L8 40 M48 48 L40 40'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Legacy names → theme (shared by both themes) */
+.admin-container[data-theme] {
+  --ivory: var(--admin-surface-2);
+  --ivory-deep: var(--admin-surface-3);
+  --charcoal: var(--admin-text-main);
+  --charcoal-light: var(--admin-text-main);
+  --taupe: var(--admin-text-muted);
+  --text-muted: var(--admin-text-muted);
+  --muted-text: var(--admin-text-light);
+  --text-ivory: var(--admin-text-main);
+  --gold: var(--admin-primary);
+  --gold-primary: var(--admin-primary);
+  --gold-light: var(--admin-primary);
+  --gold-bright: var(--admin-primary-hover);
+  --gold-pale: var(--admin-primary-soft);
+  --gold-dim: rgb(var(--admin-primary-rgb) / 0.14);
+  --gold-glow: rgb(var(--admin-primary-rgb) / 0.2);
+  --wine: var(--admin-accent);
+  --wine-dim: rgb(var(--admin-accent-rgb) / 0.1);
+
+  background-color: var(--admin-bg);
+  background-image: var(--admin-pattern);
+  color: var(--admin-text-main);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Form controls follow the theme */
+.admin-container[data-theme] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+.admin-container[data-theme] select,
+.admin-container[data-theme] textarea {
+  background-color: var(--admin-surface);
+  color: var(--admin-text-main);
+  border-color: var(--admin-border);
+}
+
+.admin-container[data-theme] input::placeholder,
+.admin-container[data-theme] textarea::placeholder {
+  color: var(--admin-text-light);
+}
+
+.admin-container[data-theme] input[type="checkbox"],
+.admin-container[data-theme] input[type="radio"] {
+  accent-color: var(--admin-accent);
+}
+
+.admin-container[data-theme="dark"] input[type="checkbox"],
+.admin-container[data-theme="dark"] input[type="radio"] {
+  accent-color: var(--admin-primary);
+}
+
+/* Headings get the editorial serif in both themes */
+.admin-container[data-theme] .page-header h2,
+.admin-container[data-theme] .admin-page-title,
+.admin-container[data-theme] .card-heading {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  letter-spacing: 0.01em;
+}
+
+/* Recharts text/grid */
+.admin-container[data-theme] .recharts-cartesian-axis-tick text,
+.admin-container[data-theme] .recharts-legend-item-text {
+  fill: var(--admin-text-muted) !important;
+}
+
+.admin-container[data-theme] .recharts-cartesian-grid line {
+  stroke: var(--admin-border-light);
+}
+
+.admin-container[data-theme] .recharts-default-tooltip {
+  background: var(--admin-surface) !important;
+  border-color: var(--admin-border) !important;
+  color: var(--admin-text-main) !important;
+}
+
+/* Theme toggle button (top bar) */
+.admin-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 999px;
+  background: var(--admin-surface);
+  color: var(--admin-text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.admin-theme-toggle:hover {
+  border-color: var(--admin-primary);
+  color: var(--admin-text-main);
+}
+
+@media (max-width: 640px) {
+  .admin-theme-toggle span {
+    display: none;
+  }
+}
+
+/* Generic empty / notice states used by the honest analytics pages */
+.admin-notice {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border: 1px solid var(--admin-info-border);
+  border-radius: 10px;
+  background: var(--admin-info-soft);
+  color: var(--admin-text-main);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.admin-notice svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--admin-info);
+}
+
+.admin-notice.is-warning {
+  border-color: var(--admin-warning-border);
+  background: var(--admin-warning-soft);
+}
+
+.admin-notice.is-warning svg {
+  color: var(--admin-warning);
+}
+
+.admin-empty {
+  padding: 36px 16px;
+  text-align: center;
+  color: var(--admin-text-muted);
+  font-size: 0.88rem;
+}

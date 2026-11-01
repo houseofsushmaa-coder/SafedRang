@@ -1,276 +1,128 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import {
-  Settings as SettingsIcon, Save, Loader2, Store, Truck, Percent,
-  Bell, Globe, Shield, AlertCircle, CheckCircle2, Activity, ArrowRight,
-  ArrowUpDown,
-} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Save, CheckCircle2 } from "lucide-react";
+import toast from "react-hot-toast";
+import { adminService } from "../adminService";
+import { Notice, Section } from "../components/AdminUI";
 import "./AdminPages.css";
 import "./Settings.css";
 
-import { adminService } from "../adminService.js";
-import TrackingIntegrations from "./TrackingIntegrations";
-import ShopSortManager from "../components/ShopSortManager";
-
-const TABS = [
-  { key: "general", label: "General", icon: <Store size={16} /> },
-  { key: "shop_sorting", label: "Shop Display & Sorting", icon: <ArrowUpDown size={16} /> },
-  { key: "shipping", label: "Shipping", icon: <Truck size={16} /> },
-  { key: "tax", label: "Tax & Pricing", icon: <Percent size={16} /> },
-  { key: "notifications", label: "Notifications", icon: <Bell size={16} /> },
-  { key: "seo", label: "SEO", icon: <Globe size={16} /> },
-  { key: "tracking", label: "Tracking & Pixels", icon: <Activity size={16} /> },
-];
-
-const FormField = ({ label, hint, children }) => (
-  <div className="settings-field">
-    <div className="settings-field-label">
-      <label>{label}</label>
-      {hint && <p className="settings-field-hint">{hint}</p>}
-    </div>
-    <div className="settings-field-input">{children}</div>
-  </div>
-);
-
-const Settings = () => {
-  const [tab, setTab] = useState("general");
-  const [settings, setSettings] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+// Only settings that the store actually uses are shown here.
+export default function Settings() {
+  const [form, setForm] = useState(null);
+  const [initial, setInitial] = useState(null);
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  const fetchSettings = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await adminService.getSettings();
-      setSettings(data ?? {});
-    } catch (err) {
-      console.error("Settings fetch failed:", err);
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    adminService
+      .getSettings()
+      .then((s) => {
+        setForm(s);
+        setInitial(JSON.stringify(s));
+      })
+      .catch((err) => setError(err.message || "Could not load settings."));
   }, []);
 
-  useEffect(() => { fetchSettings(); }, [fetchSettings]);
+  const dirty = form && JSON.stringify(form) !== initial;
+  const set = (group, key, value) => setForm((prev) => ({ ...prev, [group]: { ...prev[group], [key]: value } }));
 
-  const get = (group, key, fallback = "") =>
-    settings[group]?.[key] ?? fallback;
-
-  const set = (group, key, value) => {
-    setSettings((prev) => ({
-      ...prev,
-      [group]: { ...(prev[group] ?? {}), [key]: value },
-    }));
-  };
-
-  const handleSave = async () => {
+  const handleSave = async (e) => {
+    e.preventDefault();
+    const fee = Number(form.cod.fee);
+    if (!Number.isFinite(fee) || fee < 0) {
+      toast.error("COD fee must be 0 or more.");
+      return;
+    }
     setSaving(true);
-    setError("");
     try {
-      await adminService.saveSettings(settings);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      await adminService.saveSettings({ ...form, cod: { ...form.cod, fee } });
+      setInitial(JSON.stringify({ ...form, cod: { ...form.cod, fee } }));
+      toast.success("Settings saved — checkout uses them immediately.");
     } catch (err) {
-      setError("Failed to save settings. Please try again.");
+      toast.error(`Could not save: ${err.message}`);
     } finally {
       setSaving(false);
     }
   };
 
-  const renderTab = () => {
-    if (loading) {
-      return (
-        <div style={{ padding: "40px", textAlign: "center", color: "var(--admin-text-muted)" }}>
-          <Loader2 size={28} className="spin" style={{ display: "block", margin: "0 auto 12px" }} />
-          Loading settings…
-        </div>
-      );
-    }
-
-    switch (tab) {
-      case "general":
-        return (
-          <div className="settings-section">
-            <div className="settings-section-title">Store Information</div>
-            <FormField label="Store Name" hint="The name displayed to your customers.">
-              <input className="admin-input" value={get("general", "store_name")} onChange={(e) => set("general", "store_name", e.target.value)} id="store-name" />
-            </FormField>
-            <FormField label="Contact Email" hint="Used for order confirmations and notifications.">
-              <input className="admin-input" type="email" value={get("general", "store_email")} onChange={(e) => set("general", "store_email", e.target.value)} id="store-email" />
-            </FormField>
-            <FormField label="Phone Number">
-              <input className="admin-input" value={get("general", "store_phone")} onChange={(e) => set("general", "store_phone", e.target.value)} id="store-phone" />
-            </FormField>
-            <FormField label="Currency" hint="Primary store currency.">
-              <select className="admin-input admin-select-full" value={get("general", "currency", "INR")} onChange={(e) => set("general", "currency", e.target.value)}>
-                <option value="INR">Indian Rupee (₹)</option>
-                <option value="USD">US Dollar ($)</option>
-                <option value="GBP">British Pound (£)</option>
-                <option value="EUR">Euro (€)</option>
-              </select>
-            </FormField>
-          </div>
-        );
-
-      case "shipping":
-        return (
-          <div className="settings-section">
-            <div className="settings-section-title">Shipping Configuration</div>
-            <FormField label="Default Shipping Charge (₹)" hint="Charged on orders below the free shipping threshold.">
-              <input className="admin-input" type="number" min={0} value={get("shipping", "default_shipping_charge", "99")} onChange={(e) => set("shipping", "default_shipping_charge", e.target.value)} id="default-shipping" />
-            </FormField>
-            <FormField label="Free Shipping Threshold (₹)" hint="Orders above this amount get free shipping. Set to 0 to disable.">
-              <input className="admin-input" type="number" min={0} value={get("shipping", "free_shipping_threshold", "999")} onChange={(e) => set("shipping", "free_shipping_threshold", e.target.value)} id="free-shipping-threshold" />
-            </FormField>
-            <FormField label="International Shipping" hint="Enable shipping to international addresses.">
-              <label className="toggle-label">
-                <input type="checkbox" className="toggle-checkbox" checked={get("shipping", "international_enabled", "false") === "true"} onChange={(e) => set("shipping", "international_enabled", String(e.target.checked))} />
-                <span className="toggle-switch" />
-                <span className="toggle-text">{get("shipping", "international_enabled") === "true" ? "Enabled" : "Disabled"}</span>
-              </label>
-            </FormField>
-          </div>
-        );
-
-      case "tax":
-        return (
-          <div className="settings-section">
-            <div className="settings-section-title">Tax & Pricing</div>
-            <FormField label="GST Rate (%)" hint="Applied to all taxable products.">
-              <input className="admin-input" type="number" min={0} max={100} step={0.5} value={get("tax", "tax_rate", "5")} onChange={(e) => set("tax", "tax_rate", e.target.value)} id="tax-rate" />
-            </FormField>
-            <FormField label="Show Prices Inclusive of Tax" hint="If enabled, displayed prices include GST.">
-              <label className="toggle-label">
-                <input type="checkbox" className="toggle-checkbox" checked={get("tax", "include_tax", "false") === "true"} onChange={(e) => set("tax", "include_tax", String(e.target.checked))} />
-                <span className="toggle-switch" />
-                <span className="toggle-text">{get("tax", "include_tax") === "true" ? "Inclusive" : "Exclusive"}</span>
-              </label>
-            </FormField>
-          </div>
-        );
-
-      case "notifications":
-        return (
-          <div className="settings-section">
-            <div className="settings-section-title">Email Notifications</div>
-            <FormField label="Order Confirmation Emails" hint="Send customers an email when they place an order.">
-              <label className="toggle-label">
-                <input type="checkbox" className="toggle-checkbox" checked={get("notifications", "order_email", "true") === "true"} onChange={(e) => set("notifications", "order_email", String(e.target.checked))} />
-                <span className="toggle-switch" />
-                <span className="toggle-text">{get("notifications", "order_email") !== "false" ? "Enabled" : "Disabled"}</span>
-              </label>
-            </FormField>
-            <FormField label="Low Stock Alerts" hint="Receive an alert when a product falls below the threshold.">
-              <label className="toggle-label">
-                <input type="checkbox" className="toggle-checkbox" checked={get("notifications", "low_stock_email", "true") === "true"} onChange={(e) => set("notifications", "low_stock_email", String(e.target.checked))} />
-                <span className="toggle-switch" />
-                <span className="toggle-text">{get("notifications", "low_stock_email") !== "false" ? "Enabled" : "Disabled"}</span>
-              </label>
-            </FormField>
-            <FormField label="Low Stock Threshold" hint="Alert when stock drops to or below this quantity.">
-              <input className="admin-input" type="number" min={1} value={get("notifications", "low_stock_threshold", "5")} onChange={(e) => set("notifications", "low_stock_threshold", e.target.value)} id="low-stock-threshold" />
-            </FormField>
-          </div>
-        );
-
-      case "seo":
-        return (
-          <div className="settings-section">
-            <div className="settings-section-title">SEO & Meta</div>
-            <FormField label="Default Page Title" hint="Appears in browser tabs and search results.">
-              <input className="admin-input" value={get("seo", "meta_title")} onChange={(e) => set("seo", "meta_title", e.target.value)} placeholder="Safedrang – Premium Handcrafted Sarees" id="meta-title" />
-            </FormField>
-            <FormField label="Default Meta Description" hint="Short description shown in search results (max 160 chars).">
-              <textarea
-                className="admin-input admin-textarea"
-                rows={3}
-                maxLength={160}
-                value={get("seo", "meta_description")}
-                onChange={(e) => set("seo", "meta_description", e.target.value)}
-                placeholder="Discover exquisite Chikankari & Zardozi sarees…"
-                id="meta-description"
-              />
-              <p style={{ fontSize: "0.75rem", color: "var(--admin-text-muted)", marginTop: 4 }}>
-                {(get("seo", "meta_description") ?? "").length}/160
-              </p>
-            </FormField>
-            <FormField label="Google Analytics Measurement ID" hint="Your GA4 Measurement ID (e.g. G-XXXXXXXXXX) from Google Analytics -> Data streams.">
-              <input
-                className="admin-input"
-                value={get("seo", "google_analytics_id")}
-                onChange={(e) => set("seo", "google_analytics_id", e.target.value)}
-                placeholder="G-XXXXXXXXXX"
-                id="google-analytics-id"
-              />
-            </FormField>
-            <FormField label="Sitemap URL" hint="Your sitemap URL.">
-              <input className="admin-input" value={`${typeof window !== "undefined" ? window.location.origin : ""}/sitemap.xml`} readOnly style={{ background: "#f8fafc", color: "var(--admin-text-muted)" }} />
-            </FormField>
-          </div>
-        );
-
-      case "shop_sorting":
-        return <ShopSortManager />;
-
-      case "tracking":
-        return <TrackingIntegrations isEmbedded={true} />;
-
-      default:
-        return null;
-    }
-  };
-
   return (
-    <div className="admin-page settings-page">
-      {/* Header */}
+    <form className="admin-page settings-page" onSubmit={handleSave}>
       <div className="page-header">
         <div>
           <h2>Settings</h2>
-          <p className="page-subtitle">Configure your store preferences</p>
+          <p className="page-subtitle">Store details and Cash on Delivery rules</p>
         </div>
-        {tab !== "tracking" && tab !== "shop_sorting" && (
-          <button className="admin-btn icon-left" onClick={handleSave} disabled={saving} id="save-settings-btn">
-            {saving ? <Loader2 size={15} className="spin" /> : <Save size={15} />}
-            {saving ? "Saving…" : "Save Changes"}
+        <div className="header-actions">
+          <button type="submit" className="admin-btn icon-left" disabled={!dirty || saving}>
+            {dirty ? <Save size={16} /> : <CheckCircle2 size={16} />}
+            {saving ? "Saving…" : dirty ? "Save changes" : "Saved"}
           </button>
-        )}
+        </div>
       </div>
 
-      {/* Success / Error banners */}
-      {saved && (
-        <div className="settings-banner settings-banner--success">
-          <CheckCircle2 size={16} /> Settings saved successfully!
-        </div>
-      )}
-      {error && (
-        <div className="settings-banner settings-banner--error">
-          <AlertCircle size={16} /> {error}
-        </div>
+      {error && <div className="aui-error">{error}</div>}
+
+      {form && (
+        <>
+          <Section title="Cash on Delivery" subtitle="Used by checkout and the order server straight away">
+            <div className="settings-grid">
+              <label className="settings-row">
+                <span>
+                  <strong>Offer Cash on Delivery</strong>
+                  <small>India only. Turning this off hides COD at checkout.</small>
+                </span>
+                <input
+                  type="checkbox"
+                  className="settings-switch"
+                  checked={Boolean(form.cod.enabled)}
+                  onChange={(e) => set("cod", "enabled", e.target.checked)}
+                />
+              </label>
+              <label className="settings-row">
+                <span>
+                  <strong>COD handling fee (₹)</strong>
+                  <small>Added to the order total when a customer chooses COD. Online payments have free shipping.</small>
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  className="admin-input settings-number"
+                  value={form.cod.fee}
+                  disabled={!form.cod.enabled}
+                  onChange={(e) => set("cod", "fee", e.target.value)}
+                />
+              </label>
+            </div>
+          </Section>
+
+          <Section title="Store details" subtitle="Your business name and contact details, kept on record">
+            <div className="settings-grid">
+              <label className="settings-field-stack">
+                <span>Store name</span>
+                <input className="admin-input" value={form.store.name} onChange={(e) => set("store", "name", e.target.value)} />
+              </label>
+              <label className="settings-field-stack">
+                <span>Contact email</span>
+                <input type="email" className="admin-input" value={form.store.email} onChange={(e) => set("store", "email", e.target.value)} placeholder="contact@safedrang.com" />
+              </label>
+              <label className="settings-field-stack">
+                <span>Contact phone</span>
+                <input type="tel" className="admin-input" value={form.store.phone} onChange={(e) => set("store", "phone", e.target.value)} placeholder="+91 …" />
+              </label>
+            </div>
+          </Section>
+
+          <Notice>
+            Analytics and ad pixels are set up in <Link className="aui-link" to="/admin/settings/tracking">Tracking &amp; Pixels</Link>.
+            Search titles and descriptions are set on each product. Shop ordering is managed on the{" "}
+            <Link className="aui-link" to="/admin/categories">Categories</Link> page.
+          </Notice>
+        </>
       )}
 
-      {/* Layout: Tabs + Content */}
-      <div className="settings-layout">
-        {/* Sidebar tabs */}
-        <nav className="settings-tabs">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              className={`settings-tab-btn ${tab === t.key ? "active" : ""}`}
-              onClick={() => setTab(t.key)}
-              id={`settings-tab-${t.key}`}
-            >
-              {t.icon}
-              {t.label}
-            </button>
-          ))}
-        </nav>
-
-        {/* Content */}
-        <div className="settings-content">{renderTab()}</div>
-      </div>
-    </div>
+      {!form && !error && <div className="admin-loading-state">Loading settings…</div>}
+    </form>
   );
-};
-
-export default Settings;
+}

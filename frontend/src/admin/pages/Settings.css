@@ -372,3 +372,64 @@
   border-radius: 6px;
   letter-spacing: 0.04em;
 }
+
+/* ── Settings page (rebuilt) ── */
+.settings-page .settings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-page .settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--admin-border-light);
+  cursor: pointer;
+}
+
+.settings-page .settings-row:last-child {
+  border-bottom: none;
+}
+
+.settings-page .settings-row span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-page .settings-row strong {
+  font-size: 0.92rem;
+  color: var(--admin-text-main);
+}
+
+.settings-page .settings-row small {
+  font-size: 0.8rem;
+  color: var(--admin-text-muted);
+}
+
+.settings-page .settings-number {
+  width: 120px;
+  text-align: right;
+}
+
+.settings-page .settings-switch {
+  width: 20px;
+  height: 20px;
+}
+
+.settings-page .settings-field-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--admin-text-muted);
+}
+
+.settings-page .settings-field-stack .admin-input {
+  max-width: 460px;
+}

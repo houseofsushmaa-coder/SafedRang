@@ -137,7 +137,7 @@ const Products = () => {
   const [viewTab, setViewTab] = useState(searchParams.get("tab") || "all");
 
   // ── Filter state ───────────────────────────────────────────────────
-  const [searchTerm, setSearchTerm]         = useState("");
+  const [searchTerm, setSearchTerm]         = useState(searchParams.get("q") || "");
   const [categoryFilter, setCategoryFilter] = useState(searchParams.get("category") || "all");
   const [statusFilter, setStatusFilter]     = useState("all");
   const [badgeFilter, setBadgeFilter]       = useState(searchParams.get("badge") || "all");
@@ -158,6 +158,8 @@ const Products = () => {
     if (urlCat) setCategoryFilter(urlCat);
     const urlBadge = searchParams.get("badge");
     if (urlBadge) setBadgeFilter(urlBadge);
+    const urlQ = searchParams.get("q");
+    if (urlQ !== null) setSearchTerm(urlQ);
     const urlTab = searchParams.get("tab");
     if (urlTab) setViewTab(urlTab);
   }, [searchParams]);

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import "./AdminPages.css";
 import "./Users.css";
+import { createClient } from "@supabase/supabase-js";
 import { supabase } from "../../lib/supabase";
 
 const ROLE_OPTIONS = ["CUSTOMER", "MANAGER", "ADMIN", "SUPER_ADMIN"];
@@ -78,8 +79,13 @@ const AddUserModal = ({ onClose, onSuccess }) => {
     setLoading(true);
 
     try {
-      // 1. Sign up user via Supabase
-      const { data: authData, error: authErr } = await supabase.auth.signUp({
+      // 1. Create the account through a separate client that never stores a
+      //    session — signing up on the main client would log the admin out
+      //    and into the new account.
+      const signupClient = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: "sr-admin-create-user" },
+      });
+      const { data: authData, error: authErr } = await signupClient.auth.signUp({
         email: form.email,
         password: form.password,
         options: {
@@ -92,16 +98,14 @@ const AddUserModal = ({ onClose, onSuccess }) => {
 
       if (authErr) throw authErr;
 
-      // 2. Insert into profiles table
+      // 2. The signup trigger creates the profile as a customer; set the role
+      //    as the logged-in admin (allowed by the database's admin policy).
       if (authData?.user?.id) {
-        await supabase.from("profiles").upsert([
-          {
-            id: authData.user.id,
-            email: form.email,
-            role: form.role.toLowerCase(),
-            full_name: form.name,
-          },
-        ]);
+        const { error: roleErr } = await supabase
+          .from("profiles")
+          .update({ role: form.role.toLowerCase(), full_name: form.name })
+          .eq("id", authData.user.id);
+        if (roleErr) throw new Error(`Account created, but the role couldn't be set: ${roleErr.message}`);
       }
 
       onSuccess(`User "${form.name}" created with role ${form.role}!`);
