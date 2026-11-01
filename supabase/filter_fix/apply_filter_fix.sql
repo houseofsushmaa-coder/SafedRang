@@ -1,5 +1,6 @@
 -- Safed Rang: corrected shop filter values (fabric / craft families).
 -- 126 products. Review: supabase/filter_fix/review.csv
+-- To reverse later: supabase/backups/undo_filter_fix_2026-10-31.sql
 -- Paste into the Supabase SQL Editor and click Run.
 BEGIN;
 UPDATE public.products SET fabric = $sr$Tussar Silk$sr$, craft = $sr$Lucknowi Chikankari$sr$, "updatedAt" = now() WHERE id = $sr$65646939-e1fe-40fd-b4da-cf50a3752456$sr$;

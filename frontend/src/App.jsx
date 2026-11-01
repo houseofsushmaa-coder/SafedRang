@@ -79,6 +79,7 @@ import WhatsAppButton from "./components/WhatsAppButton";
 
 const StorefrontLayout = () => {
   const location = useLocation();
+  console.log("[DEBUG] StorefrontLayout RENDER, pathname:", location.pathname);
   return (
     // key on this real DOM element is the ONLY way to guarantee remount.
     // Every pathname change = new key = React destroys old tree, mounts correct page.
@@ -143,6 +144,7 @@ const ProtectedAdminRoute = ({ children }) => {
 // AppRoutes is a separate component so useLocation() can be called inside <Router>
 function AppRoutes() {
   const location = useLocation();
+  console.log("[DEBUG] AppRoutes RENDER, pathname:", location.pathname);
   return (
     // key={location.pathname} — secondary insurance: forces Routes to rematch
     // every route on each navigation. Works together with StorefrontLayout's key.
