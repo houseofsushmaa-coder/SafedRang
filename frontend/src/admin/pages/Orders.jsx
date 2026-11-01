@@ -14,11 +14,19 @@ import {
   Clock,
   Truck,
   Package,
+  Printer,
 } from "lucide-react";
 import "./AdminPages.css";
 import { formatINR } from "../../config/api.js";
 import { adminService } from "../adminService";
 import Papa from "papaparse";
+import { downloadShippingLabels } from "../shippingLabel";
+
+// Orders that are paid (or COD) and not yet handed to the courier.
+const TO_SHIP = ["PENDING", "CONFIRMED", "PROCESSING", "PACKED"];
+const isReadyToShip = (o) =>
+  TO_SHIP.includes(o.orderStatus) && (o.paymentMethodCode === "COD" || o.paymentStatus === "PAID");
+const canLabel = (o) => !["CANCELLED", "RETURNED"].includes(o.orderStatus);
 
 const STATUS_OPTIONS = ["ALL", "PENDING", "PROCESSING", "PACKED", "SHIPPED", "DELIVERED", "CANCELLED", "RETURNED"];
 
@@ -50,6 +58,24 @@ const Orders = () => {
   const [editingOrder, setEditingOrder] = useState(null);
   const [newStatus, setNewStatus] = useState("");
   const [updating, setUpdating] = useState(false);
+  const [labelBusy, setLabelBusy] = useState(false);
+
+  const printLabels = async (list) => {
+    if (!list.length) return;
+    setLabelBusy(true);
+    try {
+      let sender = { name: "Safed Rang" };
+      try {
+        sender = (await adminService.getSettings()).store;
+      } catch {}
+      await downloadShippingLabels(list, sender);
+      if (!sender.address) toast("Tip: add your pickup / return address in Settings so it prints on the label.", { icon: "ℹ️" });
+    } catch (err) {
+      toast.error("Could not create the label: " + err.message);
+    } finally {
+      setLabelBusy(false);
+    }
+  };
 
   useEffect(() => {
     fetchOrders();
@@ -153,6 +179,8 @@ const Orders = () => {
     return matchesSearch && matchesStatus;
   });
 
+  const readyToShip = filteredOrders.filter(isReadyToShip);
+
   return (
     <div className="admin-page">
       <div className="page-header">
@@ -161,6 +189,14 @@ const Orders = () => {
           <p className="page-subtitle">Manage, view, and update customer order fulfillments.</p>
         </div>
         <div className="header-actions">
+          <button
+            onClick={() => printLabels(readyToShip)}
+            className="admin-btn admin-btn-outline icon-left"
+            disabled={labelBusy || readyToShip.length === 0}
+            title="One 4×6 inch label per order that is paid (or COD) and not yet shipped"
+          >
+            <Printer size={16} /> {labelBusy ? "Preparing…" : `Labels to ship (${readyToShip.length})`}
+          </button>
           <button
             onClick={handleExport}
             className="admin-btn admin-btn-outline icon-left"
@@ -273,6 +309,14 @@ const Orders = () => {
                           </button>
                           <button
                             className="action-btn"
+                            title={canLabel(order) ? "Download shipping label (PDF)" : "No label for cancelled or returned orders"}
+                            disabled={labelBusy || !canLabel(order)}
+                            onClick={() => printLabels([order])}
+                          >
+                            <Printer size={16} />
+                          </button>
+                          <button
+                            className="action-btn"
                             title="Edit Status"
                             onClick={() => {
                               setEditingOrder(order);
@@ -310,9 +354,22 @@ const Orders = () => {
           >
             <div className="modal-header">
               <h3>Order #{selectedOrder.orderNumber}</h3>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                {canLabel(selectedOrder) && (
+                  <button
+                    type="button"
+                    className="admin-btn admin-btn-outline icon-left"
+                    style={{ padding: "6px 12px", fontSize: "0.8rem" }}
+                    disabled={labelBusy}
+                    onClick={() => printLabels([selectedOrder])}
+                  >
+                    <Printer size={15} /> {labelBusy ? "Preparing…" : "Shipping label"}
+                  </button>
+                )}
               <button className="modal-close" onClick={() => setSelectedOrder(null)}>
                 <X size={20} />
               </button>
+              </div>
             </div>
             <div style={{ padding: "16px 20px" }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "20px" }}>
@@ -340,7 +397,14 @@ const Orders = () => {
                   <p style={{ fontSize: "0.85rem" }}>
                     {typeof selectedOrder.shippingAddress === "string"
                       ? selectedOrder.shippingAddress
-                      : `${selectedOrder.shippingAddress.address || ""}, ${selectedOrder.shippingAddress.city || ""} ${selectedOrder.shippingAddress.state || ""} ${selectedOrder.shippingAddress.pincode || ""}`}
+                      : [
+                          selectedOrder.shippingAddress.address,
+                          selectedOrder.shippingAddress.apartment,
+                          selectedOrder.shippingAddress.city,
+                          `${selectedOrder.shippingAddress.state || ""} ${selectedOrder.shippingAddress.pincode || ""}`.trim(),
+                        ]
+                          .filter(Boolean)
+                          .join(", ")}
                   </p>
                 </div>
               )}

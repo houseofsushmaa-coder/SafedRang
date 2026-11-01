@@ -697,6 +697,7 @@ export const adminService = {
         name: text("general.site_name", "Safed Rang"),
         email: text("general.store_email"),
         phone: text("general.store_phone"),
+        address: text("general.store_address"),
       },
       cod: {
         enabled: raw["shipping.cod_enabled"]?.enabled ?? raw["shipping.cod_enabled"] !== false,
@@ -710,6 +711,7 @@ export const adminService = {
       { group: "general", key: "site_name", value: { text: String(store.name || "").trim() } },
       { group: "general", key: "store_email", value: { text: String(store.email || "").trim() } },
       { group: "general", key: "store_phone", value: { text: String(store.phone || "").trim() } },
+      { group: "general", key: "store_address", value: { text: String(store.address || "").trim() } },
       { group: "shipping", key: "cod_enabled", value: { enabled: Boolean(cod.enabled) } },
       { group: "shipping", key: "cod_charge", value: { amount: Math.max(0, Number(cod.fee) || 0) } },
     ];

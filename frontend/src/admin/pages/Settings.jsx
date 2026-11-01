@@ -111,6 +111,17 @@ export default function Settings() {
                 <span>Contact phone</span>
                 <input type="tel" className="admin-input" value={form.store.phone} onChange={(e) => set("store", "phone", e.target.value)} placeholder="+91 …" />
               </label>
+              <label className="settings-field-stack">
+                <span>Pickup / return address</span>
+                <textarea
+                  className="admin-input"
+                  rows={3}
+                  value={form.store.address}
+                  onChange={(e) => set("store", "address", e.target.value)}
+                  placeholder="House / shop, street, area, Lucknow, Uttar Pradesh 226001"
+                />
+                <small style={{ color: "var(--admin-text-muted)" }}>Printed as the "From / Return to" address on parcel labels.</small>
+              </label>
             </div>
           </Section>
 
