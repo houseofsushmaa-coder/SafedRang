@@ -611,3 +611,245 @@
     transition: bottom 0.25s ease;
   }
 }
+
+/* ══ Mobile product page ═════════════════════════════════════════════ */
+
+/* Grid columns may shrink below their content (a long thumbnail row was
+   stretching the whole column to ~670px on phones). */
+.pdp-gallery,
+.pdp-info {
+  min-width: 0;
+}
+
+/* Swipeable photo strip — phones only */
+.gallery-swipe-wrap {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .pdp-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+
+  .pdp-gallery .gallery-thumbnails,
+  .pdp-gallery .gallery-main {
+    display: none;
+  }
+
+  .gallery-swipe-wrap {
+    display: block;
+    position: relative;
+  }
+
+  .gallery-swipe {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .gallery-swipe::-webkit-scrollbar {
+    display: none;
+  }
+
+  .gallery-swipe img {
+    flex: 0 0 100%;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    scroll-snap-align: start;
+    background: var(--color-ivory-deep);
+  }
+
+  .gallery-swipe-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+  }
+
+  .gallery-swipe-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .gallery-swipe-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-soft-blush);
+    transition: background 0.2s ease, width 0.2s ease;
+  }
+
+  .gallery-swipe-dots span.is-active {
+    width: 18px;
+    border-radius: 3px;
+    background: var(--color-dark-charcoal);
+  }
+
+  /* One-line breadcrumb; the product name truncates */
+  .pdp-container > .breadcrumb {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    margin-bottom: 1rem;
+    font-size: 0.68rem;
+  }
+
+  .pdp-container > .breadcrumb > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .pdp-container > .breadcrumb svg {
+    flex-shrink: 0;
+  }
+
+  .pdp-info {
+    padding-top: 0;
+  }
+
+  .product-tabs {
+    margin-top: 2.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .pdp-info .product-title {
+    font-size: 1.45rem;
+    line-height: 1.25;
+  }
+
+  .pdp-info .product-price {
+    font-size: 1.35rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .product-actions {
+    flex-direction: column;
+  }
+
+  .product-actions button {
+    width: 100%;
+  }
+
+  /* 16px stops iOS zooming into the field */
+  .pincode-input-group input {
+    font-size: 16px;
+  }
+}
+
+/* ── PIN code check ── */
+.pincode-checker {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  border-style: solid;
+  border-color: var(--color-soft-blush);
+}
+
+.pincode-input-group input:focus {
+  outline: none;
+  border-color: var(--color-antique-gold);
+}
+
+.btn-pincode {
+  min-width: 84px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-pincode:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pincode-spin {
+  animation: pincode-spin 0.9s linear infinite;
+}
+
+@keyframes pincode-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pincode-result {
+  margin: 0.85rem 0 0;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.pincode-result.is-error,
+.pincode-result.is-info {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.pincode-result.is-error {
+  color: #b42318;
+}
+
+.pincode-result.is-info {
+  color: var(--color-dark-charcoal);
+}
+
+.pincode-result-line {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin: 0 0 0.35rem;
+  color: var(--color-dark-charcoal);
+}
+
+.pincode-result-line svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #2e7d32;
+}
+
+.pincode-result-line + .pincode-result-line svg {
+  color: var(--color-antique-gold);
+}
+
+.pincode-result-note {
+  margin: 0.25rem 0 0 1.45rem;
+  font-size: 0.78rem;
+  color: var(--color-warm-taupe);
+}
+
+/* ── Description: structured + collapsible ── */
+.pdp-desc-subhead {
+  font-size: 0.95rem !important;
+}
+
+.product-description.is-collapsible:not(.is-expanded) {
+  max-height: 17rem;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+  -webkit-mask-image: linear-gradient(to bottom, #000 65%, transparent);
+  mask-image: linear-gradient(to bottom, #000 65%, transparent);
+}
+
+.pdp-read-more {
+  display: inline-block;
+  margin: 0 0 2rem;
+  padding: 0 0 2px;
+  border: none;
+  border-bottom: 1px solid currentColor;
+  background: none;
+  color: var(--color-deep-wine);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.pincode-input-group input {
+  min-width: 0;
+}

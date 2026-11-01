@@ -15,7 +15,8 @@ import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { trackEvent, toAnalyticsItem } from "../lib/tracking";
-import { getDetailRows } from "../utils/productDetails";
+import { DETAIL_FIELDS, getDetailRows, parseDescription } from "../utils/productDetails";
+import PincodeCheck from "../components/PincodeCheck";
 import { applyHead, productPath, productSeo } from "../lib/seo";
 import "./ProductDetail.css";
 
@@ -49,6 +50,8 @@ export default function ProductDetail() {
   );
   const [activeTab, setActiveTab] = useState("details");
   const [selectedSize, setSelectedSize] = useState(null);
+  const [swipeIndex, setSwipeIndex] = useState(0);
+  const [descExpanded, setDescExpanded] = useState(false);
 
   // Mobile sticky bar: shown only while the main purchase buttons are off-screen.
   const actionsRef = useRef(null);
@@ -83,6 +86,8 @@ export default function ProductDetail() {
     if (product) {
       setActiveImage(product.image || product.images?.[0]);
       setSelectedSize(null);
+      setSwipeIndex(0);
+      setDescExpanded(false);
     }
     // product is re-created when the catalogue refreshes; key on its id
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -222,6 +227,22 @@ export default function ProductDetail() {
   // Structured "Product Details:" lines from the description, keyed by label.
   const detailMap = Object.fromEntries(getDetailRows(product.description));
 
+  // Description: intro paragraphs, then the details as a labelled list.
+  const parsedDescription = parseDescription(product.description || "");
+  const descParagraphs = parsedDescription
+    ? parsedDescription.intro.split(/\n+/).map((t) => t.trim()).filter(Boolean)
+    : [];
+  const descDetailLines = parsedDescription
+    ? [
+        ...DETAIL_FIELDS.filter((f) => parsedDescription.details[f.key]).map((f) => [f.label, parsedDescription.details[f.key]]),
+        ...parsedDescription.extra.map((line) => {
+          const m = line.match(/^([^:]{2,40}):\s*(.+)$/);
+          return m ? [m[1].trim(), m[2].trim()] : ["", line];
+        }),
+      ]
+    : [];
+  const isLongDescription = (product.description || "").length > 600;
+
   const imagesList = (() => {
     const raw = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
     if (product.image) {
@@ -263,6 +284,36 @@ export default function ProductDetail() {
                 <span className="badge-luxury">{(product.badge || "ONE OF ONE").toUpperCase()}</span>
               )}
             </div>
+          </div>
+
+          {/* Phones: swipe through full-width photos instead of tapping thumbnails */}
+          <div className="gallery-swipe-wrap">
+            <div
+              className="gallery-swipe"
+              onScroll={(e) => {
+                const el = e.currentTarget;
+                setSwipeIndex(Math.round(el.scrollLeft / Math.max(1, el.clientWidth)));
+              }}
+            >
+              {imagesList.map((img, index) => (
+                <img
+                  key={`${img}-${index}`}
+                  src={img}
+                  alt={`${product.title.replace(/"/g, "")} — photo ${index + 1}`}
+                  loading={index === 0 ? "eager" : "lazy"}
+                />
+              ))}
+            </div>
+            {Boolean(product.badge || product.isOneOfOne) && (
+              <span className="badge-luxury gallery-swipe-badge">{(product.badge || "ONE OF ONE").toUpperCase()}</span>
+            )}
+            {imagesList.length > 1 && (
+              <div className="gallery-swipe-dots" aria-hidden="true">
+                {imagesList.map((_, index) => (
+                  <span key={index} className={index === swipeIndex ? "is-active" : ""} />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -471,6 +522,8 @@ export default function ProductDetail() {
             </div>
           )}
 
+          {!product.isArchived && <PincodeCheck />}
+
           <div className="pdp-delivery-info">
             <div className="pincode-header">
               <Truck size={16} /> <span>Delivery &amp; Payment</span>
@@ -491,9 +544,49 @@ export default function ProductDetail() {
             </a>
           </div>
 
-          <div className="product-description">
-            <div dangerouslySetInnerHTML={{ __html: formatDescription(product.description) }} />
+          <div
+            id="pdp-description"
+            className={`product-description${isLongDescription ? " is-collapsible" : ""}${descExpanded ? " is-expanded" : ""}`}
+          >
+            {parsedDescription ? (
+              <>
+                {descParagraphs.map((text, i) => (
+                  <p key={i}>{text}</p>
+                ))}
+                {descDetailLines.length > 0 && (
+                  <>
+                    <h3 className="pdp-desc-subhead">Product details</h3>
+                    <ul className="pdp-detail-list">
+                      {descDetailLines.map(([label, value], i) => (
+                        <li key={i}>
+                          {label ? (
+                            <>
+                              <strong>{label}:</strong> {value}
+                            </>
+                          ) : (
+                            value
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </>
+            ) : (
+              <div dangerouslySetInnerHTML={{ __html: formatDescription(product.description) }} />
+            )}
           </div>
+          {isLongDescription && (
+            <button
+              type="button"
+              className="pdp-read-more"
+              aria-expanded={descExpanded}
+              aria-controls="pdp-description"
+              onClick={() => setDescExpanded((v) => !v)}
+            >
+              {descExpanded ? "Show less" : "Read full description"}
+            </button>
+          )}
 
           <div className="product-share">
             <button type="button" onClick={handleShare}>

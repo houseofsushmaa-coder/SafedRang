@@ -13,6 +13,7 @@ import { supabase } from "../lib/supabase";
 import { COUNTRIES, COUNTRY_MAP } from "../data/countries";
 import { trackEvent, toAnalyticsItem } from "../lib/tracking";
 import { productPath } from "../lib/seo";
+import { PINCODE_STORAGE_KEY } from "../components/PincodeCheck";
 import "./Checkout.css";
 
 const CF_ENV = import.meta.env.VITE_CASHFREE_ENV || "SANDBOX";
@@ -32,6 +33,16 @@ const loadSavedForm = () => {
     return JSON.parse(sessionStorage.getItem(FORM_STORAGE_KEY) || "null");
   } catch {
     return null;
+  }
+};
+
+// PIN, city and state from the product page's delivery check, if any.
+const loadCheckedPincode = () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(PINCODE_STORAGE_KEY) || "null");
+    return saved?.pincode ? { pincode: saved.pincode, city: saved.city || "", state: saved.state || "" } : {};
+  } catch {
+    return {};
   }
 };
 
@@ -127,7 +138,9 @@ export default function Checkout() {
     email: user?.email || "",
     firstName: user?.user_metadata?.full_name?.split(" ")[0] || "",
     lastName: user?.user_metadata?.full_name?.split(" ").slice(1).join(" ") || "",
-    ...(saved?.form || {}),
+    ...(initialCountry.code === "IN" ? loadCheckedPincode() : {}),
+    // Restore what was typed this session (blank fields don't erase the above).
+    ...Object.fromEntries(Object.entries(saved?.form || {}).filter(([, v]) => v)),
   }));
 
   useEffect(() => {
