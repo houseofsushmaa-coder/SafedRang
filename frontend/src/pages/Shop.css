@@ -234,7 +234,9 @@
 /* ── Shop Layout ── */
 .shop-page {
   background-color: #fff;
-  overflow-x: hidden;
+  /* clip (not hidden): hidden turns this into a scroll box, which stops the
+     filter sidebar from sticking */
+  overflow-x: clip;
   width: 100%;
 }
 
@@ -342,11 +344,13 @@
 /* ── Filter Sidebar (desktop) ── */
 .filters-sidebar {
   position: sticky;
-  top: 2rem;
+  /* --shop-sticky-top = height of the sticky site header (set in Shop.jsx) */
+  top: calc(var(--shop-sticky-top, 0px) + 1.25rem);
   align-self: start;
-  max-height: calc(100vh - 4rem);
+  max-height: calc(100vh - var(--shop-sticky-top, 0px) - 2.5rem);
   overflow-y: auto;
-  padding-right: 1rem;
+  overscroll-behavior: contain;
+  padding-right: 0.75rem;
   scrollbar-width: thin;
   scrollbar-color: #E0D3C0 transparent;
 }

@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useSearchParams, useLocation } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
+import { FilterSection, CheckList, PriceFilter } from "../components/ShopFilterParts";
 import { useProducts } from "../context/ProductContext";
 import {
   SORT_OPTIONS,
@@ -10,18 +11,22 @@ import {
   FABRIC_DISPLAY_ORDER,
   getEffectivePrice,
   isProductAvailable,
+  isOnSale,
   matchesCategory,
   matchesSubcategory,
   matchesCategoryFilter,
   matchesCraftFilter,
   matchesFabricFilter,
   matchesPriceFilter,
+  matchesPriceBounds,
+  priceRangesToBounds,
   matchesAvailabilityFilter,
   sortProducts,
 } from "../utils/filterUtils";
 import { trackEvent, toAnalyticsItem } from "../lib/tracking";
 import { applyHead } from "../lib/seo";
 import "./Shop.css";
+import "./ShopFilters.css";
 
 // Re-export for any consumers or tests
 export {
@@ -39,6 +44,31 @@ export {
   isProductAvailable,
   sortProducts,
 };
+
+const splitList = (raw) => (raw ? raw.split(",").map((s) => s.trim()).filter(Boolean) : []);
+const toPrice = (raw) => {
+  const n = parseInt(raw, 10);
+  return Number.isFinite(n) && n >= 0 ? n : null;
+};
+const formatRs = (n) => `₹${Math.round(n).toLocaleString("en-IN")}`;
+
+// Reads ?min=&max=, falling back to the older ?price=under-5k style links.
+const priceFromParams = (params) => {
+  const min = toPrice(params.get("min"));
+  const max = toPrice(params.get("max"));
+  if (min !== null || max !== null) return { min, max };
+  return priceRangesToBounds(splitList(params.get("price")));
+};
+
+// Price quick picks, expressed as min/max (max inclusive).
+const PRICE_PRESETS = PRICE_RANGES.map((r) => ({
+  id: r.id,
+  label: r.label,
+  min: r.min > 0 ? r.min : null,
+  max: Number.isFinite(r.max) ? r.max - 1 : null,
+}));
+
+const AVAILABILITY_LABELS = { "in-stock": "Ready to ship", "sold-out": "Sold out" };
 
 /* ── Custom Luxury Sort Dropdown ── */
 function CustomSortDropdown({ value, onChange, options }) {
@@ -137,6 +167,7 @@ export default function Shop() {
   const { storefrontProducts: products, getAllCategories, shopSortSettings } = useProducts();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
+  const pageRef = useRef(null);
 
   const isOneOfOneRoute =
     location.pathname.includes("one-of-one") ||
@@ -147,45 +178,59 @@ export default function Shop() {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, []);
 
+  // The site header is sticky; the filter sidebar sticks just below it.
+  useEffect(() => {
+    const header = document.querySelector(".site-header");
+    const page = pageRef.current;
+    if (!header || !page || typeof ResizeObserver === "undefined") return;
+    const sync = () => page.style.setProperty("--shop-sticky-top", `${Math.round(header.getBoundingClientRect().height)}px`);
+    sync();
+    const ro = new ResizeObserver(sync);
+    ro.observe(header);
+    return () => ro.disconnect();
+  }, []);
+
   // Memoised: a fresh array on every render made the URL-sync effect below run
   // after every render and loop ("Maximum update depth exceeded"), which froze
   // the filters.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const categories = useMemo(() => getAllCategories(), [products]);
 
-  /* ── Filter state with full multi-select support ── */
-  const [selectedCrafts, setSelectedCrafts] = useState(() => {
-    const raw = searchParams.get("craft");
-    return raw ? raw.split(",").map((s) => s.trim()).filter(Boolean) : [];
-  });
-
-  const [selectedFabrics, setSelectedFabrics] = useState(() => {
-    const raw = searchParams.get("fabric");
-    return raw ? raw.split(",").map((s) => s.trim()).filter(Boolean) : [];
-  });
-
-  const [selectedPriceRanges, setSelectedPriceRanges] = useState(() => {
-    const raw = searchParams.get("price");
-    return raw ? raw.split(",").map((s) => s.trim()).filter(Boolean) : [];
-  });
-
+  /* ── Filter state (mirrors the URL) ── */
+  const [selectedCrafts, setSelectedCrafts] = useState(() => splitList(searchParams.get("craft")));
+  const [selectedFabrics, setSelectedFabrics] = useState(() => splitList(searchParams.get("fabric")));
+  const [priceMin, setPriceMin] = useState(() => priceFromParams(searchParams).min);
+  const [priceMax, setPriceMax] = useState(() => priceFromParams(searchParams).max);
+  const [onSaleOnly, setOnSaleOnly] = useState(() => searchParams.get("sale") === "1");
   const [activeAvailability, setActiveAvailability] = useState(() => {
     return searchParams.get("availability") || (isArchiveRoute ? "sold-out" : "All");
   });
-
   const [activeCategory, setActiveCategory] = useState(() => {
     return searchParams.get("category") || "All";
   });
-
   const [activeSubcategory, setActiveSubcategory] = useState(() => {
     return searchParams.get("subcategory") || searchParams.get("sub") || "All";
   });
-
   const [sortBy, setSortBy] = useState(() => {
     return searchParams.get("sort") || "recommended";
   });
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  // Which filter sections are expanded. Sections with an active filter open too.
+  const [openSections, setOpenSections] = useState(() => {
+    const open = new Set(["category", "price"]);
+    if (searchParams.get("craft")) open.add("craft");
+    if (searchParams.get("fabric")) open.add("fabric");
+    if (searchParams.get("availability") || searchParams.get("sale")) open.add("availability");
+    return open;
+  });
+  const toggleSection = (id) =>
+    setOpenSections((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
 
   const urlSearch = searchParams.get("search") || "";
 
@@ -212,26 +257,13 @@ export default function Shop() {
       setActiveSubcategory("All");
     }
 
-    const urlCr = searchParams.get("craft");
-    if (urlCr) {
-      setSelectedCrafts(sameList(urlCr.split(",").map((s) => s.trim()).filter(Boolean)));
-    } else {
-      setSelectedCrafts(sameList([]));
-    }
+    setSelectedCrafts(sameList(splitList(searchParams.get("craft"))));
+    setSelectedFabrics(sameList(splitList(searchParams.get("fabric"))));
 
-    const urlFab = searchParams.get("fabric");
-    if (urlFab) {
-      setSelectedFabrics(sameList(urlFab.split(",").map((s) => s.trim()).filter(Boolean)));
-    } else {
-      setSelectedFabrics(sameList([]));
-    }
-
-    const urlPr = searchParams.get("price");
-    if (urlPr) {
-      setSelectedPriceRanges(sameList(urlPr.split(",").map((s) => s.trim()).filter(Boolean)));
-    } else {
-      setSelectedPriceRanges(sameList([]));
-    }
+    const price = priceFromParams(searchParams);
+    setPriceMin(price.min);
+    setPriceMax(price.max);
+    setOnSaleOnly(searchParams.get("sale") === "1");
 
     const urlAv = searchParams.get("availability");
     if (urlAv) {
@@ -249,19 +281,21 @@ export default function Shop() {
   }, [searchParams, isArchiveRoute, categories]);
 
   /* ── Dynamic available crafts and fabrics derived from catalogue ── */
+  const orderBy = (preferred) => (a, b) => {
+    const idxA = preferred.indexOf(a);
+    const idxB = preferred.indexOf(b);
+    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+    if (idxA !== -1) return -1;
+    if (idxB !== -1) return 1;
+    return a.localeCompare(b);
+  };
+
   const availableCrafts = useMemo(() => {
     const present = new Set();
     products.forEach((p) => {
       if (p.craft && p.craft.trim()) present.add(p.craft.trim());
     });
-    return Array.from(present).sort((a, b) => {
-      const idxA = CRAFT_DISPLAY_ORDER.indexOf(a);
-      const idxB = CRAFT_DISPLAY_ORDER.indexOf(b);
-      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-      if (idxA !== -1) return -1;
-      if (idxB !== -1) return 1;
-      return a.localeCompare(b);
-    });
+    return Array.from(present).sort(orderBy(CRAFT_DISPLAY_ORDER));
   }, [products]);
 
   const availableFabrics = useMemo(() => {
@@ -269,14 +303,7 @@ export default function Shop() {
     products.forEach((p) => {
       if (p.fabric && p.fabric.trim()) present.add(p.fabric.trim());
     });
-    return Array.from(present).sort((a, b) => {
-      const idxA = FABRIC_DISPLAY_ORDER.indexOf(a);
-      const idxB = FABRIC_DISPLAY_ORDER.indexOf(b);
-      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-      if (idxA !== -1) return -1;
-      if (idxB !== -1) return 1;
-      return a.localeCompare(b);
-    });
+    return Array.from(present).sort(orderBy(FABRIC_DISPLAY_ORDER));
   }, [products]);
 
   /* ── Storefront Authoritative Eligible Collection ── */
@@ -309,140 +336,86 @@ export default function Shop() {
     return list;
   }, [products, urlSearch, isOneOfOneRoute, isArchiveRoute]);
 
-  /* ── Dynamic Facet Counts (Context-aware excluding facet's own selection) ── */
+  /* ── One test per facet; counts for a facet ignore that facet's own selection ── */
+  const passes = useCallback(
+    (p, skip) =>
+      (skip === "category" || matchesCategoryFilter(p, activeCategory, activeSubcategory)) &&
+      (skip === "craft" || matchesCraftFilter(p, selectedCrafts)) &&
+      (skip === "fabric" || matchesFabricFilter(p, selectedFabrics)) &&
+      (skip === "price" || matchesPriceBounds(p, priceMin, priceMax)) &&
+      (skip === "sale" || !onSaleOnly || isOnSale(p)) &&
+      (skip === "availability" || matchesAvailabilityFilter(p, activeAvailability)),
+    [activeCategory, activeSubcategory, selectedCrafts, selectedFabrics, priceMin, priceMax, onSaleOnly, activeAvailability]
+  );
+
+  const facetSubset = useCallback((skip) => baseEligibleProducts.filter((p) => passes(p, skip)), [baseEligibleProducts, passes]);
+
   const categoryCounts = useMemo(() => {
-    const subset = baseEligibleProducts.filter(
-      (p) =>
-        matchesCraftFilter(p, selectedCrafts) &&
-        matchesFabricFilter(p, selectedFabrics) &&
-        matchesPriceFilter(p, selectedPriceRanges) &&
-        matchesAvailabilityFilter(p, activeAvailability)
-    );
+    const subset = facetSubset("category");
     const counts = { All: subset.length };
     categories.forEach((cat) => {
       if (cat === "All") return;
       counts[cat] = subset.filter((p) => matchesCategory(p.category, cat)).length;
     });
     return counts;
-  }, [
-    baseEligibleProducts,
-    selectedCrafts,
-    selectedFabrics,
-    selectedPriceRanges,
-    activeAvailability,
-    categories,
-  ]);
-
-  const craftCounts = useMemo(() => {
-    const subset = baseEligibleProducts.filter(
-      (p) =>
-        matchesCategoryFilter(p, activeCategory, activeSubcategory) &&
-        matchesFabricFilter(p, selectedFabrics) &&
-        matchesPriceFilter(p, selectedPriceRanges) &&
-        matchesAvailabilityFilter(p, activeAvailability)
-    );
-    const counts = {};
-    availableCrafts.forEach((craft) => {
-      counts[craft] = subset.filter((p) => matchesCraftFilter(p, [craft])).length;
-    });
-    return counts;
-  }, [
-    baseEligibleProducts,
-    activeCategory,
-    activeSubcategory,
-    selectedFabrics,
-    selectedPriceRanges,
-    activeAvailability,
-    availableCrafts,
-  ]);
-
-  const fabricCounts = useMemo(() => {
-    const subset = baseEligibleProducts.filter(
-      (p) =>
-        matchesCategoryFilter(p, activeCategory, activeSubcategory) &&
-        matchesCraftFilter(p, selectedCrafts) &&
-        matchesPriceFilter(p, selectedPriceRanges) &&
-        matchesAvailabilityFilter(p, activeAvailability)
-    );
-    const counts = {};
-    availableFabrics.forEach((fabric) => {
-      counts[fabric] = subset.filter((p) => matchesFabricFilter(p, [fabric])).length;
-    });
-    return counts;
-  }, [
-    baseEligibleProducts,
-    activeCategory,
-    activeSubcategory,
-    selectedCrafts,
-    selectedPriceRanges,
-    activeAvailability,
-    availableFabrics,
-  ]);
-
-  const priceRangeCounts = useMemo(() => {
-    const subset = baseEligibleProducts.filter(
-      (p) =>
-        matchesCategoryFilter(p, activeCategory, activeSubcategory) &&
-        matchesCraftFilter(p, selectedCrafts) &&
-        matchesFabricFilter(p, selectedFabrics) &&
-        matchesAvailabilityFilter(p, activeAvailability)
-    );
-    const counts = {};
-    PRICE_RANGES.forEach((range) => {
-      counts[range.id] = subset.filter((p) => matchesPriceFilter(p, [range.id])).length;
-    });
-    return counts;
-  }, [
-    baseEligibleProducts,
-    activeCategory,
-    activeSubcategory,
-    selectedCrafts,
-    selectedFabrics,
-    activeAvailability,
-  ]);
-
-  const stockCounts = useMemo(() => {
-    const subset = baseEligibleProducts.filter(
-      (p) =>
-        matchesCategoryFilter(p, activeCategory, activeSubcategory) &&
-        matchesCraftFilter(p, selectedCrafts) &&
-        matchesFabricFilter(p, selectedFabrics) &&
-        matchesPriceFilter(p, selectedPriceRanges)
-    );
-    const inStock = subset.filter(isProductAvailable).length;
-    const soldOut = subset.length - inStock;
-    return { inStock, soldOut, total: subset.length };
-  }, [
-    baseEligibleProducts,
-    activeCategory,
-    activeSubcategory,
-    selectedCrafts,
-    selectedFabrics,
-    selectedPriceRanges,
-  ]);
+  }, [facetSubset, categories]);
 
   const sareeSubcategoryCounts = useMemo(() => {
-    const sarees = baseEligibleProducts.filter(
-      (p) =>
-        matchesCategory(p.category, "Sarees") &&
-        matchesCraftFilter(p, selectedCrafts) &&
-        matchesFabricFilter(p, selectedFabrics) &&
-        matchesPriceFilter(p, selectedPriceRanges) &&
-        matchesAvailabilityFilter(p, activeAvailability)
-    );
+    const sarees = facetSubset("category").filter((p) => matchesCategory(p.category, "Sarees"));
     return {
       All: sarees.length,
       Chikankari: sarees.filter((s) => matchesSubcategory(s, "Chikankari")).length,
       Zardozi: sarees.filter((s) => matchesSubcategory(s, "Zardozi")).length,
       "One of One": sarees.filter((s) => matchesSubcategory(s, "One of One")).length,
     };
-  }, [
-    baseEligibleProducts,
-    selectedCrafts,
-    selectedFabrics,
-    selectedPriceRanges,
-    activeAvailability,
-  ]);
+  }, [facetSubset]);
+
+  const craftOptions = useMemo(() => {
+    const subset = facetSubset("craft");
+    return availableCrafts.map((craft) => ({
+      value: craft,
+      label: craft,
+      count: subset.filter((p) => matchesCraftFilter(p, [craft])).length,
+    }));
+  }, [facetSubset, availableCrafts]);
+
+  const fabricOptions = useMemo(() => {
+    const subset = facetSubset("fabric");
+    return availableFabrics.map((fabric) => ({
+      value: fabric,
+      label: fabric,
+      count: subset.filter((p) => matchesFabricFilter(p, [fabric])).length,
+    }));
+  }, [facetSubset, availableFabrics]);
+
+  // Slider scale: the whole collection being browsed, rounded to ₹500.
+  const priceBounds = useMemo(() => {
+    const all = baseEligibleProducts.map(getEffectivePrice).filter(Number.isFinite);
+    if (!all.length) return { min: 0, max: 25000 };
+    const min = Math.floor(Math.min(...all) / 500) * 500;
+    const max = Math.ceil(Math.max(...all) / 500) * 500;
+    return { min, max: max > min ? max : min + 500 };
+  }, [baseEligibleProducts]);
+
+  const priceSubset = useMemo(() => facetSubset("price"), [facetSubset]);
+  const priceHistogram = useMemo(() => priceSubset.map(getEffectivePrice), [priceSubset]);
+  const pricePresets = useMemo(
+    () =>
+      PRICE_PRESETS.map((p) => ({
+        ...p,
+        active: p.min === priceMin && p.max === priceMax,
+        count: priceSubset.filter((prod) => matchesPriceBounds(prod, p.min, p.max)).length,
+      })),
+    [priceSubset, priceMin, priceMax]
+  );
+
+  const stockCounts = useMemo(() => {
+    const subset = facetSubset("availability");
+    const inStock = subset.filter(isProductAvailable).length;
+    return { inStock, soldOut: subset.length - inStock, total: subset.length };
+  }, [facetSubset]);
+
+  const saleCount = useMemo(() => facetSubset("sale").filter(isOnSale).length, [facetSubset]);
 
   const isSareeActive =
     activeCategory === "Sarees" ||
@@ -450,14 +423,7 @@ export default function Shop() {
 
   /* ── Authoritative Unified Filtering Pipeline ── */
   const filteredProducts = useMemo(() => {
-    let list = baseEligibleProducts.filter(
-      (p) =>
-        matchesCategoryFilter(p, activeCategory, activeSubcategory) &&
-        matchesCraftFilter(p, selectedCrafts) &&
-        matchesFabricFilter(p, selectedFabrics) &&
-        matchesPriceFilter(p, selectedPriceRanges) &&
-        matchesAvailabilityFilter(p, activeAvailability)
-    );
+    let list = baseEligibleProducts.filter((p) => passes(p));
 
     // Canonical deduplication guard
     const seenIds = new Set();
@@ -469,17 +435,7 @@ export default function Shop() {
 
     // Sorting operates strictly on the filtered set
     return sortProducts(list, sortBy, shopSortSettings);
-  }, [
-    baseEligibleProducts,
-    activeCategory,
-    activeSubcategory,
-    selectedCrafts,
-    selectedFabrics,
-    selectedPriceRanges,
-    activeAvailability,
-    sortBy,
-    shopSortSettings,
-  ]);
+  }, [baseEligibleProducts, passes, sortBy, shopSortSettings]);
 
   // Name of the list being browsed, for view_item_list / select_item.
   const listName = isOneOfOneRoute
@@ -524,25 +480,24 @@ export default function Shop() {
     return () => clearTimeout(t);
   }, [filteredProducts, listName]);
 
-  const activeFilterCount = useMemo(() => {
-    let count = 0;
-    if (urlSearch) count++;
-    if (activeCategory !== "All") count++;
-    if (activeSubcategory !== "All") count++;
-    count += selectedCrafts.length;
-    count += selectedFabrics.length;
-    count += selectedPriceRanges.length;
-    if (activeAvailability !== "All") count++;
-    return count;
-  }, [
-    urlSearch,
-    activeCategory,
-    activeSubcategory,
-    selectedCrafts,
-    selectedFabrics,
-    selectedPriceRanges,
-    activeAvailability,
-  ]);
+  const hasPriceFilter = priceMin !== null || priceMax !== null;
+  const priceLabel = hasPriceFilter
+    ? priceMin !== null && priceMax !== null
+      ? `${formatRs(priceMin)} – ${formatRs(priceMax)}`
+      : priceMin !== null
+      ? `${formatRs(priceMin)}+`
+      : `Up to ${formatRs(priceMax)}`
+    : "";
+
+  const activeFilterCount =
+    (urlSearch ? 1 : 0) +
+    (activeCategory !== "All" ? 1 : 0) +
+    (activeSubcategory !== "All" ? 1 : 0) +
+    selectedCrafts.length +
+    selectedFabrics.length +
+    (hasPriceFilter ? 1 : 0) +
+    (onSaleOnly ? 1 : 0) +
+    (activeAvailability !== "All" ? 1 : 0);
 
   /* ── URL and State Helpers ── */
   const updateParams = useCallback(
@@ -613,13 +568,18 @@ export default function Shop() {
     updateParams({ fabric: next });
   };
 
-  const togglePriceRange = (rangeId) => {
-    const next = selectedPriceRanges.includes(rangeId)
-      ? selectedPriceRanges.filter((id) => id !== rangeId)
-      : [...selectedPriceRanges, rangeId];
-    if (next.length > selectedPriceRanges.length) trackFilter("price", rangeId);
-    setSelectedPriceRanges(next);
-    updateParams({ price: next });
+  const handlePriceChange = (min, max) => {
+    if (min !== null || max !== null) trackFilter("price", `${min ?? 0}-${max ?? "max"}`);
+    setPriceMin(min);
+    setPriceMax(max);
+    updateParams({ min, max, price: null });
+  };
+
+  const toggleOnSale = () => {
+    const next = !onSaleOnly;
+    if (next) trackFilter("offer", "on_sale");
+    setOnSaleOnly(next);
+    updateParams({ sale: next ? "1" : null });
   };
 
   const handleAvailabilityChange = (val) => {
@@ -639,233 +599,182 @@ export default function Shop() {
     setActiveSubcategory("All");
     setSelectedCrafts([]);
     setSelectedFabrics([]);
-    setSelectedPriceRanges([]);
+    setPriceMin(null);
+    setPriceMax(null);
+    setOnSaleOnly(false);
     setActiveAvailability(isArchiveRoute ? "sold-out" : "All");
     setSortBy("recommended");
     setSearchParams({}, { replace: true });
   }, [isArchiveRoute, setSearchParams]);
 
+  const countSummary = (n) => (n ? `${n} selected` : "");
+
   /* ── Filter Sidebar Render Function ── */
-  const renderFilters = () => (
+  const renderFilters = (scope = "side") => (
     <>
-      {/* ── Filter Header ── */}
       <div className="filter-sidebar-top">
         <div className="filter-sidebar-title-wrap">
-          <span className="filter-sidebar-title">FILTERS</span>
-          <span className="filter-sidebar-gem">✦</span>
+          <span className="filter-sidebar-title">Filters</span>
+          {activeFilterCount > 0 && <span className="filter-sidebar-badge">{activeFilterCount}</span>}
         </div>
         {activeFilterCount > 0 && (
-          <button
-            className="filter-sidebar-reset"
-            onClick={clearAllFilters}
-            title="Reset all active filters"
-          >
-            RESET ALL ({activeFilterCount})
+          <button className="filter-sidebar-reset" onClick={clearAllFilters} title="Reset all active filters">
+            Clear all
           </button>
         )}
       </div>
 
-      {/* ── 1. Silhouette / Category ── */}
-      <div className="filter-group">
-        <div className="filter-group-header">
-          <h4>SILHOUETTE / CATEGORY</h4>
-          <span className="group-count">{products.length}</span>
-        </div>
-        <div className="filter-chips">
-          <button
-            type="button"
-            className={`filter-chip ${activeCategory === "All" ? "active" : ""}`}
-            onClick={() => handleCategoryChange("All")}
-          >
-            ALL <span className="chip-count">({products.length})</span>
-          </button>
-          {categories.map((cat) => {
-            if (cat === "All") return null;
-            const count = categoryCounts[cat] || 0;
+      {/* ── Category ── */}
+      <FilterSection
+        id={`${scope}-category`}
+        title="Category"
+        summary={activeCategory !== "All" ? activeCategory : ""}
+        open={openSections.has("category")}
+        onToggle={() => toggleSection("category")}
+      >
+        <div className="fcat-list">
+          {["All", ...categories.filter((c) => c !== "All")].map((cat) => {
+            const count = cat === "All" ? categoryCounts.All || 0 : categoryCounts[cat] || 0;
+            const isActive = activeCategory === cat;
             return (
               <button
                 key={cat}
                 type="button"
-                className={`filter-chip ${activeCategory === cat ? "active" : ""}`}
+                className={`fcat ${isActive ? "is-active" : ""}`}
+                aria-pressed={isActive}
+                disabled={!isActive && count === 0}
                 onClick={() => handleCategoryChange(cat)}
               >
-                {cat.toUpperCase()}{" "}
-                <span className="chip-count">({count})</span>
+                <span>{cat === "All" ? "All creations" : cat}</span>
+                <span className="fcat-count">{count}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Nested Saree Edit: Quick filters when Saree is selected */}
         {isSareeActive && (
-          <div className="category-sub-nested">
-            <span className="nested-sub-label">Saree Edit:</span>
-            <div className="filter-chips">
+          <div className="fcat-sub">
+            <span className="fcat-sub-label">Saree edit</span>
+            <div className="fpill-row">
               {SAREE_SUBCATEGORIES.map((sub) => {
                 const isSelected = activeSubcategory === sub.id;
-                const count = sareeSubcategoryCounts[sub.id] || 0;
                 return (
                   <button
                     key={sub.id}
                     type="button"
-                    className={`filter-chip sub-chip ${isSelected ? "active" : ""}`}
+                    className={`fpill ${isSelected ? "is-active" : ""}`}
+                    aria-pressed={isSelected}
                     onClick={() => handleSubcategoryChange(sub.id)}
                   >
-                    {sub.label.toUpperCase()}{" "}
-                    <span className="chip-count">({count})</span>
+                    {sub.id === "All" ? "All" : sub.label}
+                    <span>{sareeSubcategoryCounts[sub.id] || 0}</span>
                   </button>
                 );
               })}
             </div>
           </div>
         )}
-      </div>
+      </FilterSection>
 
-      {/* ── 2. Artisanal Craft (Multi-select OR logic) ── */}
-      <div className="filter-group">
-        <div className="filter-group-header">
-          <h4>ARTISANAL CRAFT</h4>
-          <span>—</span>
-        </div>
-        <div className="filter-checkbox-list">
-          {availableCrafts.map((craft) => {
-            const count = craftCounts[craft] || 0;
-            const isChecked = selectedCrafts.includes(craft);
-            return (
-              <label key={craft} className="filter-checkbox-item">
-                <div className="checkbox-wrap">
-                  <input
-                    type="checkbox"
-                    checked={isChecked}
-                    onChange={() => toggleCraft(craft)}
-                  />
-                  <span className="custom-checkbox" />
-                  <span className="checkbox-label">{craft}</span>
-                </div>
-                <span className="checkbox-count">({count})</span>
-              </label>
-            );
-          })}
-        </div>
-      </div>
+      {/* ── Price ── */}
+      <FilterSection
+        id={`${scope}-price`}
+        title="Price"
+        summary={priceLabel}
+        open={openSections.has("price")}
+        onToggle={() => toggleSection("price")}
+      >
+        <PriceFilter
+          bounds={priceBounds}
+          min={priceMin}
+          max={priceMax}
+          prices={priceHistogram}
+          presets={pricePresets}
+          onCommit={handlePriceChange}
+        />
+      </FilterSection>
 
-      {/* ── 3. Luxury Fabric (Multi-select OR logic) ── */}
-      <div className="filter-group">
-        <div className="filter-group-header">
-          <h4>LUXURY FABRIC</h4>
-          <span>—</span>
-        </div>
-        <div className="filter-checkbox-list">
-          {availableFabrics.map((fabric) => {
-            const count = fabricCounts[fabric] || 0;
-            const isChecked = selectedFabrics.includes(fabric);
-            return (
-              <label key={fabric} className="filter-checkbox-item">
-                <div className="checkbox-wrap">
-                  <input
-                    type="checkbox"
-                    checked={isChecked}
-                    onChange={() => toggleFabric(fabric)}
-                  />
-                  <span className="custom-checkbox" />
-                  <span className="checkbox-label">{fabric}</span>
-                </div>
-                <span className="checkbox-count">({count})</span>
-              </label>
-            );
-          })}
-        </div>
-      </div>
+      {/* ── Craft ── */}
+      {craftOptions.length > 0 && (
+        <FilterSection
+          id={`${scope}-craft`}
+          title="Craft"
+          summary={countSummary(selectedCrafts.length)}
+          open={openSections.has("craft")}
+          onToggle={() => toggleSection("craft")}
+        >
+          <CheckList name="Craft" options={craftOptions} selected={selectedCrafts} onToggle={toggleCraft} limit={6} />
+        </FilterSection>
+      )}
 
-      {/* ── 4. Price Range (Multi-select non-overlapping tiers) ── */}
-      <div className="filter-group">
-        <div className="filter-group-header">
-          <h4>PRICE RANGE</h4>
-          <span>—</span>
-        </div>
-        <div className="filter-checkbox-list">
-          {PRICE_RANGES.map((range) => {
-            const count = priceRangeCounts[range.id] || 0;
-            const isChecked = selectedPriceRanges.includes(range.id);
-            return (
-              <label key={range.id} className="filter-checkbox-item">
-                <div className="checkbox-wrap">
-                  <input
-                    type="checkbox"
-                    checked={isChecked}
-                    onChange={() => togglePriceRange(range.id)}
-                  />
-                  <span className="custom-checkbox" />
-                  <span className="checkbox-label">{range.label}</span>
-                </div>
-                <span className="checkbox-count">({count})</span>
-              </label>
-            );
-          })}
-        </div>
-      </div>
+      {/* ── Fabric ── */}
+      {fabricOptions.length > 0 && (
+        <FilterSection
+          id={`${scope}-fabric`}
+          title="Fabric"
+          summary={countSummary(selectedFabrics.length)}
+          open={openSections.has("fabric")}
+          onToggle={() => toggleSection("fabric")}
+        >
+          <CheckList
+            name="Fabric"
+            options={fabricOptions}
+            selected={selectedFabrics}
+            onToggle={toggleFabric}
+            limit={6}
+            searchable
+          />
+        </FilterSection>
+      )}
 
-      {/* ── 5. Availability ── */}
-      <div className="filter-group">
-        <div className="filter-group-header">
-          <h4>AVAILABILITY</h4>
-          <span>—</span>
+      {/* ── Availability & offers ── */}
+      <FilterSection
+        id={`${scope}-availability`}
+        title="Availability & offers"
+        summary={[AVAILABILITY_LABELS[activeAvailability], onSaleOnly && "On sale"].filter(Boolean).join(", ")}
+        open={openSections.has("availability")}
+        onToggle={() => toggleSection("availability")}
+      >
+        <div className="fseg" role="radiogroup" aria-label="Availability">
+          {[
+            ["All", "All", stockCounts.total],
+            ["in-stock", "Ready to ship", stockCounts.inStock],
+            ["sold-out", "Sold out", stockCounts.soldOut],
+          ].map(([value, label, count]) => (
+            <button
+              key={value}
+              type="button"
+              role="radio"
+              aria-checked={activeAvailability === value}
+              className={activeAvailability === value ? "is-active" : ""}
+              onClick={() => handleAvailabilityChange(value)}
+            >
+              {label}
+              <span>{count}</span>
+            </button>
+          ))}
         </div>
-        <div className="filter-checkbox-list">
-          <label className="filter-checkbox-item">
-            <div className="checkbox-wrap">
-              <input
-                type="radio"
-                name="availability"
-                checked={activeAvailability === "All"}
-                onChange={() => handleAvailabilityChange("All")}
-              />
-              <span className="custom-radio" />
-              <span className="checkbox-label">All Creations</span>
-            </div>
-            <span className="checkbox-count">({stockCounts.total})</span>
-          </label>
-          <label className="filter-checkbox-item">
-            <div className="checkbox-wrap">
-              <input
-                type="radio"
-                name="availability"
-                checked={activeAvailability === "in-stock"}
-                onChange={() =>
-                  handleAvailabilityChange(
-                    activeAvailability === "in-stock" ? "All" : "in-stock"
-                  )
-                }
-              />
-              <span className="custom-radio" />
-              <span className="checkbox-label">Ready to Ship</span>
-            </div>
-            <span className="checkbox-count">({stockCounts.inStock})</span>
-          </label>
-          <label className="filter-checkbox-item">
-            <div className="checkbox-wrap">
-              <input
-                type="radio"
-                name="availability"
-                checked={activeAvailability === "sold-out"}
-                onChange={() =>
-                  handleAvailabilityChange(
-                    activeAvailability === "sold-out" ? "All" : "sold-out"
-                  )
-                }
-              />
-              <span className="custom-radio" />
-              <span className="checkbox-label">Archive (Sold Out)</span>
-            </div>
-            <span className="checkbox-count">({stockCounts.soldOut})</span>
-          </label>
-        </div>
-      </div>
+
+        <label className={`fswitch ${saleCount === 0 && !onSaleOnly ? "is-disabled" : ""}`}>
+          <span>
+            On sale
+            <small>{saleCount} {saleCount === 1 ? "piece" : "pieces"} with a reduced price</small>
+          </span>
+          <input
+            type="checkbox"
+            role="switch"
+            checked={onSaleOnly}
+            disabled={saleCount === 0 && !onSaleOnly}
+            onChange={toggleOnSale}
+          />
+          <i aria-hidden="true" />
+        </label>
+      </FilterSection>
     </>
   );
 
   return (
-    <div className="shop-page">
+    <div className="shop-page" ref={pageRef}>
       {/* ── Active Filters Top Bar with Individual Dismiss Tags ── */}
       <div className="shop-top-bar container">
         <div className="active-filters">
@@ -944,19 +853,17 @@ export default function Shop() {
             </span>
           ))}
 
-          {selectedPriceRanges.map((rangeId) => {
-            const r = PRICE_RANGES.find((x) => x.id === rangeId);
-            return (
-              <span
-                key={rangeId}
-                className="active-tag"
-                onClick={() => togglePriceRange(rangeId)}
-                title={`Remove price filter: ${r?.label}`}
-              >
-                PRICE: {r ? r.label.toUpperCase() : rangeId.toUpperCase()} ✕
-              </span>
-            );
-          })}
+          {hasPriceFilter && (
+            <span className="active-tag" onClick={() => handlePriceChange(null, null)} title="Remove price filter">
+              PRICE: {priceLabel} ✕
+            </span>
+          )}
+
+          {onSaleOnly && (
+            <span className="active-tag" onClick={toggleOnSale} title="Remove on-sale filter">
+              ON SALE ✕
+            </span>
+          )}
 
           {activeAvailability !== "All" && (
             <span
@@ -995,7 +902,7 @@ export default function Shop() {
       <div className="shop-body container">
         <div className="shop-layout">
           {/* ── Desktop sidebar ── */}
-          <aside className="filters-sidebar">{renderFilters()}</aside>
+          <aside className="filters-sidebar" aria-label="Filters">{renderFilters()}</aside>
 
           {/* ── Mobile filter drawer ── */}
           <div
@@ -1024,14 +931,19 @@ export default function Shop() {
                 </button>
               </div>
               <div className="mobile-drawer-scrollable">
-                {renderFilters()}
+                {mobileFiltersOpen && renderFilters("drawer")}
               </div>
-              <div className="mobile-drawer-bottom-bar">
+              <div className="mobile-drawer-bottom-bar mobile-drawer-actions">
+                {activeFilterCount > 0 && (
+                  <button className="mobile-clear-btn" onClick={clearAllFilters}>
+                    Clear
+                  </button>
+                )}
                 <button
                   className="mobile-apply-btn"
                   onClick={() => setMobileFiltersOpen(false)}
                 >
-                  VIEW {filteredProducts.length} PIECES
+                  VIEW {filteredProducts.length} {filteredProducts.length === 1 ? "PIECE" : "PIECES"}
                 </button>
               </div>
             </div>

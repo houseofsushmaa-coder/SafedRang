@@ -238,6 +238,32 @@ export function matchesPriceFilter(product, selectedPriceRangeIds) {
   });
 }
 
+/** Min/max price filter (either bound may be null). */
+export function matchesPriceBounds(product, min, max) {
+  if (min == null && max == null) return true;
+  const price = getEffectivePrice(product);
+  if (isNaN(price)) return false;
+  if (min != null && price < min) return false;
+  if (max != null && price > max) return false;
+  return true;
+}
+
+/** Converts old ?price=under-5k,5k-10k links into one min/max span. */
+export function priceRangesToBounds(rangeIds) {
+  const ranges = (rangeIds || []).map((id) => PRICE_RANGES.find((r) => r.id === id)).filter(Boolean);
+  if (!ranges.length) return { min: null, max: null };
+  const min = Math.min(...ranges.map((r) => r.min));
+  const max = Math.max(...ranges.map((r) => r.max));
+  return { min: min > 0 ? min : null, max: Number.isFinite(max) ? max - 1 : null };
+}
+
+/** A real markdown: a sale price below the regular price. */
+export function isOnSale(product) {
+  const sale = Number(product?.salePrice);
+  const regular = Number(product?.price);
+  return Number.isFinite(sale) && sale > 0 && Number.isFinite(regular) && sale < regular;
+}
+
 export function matchesAvailabilityFilter(product, activeAvailability) {
   if (!activeAvailability || activeAvailability === "All") return true;
   if (activeAvailability === "in-stock") return isProductAvailable(product);

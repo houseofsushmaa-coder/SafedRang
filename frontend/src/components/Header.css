@@ -7,6 +7,16 @@
   position: sticky;
   top: 0;
   z-index: 100;
+}
+
+/* On phones the header scrolls away so products get the whole screen. */
+@media (max-width: 900px) {
+  .site-header {
+    position: relative;
+  }
+}
+
+.site-header {
   background-color: var(--color-white, #FFFFFF);
   border-bottom: 1px solid var(--color-ivory-deep, #E8DFD0);
   transition: all 0.3s ease;
