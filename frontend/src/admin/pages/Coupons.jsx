@@ -261,7 +261,7 @@ const Coupons = () => {
                           onClick={() => copyCode(c.code, c.id)}
                           style={{ padding: "4px" }}
                         >
-                          {copiedId === c.id ? <CheckCircle2 size={14} color="#10b981" /> : <Copy size={14} />}
+                          {copiedId === c.id ? <CheckCircle2 size={14} color="var(--admin-success)" /> : <Copy size={14} />}
                         </button>
                       </div>
                     </td>
@@ -283,7 +283,7 @@ const Coupons = () => {
                       <span style={{ fontWeight: 600 }}>{c.usageCount ?? 0}</span>
                       {c.usageLimit ? <span style={{ color: "var(--admin-text-muted)" }}> / {c.usageLimit}</span> : " / ∞"}
                     </td>
-                    <td style={{ fontSize: "0.82rem", color: expired ? "#ef4444" : "var(--admin-text-muted)" }}>
+                    <td style={{ fontSize: "0.82rem", color: expired ? "var(--admin-danger)" : "var(--admin-text-muted)" }}>
                       {c.expiresAt ? new Date(c.expiresAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "Never"}
                     </td>
                     <td>

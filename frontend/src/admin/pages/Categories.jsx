@@ -12,7 +12,7 @@ import { adminService } from "../adminService";
 import { useProducts } from "../../context/ProductContext";
 
 const EMPTY_CAT_FORM = { name: "", description: "", parentId: "", sortOrder: 0, status: "ACTIVE" };
-const EMPTY_BADGE_FORM = { name: "", description: "", color: "#6E1E2A", status: "ACTIVE", sort_order: 0 };
+const EMPTY_BADGE_FORM = { name: "", description: "", color: "var(--admin-accent-text)", status: "ACTIVE", sort_order: 0 };
 
 const PRESET_COLORS = [
   { label: "Luxury Burgundy", hex: "#6E1E2A" },
@@ -195,7 +195,7 @@ const Categories = () => {
     setBadgeForm({
       name: b.name,
       description: b.description ?? "",
-      color: b.color || "#6E1E2A",
+      color: b.color || "var(--admin-accent-text)",
       status: b.status ?? "ACTIVE",
       sort_order: b.sort_order ?? 0,
     });
@@ -211,7 +211,7 @@ const Categories = () => {
         id: editBadgeItem?.id,
         name: badgeForm.name.trim(),
         description: badgeForm.description || undefined,
-        color: badgeForm.color || "#6E1E2A",
+        color: badgeForm.color || "var(--admin-accent-text)",
         status: badgeForm.status,
         sort_order: badgeForm.sort_order,
       });
@@ -328,7 +328,7 @@ const Categories = () => {
                   style={{
                     fontSize: "0.78rem",
                     color: "var(--admin-primary-hover)",
-                    background: "rgba(174,138,84,0.12)",
+                    background: "rgb(var(--admin-primary-rgb) / 0.12)",
                     padding: "2px 8px",
                     borderRadius: "99px",
                     fontWeight: 600,
@@ -404,8 +404,8 @@ const Categories = () => {
                               fontWeight: 700,
                               cursor: "pointer",
                               border: "1px solid var(--admin-border)",
-                              background: prodCount > 0 ? "rgba(174,138,84,0.12)" : "var(--ivory-deep)",
-                              color: prodCount > 0 ? "#7A5C2E" : "var(--admin-text-muted)",
+                              background: prodCount > 0 ? "rgb(var(--admin-primary-rgb) / 0.12)" : "var(--ivory-deep)",
+                              color: prodCount > 0 ? "var(--admin-primary-hover)" : "var(--admin-text-muted)",
                               transition: "all 0.18s ease",
                             }}
                           >
@@ -485,8 +485,8 @@ const Categories = () => {
                 <span
                   style={{
                     fontSize: "0.78rem",
-                    color: "#FAF5EC",
-                    background: "#6E1E2A",
+                    color: "var(--admin-on-accent)",
+                    background: "var(--admin-accent)",
                     padding: "2px 10px",
                     borderRadius: "99px",
                     fontWeight: 700,
@@ -534,7 +534,7 @@ const Categories = () => {
                       <tr key={badge.id || badge.name}>
                         <td>
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <div className="cat-icon-wrap" style={{ background: `${badge.color || '#6E1E2A'}20`, color: badge.color || '#6E1E2A' }}>
+                            <div className="cat-icon-wrap" style={{ background: `${badge.color || 'var(--admin-accent)'}20`, color: badge.color || 'var(--admin-accent-text)' }}>
                               <Sparkles size={16} />
                             </div>
                             <div>
@@ -542,7 +542,7 @@ const Categories = () => {
                                 {badge.name}
                               </span>
                               {isSystem && (
-                                <span style={{ fontSize: "0.68rem", color: "#6E1E2A", fontWeight: 700, letterSpacing: "0.05em" }}>
+                                <span style={{ fontSize: "0.68rem", color: "var(--admin-accent-text)", fontWeight: 700, letterSpacing: "0.05em" }}>
                                   SYSTEM / EXCLUSIVE COLLECTION
                                 </span>
                               )}
@@ -557,8 +557,8 @@ const Categories = () => {
                               fontSize: "0.65rem",
                               fontWeight: 700,
                               letterSpacing: "0.08em",
-                              backgroundColor: badge.color || "#6E1E2A",
-                              color: "#FAF5EC",
+                              backgroundColor: badge.color || "var(--admin-accent)",
+                              color: "var(--admin-text-main)",
                               padding: "3px 8px",
                               borderRadius: "3px",
                               boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
@@ -583,8 +583,8 @@ const Categories = () => {
                               fontWeight: 700,
                               cursor: "pointer",
                               border: "1px solid var(--admin-border)",
-                              background: count > 0 ? "rgba(110,30,42,0.08)" : "var(--ivory-deep)",
-                              color: count > 0 ? "#6E1E2A" : "var(--admin-text-muted)",
+                              background: count > 0 ? "rgb(var(--admin-accent-rgb) / 0.08)" : "var(--ivory-deep)",
+                              color: count > 0 ? "var(--admin-accent-text)" : "var(--admin-text-muted)",
                               transition: "all 0.18s ease",
                             }}
                           >
@@ -755,8 +755,8 @@ const Categories = () => {
                     fontSize: "0.68rem",
                     fontWeight: 700,
                     letterSpacing: "0.08em",
-                    backgroundColor: badgeForm.color || "#6E1E2A",
-                    color: "#FAF5EC",
+                    backgroundColor: badgeForm.color || "var(--admin-accent)",
+                    color: "var(--admin-text-main)",
                     padding: "3px 10px",
                     borderRadius: "3px",
                     boxShadow: "0 1px 4px rgba(0,0,0,0.15)",
@@ -793,7 +793,7 @@ const Categories = () => {
                         height: "28px",
                         borderRadius: "50%",
                         backgroundColor: preset.hex,
-                        border: badgeForm.color === preset.hex ? "3px solid #fff" : "1px solid rgba(0,0,0,0.1)",
+                        border: badgeForm.color === preset.hex ? "3px solid var(--admin-surface)" : "1px solid rgba(0,0,0,0.1)",
                         outline: badgeForm.color === preset.hex ? "2px solid var(--admin-primary)" : "none",
                         cursor: "pointer",
                       }}

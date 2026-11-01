@@ -78,7 +78,7 @@
   gap: 7px;
   padding: 8px 16px;
   background-color: var(--gold);
-  color: #fff;
+  color: var(--admin-on-primary);
   border: 1px solid var(--gold);
   border-radius: 7px;
   font-size: 0.875rem;
@@ -103,7 +103,7 @@
   background-color: var(--admin-danger);
   border-color: var(--admin-danger);
 }
-.admin-btn.admin-btn-danger:hover { background-color: #a83228; }
+.admin-btn.admin-btn-danger:hover { background-color: var(--admin-danger); }
 .icon-left { gap: 7px; }
 .full-width { width: 100%; }
 
@@ -114,12 +114,12 @@
   border-radius: 7px;
   font-size: 0.875rem;
   color: var(--admin-text-main);
-  background-color: #fff;
+  background-color: var(--admin-surface);
   outline: none;
   cursor: pointer;
   font-family: inherit;
 }
-.admin-select:focus { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(174,138,84,0.12); }
+.admin-select:focus { border-color: var(--gold); box-shadow: 0 0 0 2px rgb(var(--admin-primary-rgb) / 0.12); }
 
 /* ── Stats grid ── */
 .dashboard-stats-grid {
@@ -147,7 +147,7 @@
   opacity: 0;
   transition: opacity 0.2s;
 }
-.admin-stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(42,33,29,0.07); }
+.admin-stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgb(var(--admin-ink-rgb) / 0.07); }
 .admin-stat-card:hover::after { opacity: 1; }
 
 .stat-header {
@@ -163,12 +163,12 @@
   align-items: center;
   justify-content: center;
 }
-.stat-icon.revenue  { background: rgba(174,138,84,0.12); color: var(--gold); }
-.stat-icon.orders   { background: rgba(110,30,42,0.08);  color: var(--wine); }
-.stat-icon.customers{ background: rgba(42,33,29,0.07);   color: #6B4F3A; }
-.stat-icon.products { background: rgba(46,125,79,0.1);   color: #2E7D4F; }
-.stat-icon.aov      { background: rgba(14,165,233,0.1);  color: #0284C7; }
-.stat-icon.refunds  { background: rgba(192,57,43,0.1);   color: var(--admin-danger); }
+.stat-icon.revenue  { background: rgb(var(--admin-primary-rgb) / 0.12); color: var(--gold); }
+.stat-icon.orders   { background: rgb(var(--admin-accent-rgb) / 0.08);  color: var(--wine); }
+.stat-icon.customers{ background: rgb(var(--admin-ink-rgb) / 0.07);   color: var(--admin-text-muted); }
+.stat-icon.products { background: rgb(var(--admin-success-rgb) / 0.1);   color: var(--admin-success); }
+.stat-icon.aov      { background: rgb(var(--admin-info-rgb) / 0.1);  color: var(--admin-info); }
+.stat-icon.refunds  { background: rgb(var(--admin-danger-rgb) / 0.1);   color: var(--admin-danger); }
 
 .stat-trend {
   display: flex;
@@ -179,9 +179,9 @@
   border-radius: 99px;
   gap: 3px;
 }
-.stat-trend.positive { color: #2E7D4F; background: rgba(46,125,79,0.1); }
-.stat-trend.negative { color: var(--admin-danger); background: rgba(192,57,43,0.08); }
-.stat-trend.warning  { color: var(--admin-warning); background: rgba(212,135,11,0.1); }
+.stat-trend.positive { color: var(--admin-success); background: rgb(var(--admin-success-rgb) / 0.1); }
+.stat-trend.negative { color: var(--admin-danger); background: rgb(var(--admin-danger-rgb) / 0.08); }
+.stat-trend.warning  { color: var(--admin-warning); background: rgb(var(--admin-warning-rgb) / 0.1); }
 
 .stat-body h4 {
   margin: 0 0 6px;
@@ -216,12 +216,12 @@
   gap: 3px;
   letter-spacing: 0.02em;
 }
-.pill--yellow  { background: #FEF3C7; color: #92400E; }
-.pill--green   { background: #D1FAE5; color: #065F46; }
-.pill--red     { background: #FEE2E2; color: #991B1B; }
-.pill--blue    { background: #E0E7FF; color: #3730A3; }
-.pill--wine    { background: rgba(110,30,42,0.1); color: var(--wine); }
-.pill--gold    { background: rgba(174,138,84,0.12); color: #7A5C2E; }
+.pill--yellow  { background: var(--admin-warning-soft); color: var(--admin-warning); }
+.pill--green   { background: var(--admin-success-soft); color: var(--admin-success); }
+.pill--red     { background: var(--admin-danger-soft); color: var(--admin-danger); }
+.pill--blue    { background: var(--admin-info-soft); color: var(--admin-info); }
+.pill--wine    { background: rgb(var(--admin-accent-rgb) / 0.1); color: var(--wine); }
+.pill--gold    { background: rgb(var(--admin-primary-rgb) / 0.12); color: var(--admin-primary-hover); }
 
 /* ── Dashboard layout ── */
 .dashboard-main-grid {
@@ -304,13 +304,13 @@
   text-transform: capitalize;
   letter-spacing: 0.03em;
 }
-.status-completed, .status-delivered { background: #D1FAE5; color: #065F46; }
-.status-pending    { background: #FEF3C7; color: #92400E; }
-.status-processing { background: #E0E7FF; color: #3730A3; }
-.status-cancelled  { background: #FEE2E2; color: #991B1B; }
-.status-published  { background: rgba(174,138,84,0.12); color: #7A5C2E; }
-.status-draft      { background: #F1F5F9; color: #64748B; }
-.status-archived   { background: #F1F5F9; color: #94A3B8; }
+.status-completed, .status-delivered { background: var(--admin-success-soft); color: var(--admin-success); }
+.status-pending    { background: var(--admin-warning-soft); color: var(--admin-warning); }
+.status-processing { background: var(--admin-info-soft); color: var(--admin-info); }
+.status-cancelled  { background: var(--admin-danger-soft); color: var(--admin-danger); }
+.status-published  { background: rgb(var(--admin-primary-rgb) / 0.12); color: var(--admin-primary-hover); }
+.status-draft      { background: var(--admin-surface-3); color: var(--admin-text-muted); }
+.status-archived   { background: var(--admin-surface-3); color: var(--admin-text-light); }
 
 /* ── Toolbar ── */
 .table-toolbar {
@@ -341,8 +341,8 @@
 }
 .toolbar-search input:focus {
   border-color: var(--gold);
-  background: #fff;
-  box-shadow: 0 0 0 2px rgba(174,138,84,0.1);
+  background: var(--admin-surface);
+  box-shadow: 0 0 0 2px rgb(var(--admin-primary-rgb) / 0.1);
 }
 
 /* ── Product cells ── */
@@ -399,8 +399,8 @@
   transition: all 0.18s;
 }
 .action-btn:hover { background-color: var(--ivory-deep); color: var(--admin-text-main); }
-.action-btn.delete:hover { background-color: #fee2e2; color: var(--admin-danger); }
-.action-btn.edit:hover   { background-color: rgba(174,138,84,0.1); color: var(--gold); }
+.action-btn.delete:hover { background-color: var(--admin-danger-soft); color: var(--admin-danger); }
+.action-btn.edit:hover   { background-color: rgb(var(--admin-primary-rgb) / 0.1); color: var(--gold); }
 
 /* ── Utilities ── */
 .text-right { text-align: right !important; }
@@ -423,12 +423,12 @@
   background: var(--charcoal);
   border-radius: 8px;
   padding: 8px 12px;
-  color: #fff;
+  color: var(--admin-on-accent);
   font-size: 0.82rem;
   box-shadow: 0 4px 14px rgba(0,0,0,0.25);
-  border: 1px solid rgba(174,138,84,0.2);
+  border: 1px solid rgb(var(--admin-primary-rgb) / 0.2);
 }
-.chart-tooltip-label { color: #B8A898; margin-bottom: 3px; }
+.chart-tooltip-label { color: var(--admin-text-light); margin-bottom: 3px; }
 .chart-tooltip-value { font-weight: 700; font-size: 0.92rem; color: var(--gold-light); }
 
 /* ── Empty state ── */

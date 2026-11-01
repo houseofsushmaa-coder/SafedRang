@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import "./AdminPages.css";
 
-import { adminService } from "../adminService";
+import { adminService, LOW_STOCK_AT } from "../adminService";
 import { useProducts } from "../../context/ProductContext";
 
 const Toast = ({ toast, onClose }) => {
@@ -144,7 +144,7 @@ const AdjustStockModal = ({ item, onClose, onSuccess, onUpdateStock }) => {
             )}
             <div style={{ marginTop: "6px", fontSize: "0.88rem" }}>
               Current stock:{" "}
-              <strong style={{ fontSize: "1.05rem", color: item.currentStock === 0 ? "#DC2626" : "var(--admin-text-main)" }}>
+              <strong style={{ fontSize: "1.05rem", color: item.currentStock === 0 ? "var(--admin-danger)" : "var(--admin-text-main)" }}>
                 {item.currentStock} units
               </strong>
             </div>
@@ -178,9 +178,9 @@ const AdjustStockModal = ({ item, onClose, onSuccess, onUpdateStock }) => {
                 padding: "8px 6px",
                 fontSize: "0.82rem",
                 justifyContent: "center",
-                borderColor: operation === "subtract" ? "#dc2626" : "",
-                backgroundColor: operation === "subtract" ? "#fef2f2" : "",
-                color: operation === "subtract" ? "#dc2626" : "",
+                borderColor: operation === "subtract" ? "var(--admin-danger)" : "",
+                backgroundColor: operation === "subtract" ? "var(--admin-danger-soft)" : "",
+                color: operation === "subtract" ? "var(--admin-danger)" : "",
               }}
             >
               <ArrowDownCircle size={14} style={{ marginRight: 4 }} /> - Deduct
@@ -313,7 +313,7 @@ const Inventory = () => {
         stockStatus:
           totalStock <= 0
             ? "Out of Stock"
-            : totalStock < 5
+            : totalStock <= LOW_STOCK_AT
             ? "Low Stock"
             : "In Stock",
         price: p.price,
@@ -346,14 +346,14 @@ const Inventory = () => {
             return {
               ...p,
               stock: sumStock,
-              stockStatus: sumStock <= 0 ? "Out of Stock" : sumStock < 5 ? "Low Stock" : "In Stock",
+              stockStatus: sumStock <= 0 ? "Out of Stock" : sumStock <= LOW_STOCK_AT ? "Low Stock" : "In Stock",
               variants: updatedVars,
             };
           }
           return {
             ...p,
             stock: newTotal,
-            stockStatus: newTotal <= 0 ? "Out of Stock" : newTotal < 5 ? "Low Stock" : "In Stock",
+            stockStatus: newTotal <= 0 ? "Out of Stock" : newTotal <= LOW_STOCK_AT ? "Low Stock" : "In Stock",
           };
         })
       );
@@ -427,7 +427,7 @@ const Inventory = () => {
       outOfStock = 0;
     products.forEach((p) => {
       if (p.stock <= 0) outOfStock++;
-      else if (p.stock < 5) lowStock++;
+      else if (p.stock <= LOW_STOCK_AT) lowStock++;
       else inStock++;
     });
     return { total: products.length, inStock, lowStock, outOfStock };
@@ -446,7 +446,7 @@ const Inventory = () => {
 
       // Status tab filter
       if (viewFilter === "instock") return p.stock > 0;
-      if (viewFilter === "lowstock") return p.stock > 0 && p.stock < 5;
+      if (viewFilter === "lowstock") return p.stock > 0 && p.stock <= LOW_STOCK_AT;
       if (viewFilter === "outofstock") return p.stock <= 0;
       return true;
     });
@@ -543,8 +543,8 @@ const Inventory = () => {
         <div
           onClick={() => setViewFilter("all")}
           style={{
-            background: viewFilter === "all" ? "var(--admin-border-subtle, #f3ede4)" : "#fff",
-            border: viewFilter === "all" ? "2px solid #6E1E2A" : "1px solid var(--admin-border)",
+            background: viewFilter === "all" ? "var(--admin-border-subtle, #f3ede4)" : "var(--admin-surface)",
+            border: viewFilter === "all" ? "2px solid var(--admin-accent)" : "1px solid var(--admin-border)",
             padding: "12px 16px",
             borderRadius: "8px",
             cursor: "pointer",
@@ -554,7 +554,7 @@ const Inventory = () => {
           <div style={{ fontSize: "0.75rem", textTransform: "uppercase", fontWeight: 700, color: "var(--admin-text-muted)" }}>
             Total Tracked
           </div>
-          <div style={{ fontSize: "1.4rem", fontWeight: 800, color: "#6E1E2A", marginTop: "2px" }}>
+          <div style={{ fontSize: "1.4rem", fontWeight: 800, color: "var(--admin-accent-text)", marginTop: "2px" }}>
             {auditMetrics.total}
           </div>
         </div>
@@ -562,18 +562,18 @@ const Inventory = () => {
         <div
           onClick={() => setViewFilter("instock")}
           style={{
-            background: viewFilter === "instock" ? "#f0fdf4" : "#fff",
-            border: viewFilter === "instock" ? "2px solid #16a34a" : "1px solid var(--admin-border)",
+            background: viewFilter === "instock" ? "var(--admin-success-soft)" : "var(--admin-surface)",
+            border: viewFilter === "instock" ? "2px solid var(--admin-success)" : "1px solid var(--admin-border)",
             padding: "12px 16px",
             borderRadius: "8px",
             cursor: "pointer",
             transition: "all 0.15s ease",
           }}
         >
-          <div style={{ fontSize: "0.75rem", textTransform: "uppercase", fontWeight: 700, color: "#16a34a" }}>
+          <div style={{ fontSize: "0.75rem", textTransform: "uppercase", fontWeight: 700, color: "var(--admin-success)" }}>
             In Stock
           </div>
-          <div style={{ fontSize: "1.4rem", fontWeight: 800, color: "#16a34a", marginTop: "2px" }}>
+          <div style={{ fontSize: "1.4rem", fontWeight: 800, color: "var(--admin-success)", marginTop: "2px" }}>
             {auditMetrics.inStock}
           </div>
         </div>
@@ -581,18 +581,18 @@ const Inventory = () => {
         <div
           onClick={() => setViewFilter("lowstock")}
           style={{
-            background: viewFilter === "lowstock" ? "#fefce8" : "#fff",
-            border: viewFilter === "lowstock" ? "2px solid #ca8a04" : "1px solid var(--admin-border)",
+            background: viewFilter === "lowstock" ? "var(--admin-warning-soft)" : "var(--admin-surface)",
+            border: viewFilter === "lowstock" ? "2px solid var(--admin-warning)" : "1px solid var(--admin-border)",
             padding: "12px 16px",
             borderRadius: "8px",
             cursor: "pointer",
             transition: "all 0.15s ease",
           }}
         >
-          <div style={{ fontSize: "0.75rem", textTransform: "uppercase", fontWeight: 700, color: "#a16207" }}>
-            Low Stock (&lt; 5)
+          <div style={{ fontSize: "0.75rem", textTransform: "uppercase", fontWeight: 700, color: "var(--admin-warning)" }}>
+            Last piece (1 left)
           </div>
-          <div style={{ fontSize: "1.4rem", fontWeight: 800, color: "#ca8a04", marginTop: "2px" }}>
+          <div style={{ fontSize: "1.4rem", fontWeight: 800, color: "var(--admin-warning)", marginTop: "2px" }}>
             {auditMetrics.lowStock}
           </div>
         </div>
@@ -600,18 +600,18 @@ const Inventory = () => {
         <div
           onClick={() => setViewFilter("outofstock")}
           style={{
-            background: viewFilter === "outofstock" ? "#fef2f2" : "#fff",
-            border: viewFilter === "outofstock" ? "2px solid #dc2626" : "1px solid var(--admin-border)",
+            background: viewFilter === "outofstock" ? "var(--admin-danger-soft)" : "var(--admin-surface)",
+            border: viewFilter === "outofstock" ? "2px solid var(--admin-danger)" : "1px solid var(--admin-border)",
             padding: "12px 16px",
             borderRadius: "8px",
             cursor: "pointer",
             transition: "all 0.15s ease",
           }}
         >
-          <div style={{ fontSize: "0.75rem", textTransform: "uppercase", fontWeight: 700, color: "#dc2626" }}>
+          <div style={{ fontSize: "0.75rem", textTransform: "uppercase", fontWeight: 700, color: "var(--admin-danger)" }}>
             Out of Stock
           </div>
-          <div style={{ fontSize: "1.4rem", fontWeight: 800, color: "#dc2626", marginTop: "2px" }}>
+          <div style={{ fontSize: "1.4rem", fontWeight: 800, color: "var(--admin-danger)", marginTop: "2px" }}>
             {auditMetrics.outOfStock}
           </div>
         </div>
@@ -621,8 +621,8 @@ const Inventory = () => {
       {selectedIds.size > 0 && (
         <div
           style={{
-            background: "rgba(110, 30, 42, 0.08)",
-            border: "1px solid rgba(110, 30, 42, 0.25)",
+            background: "rgb(var(--admin-accent-rgb) / 0.08)",
+            border: "1px solid rgb(var(--admin-accent-rgb) / 0.25)",
             padding: "12px 18px",
             borderRadius: "8px",
             marginBottom: "16px",
@@ -634,13 +634,13 @@ const Inventory = () => {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <span style={{ fontWeight: 800, color: "#6E1E2A", fontSize: "0.92rem" }}>
+            <span style={{ fontWeight: 800, color: "var(--admin-accent-text)", fontSize: "0.92rem" }}>
               {selectedIds.size} item{selectedIds.size !== 1 ? "s" : ""} selected
             </span>
             <button
               type="button"
               className="text-link"
-              style={{ fontSize: "0.82rem", color: "#6E1E2A", textDecoration: "underline", cursor: "pointer", background: "none", border: "none" }}
+              style={{ fontSize: "0.82rem", color: "var(--admin-accent-text)", textDecoration: "underline", cursor: "pointer", background: "none", border: "none" }}
               onClick={() => setSelectedIds(new Set())}
             >
               Clear selection
@@ -684,17 +684,17 @@ const Inventory = () => {
               disabled={isBulkApplying}
               onClick={() => handleBulkStatus("In Stock")}
             >
-              <CheckCircle2 size={14} color="#16a34a" /> Mark In Stock
+              <CheckCircle2 size={14} color="var(--admin-success)" /> Mark In Stock
             </button>
 
             <button
               type="button"
               className="admin-btn admin-btn-outline icon-left"
-              style={{ fontSize: "0.8rem", padding: "6px 12px", borderColor: "#fca5a5", color: "#b91c1c" }}
+              style={{ fontSize: "0.8rem", padding: "6px 12px", borderColor: "var(--admin-danger-border)", color: "var(--admin-danger)" }}
               disabled={isBulkApplying}
               onClick={() => handleBulkStatus("Out of Stock")}
             >
-              <XCircle size={14} color="#dc2626" /> Mark Out of Stock
+              <XCircle size={14} color="var(--admin-danger)" /> Mark Out of Stock
             </button>
           </div>
         </div>
@@ -755,7 +755,7 @@ const Inventory = () => {
                     <tr
                       key={`p-${product.id}`}
                       style={{
-                        backgroundColor: isSelected ? "rgba(110, 30, 42, 0.05)" : "#f8fafc",
+                        backgroundColor: isSelected ? "rgb(var(--admin-accent-rgb) / 0.05)" : "var(--admin-surface-2)",
                         fontWeight: 600,
                       }}
                     >
@@ -793,7 +793,7 @@ const Inventory = () => {
                             <span className="product-title" style={{ fontWeight: 700 }}>
                               {product.title}
                             </span>
-                            <span className="product-sku" style={{ color: "#6E1E2A", fontWeight: 600 }}>
+                            <span className="product-sku" style={{ color: "var(--admin-accent-text)", fontWeight: 600 }}>
                               {product.variants.length} Sizes/Variants
                             </span>
                           </div>
@@ -828,7 +828,7 @@ const Inventory = () => {
                     const isSaving = inlineSavingKey === inlineKey;
 
                     rows.push(
-                      <tr key={`v-${variant.id}`} style={{ backgroundColor: "#fff" }}>
+                      <tr key={`v-${variant.id}`} style={{ backgroundColor: "var(--admin-surface)" }}>
                         <td></td>
                         <td style={{ paddingLeft: "54px" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -837,7 +837,7 @@ const Inventory = () => {
                                 width: "6px",
                                 height: "6px",
                                 borderRadius: "50%",
-                                backgroundColor: isOut ? "#dc2626" : isLow ? "#ca8a04" : "#16a34a",
+                                backgroundColor: isOut ? "var(--admin-danger)" : isLow ? "var(--admin-warning)" : "var(--admin-success)",
                               }}
                             />
                             <span style={{ fontSize: "0.88rem", fontWeight: 600, color: "var(--admin-text-main)" }}>
@@ -855,7 +855,7 @@ const Inventory = () => {
                           ) : isLow ? (
                             <span
                               className="status-badge status-pending"
-                              style={{ backgroundColor: "#fef9c3", color: "#a16207" }}
+                              style={{ backgroundColor: "var(--admin-warning-soft)", color: "var(--admin-warning)" }}
                             >
                               <AlertTriangle size={11} style={{ marginRight: 3 }} /> Low ({variant.stock})
                             </span>
@@ -892,8 +892,8 @@ const Inventory = () => {
                                 disabled={isSaving}
                                 style={{
                                   padding: "4px 6px",
-                                  background: "#6E1E2A",
-                                  color: "#fff",
+                                  background: "var(--admin-accent)",
+                                  color: "var(--admin-on-accent)",
                                   border: "none",
                                   borderRadius: "4px",
                                   cursor: "pointer",
@@ -924,7 +924,7 @@ const Inventory = () => {
                               }}
                               title="Click to quickly edit stock"
                             >
-                              <strong style={{ color: isOut ? "#dc2626" : "inherit" }}>
+                              <strong style={{ color: isOut ? "var(--admin-danger)" : "inherit" }}>
                                 {variant.stock} units
                               </strong>
                               <Edit2 size={11} style={{ color: "var(--admin-text-muted)" }} />
@@ -962,7 +962,7 @@ const Inventory = () => {
                     <tr
                       key={`p-${product.id}`}
                       style={{
-                        backgroundColor: isSelected ? "rgba(110, 30, 42, 0.05)" : undefined,
+                        backgroundColor: isSelected ? "rgb(var(--admin-accent-rgb) / 0.05)" : undefined,
                       }}
                     >
                       <td>
@@ -1012,7 +1012,7 @@ const Inventory = () => {
                         ) : isLow ? (
                           <span
                             className="status-badge status-pending"
-                            style={{ backgroundColor: "#fef9c3", color: "#a16207" }}
+                            style={{ backgroundColor: "var(--admin-warning-soft)", color: "var(--admin-warning)" }}
                           >
                             <AlertTriangle size={12} style={{ marginRight: "3px" }} /> Low Stock
                           </span>
@@ -1049,8 +1049,8 @@ const Inventory = () => {
                               disabled={isSaving}
                               style={{
                                 padding: "4px 8px",
-                                background: "#6E1E2A",
-                                color: "#fff",
+                                background: "var(--admin-accent)",
+                                color: "var(--admin-on-accent)",
                                 border: "none",
                                 borderRadius: "4px",
                                 cursor: "pointer",
@@ -1081,7 +1081,7 @@ const Inventory = () => {
                             }}
                             title="Click to edit stock quantity"
                           >
-                            <strong style={{ fontWeight: 800, color: isOut ? "#dc2626" : "inherit" }}>
+                            <strong style={{ fontWeight: 800, color: isOut ? "var(--admin-danger)" : "inherit" }}>
                               {product.stock} units
                             </strong>
                             <Edit2 size={11} style={{ color: "var(--admin-text-muted)" }} />

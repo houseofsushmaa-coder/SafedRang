@@ -87,7 +87,7 @@
 
 .admin-input:focus {
   border-color: var(--admin-primary);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  box-shadow: 0 0 0 3px rgb(var(--admin-success-rgb) / 0.1);
 }
 
 .admin-input::placeholder {
@@ -144,13 +144,13 @@ textarea.admin-input {
   transition: all 0.2s;
   overflow: hidden;
   position: relative;
-  background-color: #f8fafc;
+  background-color: var(--admin-surface-2);
 }
 
 .image-upload-zone:hover,
 .image-upload-zone.dragging {
   border-color: var(--admin-primary);
-  background-color: rgba(16, 185, 129, 0.05);
+  background-color: rgb(var(--admin-success-rgb) / 0.05);
 }
 
 .upload-placeholder {
@@ -229,7 +229,7 @@ textarea.admin-input {
   border-radius: 8px;
   overflow: hidden;
   aspect-ratio: 1;
-  background: #f1f5f9;
+  background: var(--admin-surface-3);
   border: 2px solid transparent;
   transition: border-color 0.2s;
 }
@@ -306,14 +306,14 @@ textarea.admin-input {
   aspect-ratio: 1;
   color: var(--admin-text-light);
   transition: all 0.2s;
-  background: #f8fafc;
+  background: var(--admin-surface-2);
   gap: 4px;
 }
 
 .gallery-add-btn:hover {
   border-color: var(--admin-primary);
   color: var(--admin-primary);
-  background-color: rgba(16, 185, 129, 0.05);
+  background-color: rgb(var(--admin-success-rgb) / 0.05);
 }
 
 .gallery-add-btn span {
@@ -341,12 +341,12 @@ textarea.admin-input {
 
 .product-type-option:hover {
   border-color: var(--admin-primary);
-  background: rgba(16, 185, 129, 0.04);
+  background: rgb(var(--admin-success-rgb) / 0.04);
 }
 
 .product-type-option.selected {
   border-color: var(--admin-primary);
-  background: rgba(16, 185, 129, 0.07);
+  background: rgb(var(--admin-success-rgb) / 0.07);
 }
 
 .product-type-label {
@@ -421,13 +421,13 @@ textarea.admin-input {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: rgb(var(--admin-danger-rgb) / 0.1);
+  color: var(--admin-danger);
   transition: background 0.2s;
 }
 
 .variation-remove-btn:hover {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgb(var(--admin-danger-rgb) / 0.2);
 }
 
 .variation-hint {
@@ -525,9 +525,9 @@ textarea.admin-input {
 }
 
 .admin-btn-secondary-sm:hover:not(:disabled) {
-  border-color: #6E1E2A;
-  color: #6E1E2A;
-  background: rgba(110, 30, 42, 0.04);
+  border-color: var(--admin-accent);
+  color: var(--admin-accent-text);
+  background: rgb(var(--admin-accent-rgb) / 0.04);
 }
 
 .admin-btn-secondary-sm:disabled {
@@ -538,7 +538,7 @@ textarea.admin-input {
 .gallery-add-link {
   background: none;
   border: none;
-  color: #6E1E2A;
+  color: var(--admin-accent-text);
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
@@ -558,8 +558,8 @@ textarea.admin-input {
 
 /* ── Upload Progress Feedback ── */
 .upload-progress-container {
-  background: #fbf7f4;
-  border: 1px solid #e7d8cf;
+  background: var(--admin-surface-2);
+  border: 1px solid var(--admin-border);
   border-radius: 8px;
   padding: 12px 14px;
   margin-bottom: 16px;
@@ -576,14 +576,14 @@ textarea.admin-input {
 }
 
 .upload-progress-pct {
-  color: #6E1E2A;
+  color: var(--admin-accent-text);
   font-weight: 700;
 }
 
 .upload-progress-track {
   width: 100%;
   height: 6px;
-  background: #ecdcd2;
+  background: var(--admin-surface-3);
   border-radius: 999px;
   overflow: hidden;
   margin-bottom: 6px;
@@ -591,7 +591,7 @@ textarea.admin-input {
 
 .upload-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #6E1E2A, #a53245);
+  background: linear-gradient(90deg, var(--admin-accent), var(--admin-danger));
   border-radius: 999px;
   transition: width 0.25s ease-out;
 }
@@ -607,8 +607,8 @@ textarea.admin-input {
 
 /* ── Uploading Active State in Dropzone ── */
 .image-upload-zone.uploading {
-  border-color: #6E1E2A;
-  background: #fbf7f4;
+  border-color: var(--admin-accent);
+  background: var(--admin-surface-2);
   cursor: wait;
   pointer-events: none;
 }
@@ -624,7 +624,7 @@ textarea.admin-input {
 
 .upload-spinner-icon {
   animation: spin 1s linear infinite;
-  color: #6E1E2A;
+  color: var(--admin-accent-text);
   margin-bottom: 12px;
 }
 
@@ -651,8 +651,8 @@ textarea.admin-input {
 }
 
 .gallery-grid.dragging {
-  border: 2px dashed #6E1E2A;
-  background: rgba(110, 30, 42, 0.04);
+  border: 2px dashed var(--admin-accent);
+  background: rgb(var(--admin-accent-rgb) / 0.04);
   border-radius: 8px;
   padding: 8px;
 }
@@ -677,15 +677,15 @@ textarea.admin-input {
 }
 
 .ep-status-draft {
-  color: #8a5a00;
-  background: #fdf3e1;
-  border-color: #f0d9a8;
+  color: var(--admin-warning);
+  background: var(--admin-warning-soft);
+  border-color: var(--admin-warning-border);
 }
 
 .ep-status-live {
   color: var(--admin-success);
-  background: #e9f5ee;
-  border-color: #bfe0cc;
+  background: var(--admin-success-soft);
+  border-color: var(--admin-success-border);
 }
 
 .ep-status-archived {
@@ -702,8 +702,8 @@ textarea.admin-input {
   height: 22px;
   margin-right: 8px;
   border-radius: 50%;
-  background: var(--admin-text-main);
-  color: #fff;
+  background: var(--admin-strong);
+  color: var(--admin-on-strong);
   font-size: 0.72rem;
   font-weight: 700;
   vertical-align: middle;
@@ -718,7 +718,7 @@ textarea.admin-input {
 
 .edit-product-page .admin-input.has-error {
   border-color: var(--admin-danger);
-  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.08);
+  box-shadow: 0 0 0 3px rgb(var(--admin-danger-rgb) / 0.08);
 }
 
 /* One of One switch */
@@ -763,13 +763,13 @@ textarea.admin-input {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--admin-surface);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s ease;
 }
 
 .ep-switch input:checked + .ep-switch-track {
-  background: #6e1e2a;
+  background: var(--admin-accent);
 }
 
 .ep-switch input:checked + .ep-switch-track::after {
@@ -862,8 +862,8 @@ textarea.admin-input {
 }
 
 .ep-segmented button.is-active {
-  background: var(--admin-text-main);
-  color: #fff;
+  background: var(--admin-strong);
+  color: var(--admin-on-strong);
 }
 
 .ep-input-action {
@@ -884,7 +884,7 @@ textarea.admin-input {
 
 /* Publishing checklist */
 .ep-publish-card {
-  border-top: 3px solid #6e1e2a;
+  border-top: 3px solid var(--admin-accent);
 }
 
 .ep-checklist {
@@ -935,7 +935,7 @@ textarea.admin-input {
   padding: 12px 14px;
   border: 1px solid var(--admin-border);
   border-radius: 8px;
-  background: #fff;
+  background: #ffffff; /* mimics Google - same in both themes */
   font-family: Arial, sans-serif;
 }
 

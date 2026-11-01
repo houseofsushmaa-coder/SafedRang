@@ -443,27 +443,27 @@ const Dashboard = () => {
                   <AreaChart data={chartData} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                        <stop offset="5%" stopColor="var(--admin-success)" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="var(--admin-success)" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 11 }} interval="preserveStartEnd" />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 11 }} tickFormatter={(v) => `\u20b9${(v / 1000).toFixed(0)}k`} width={50} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--admin-text-muted)" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "var(--admin-text-light)", fontSize: 11 }} interval="preserveStartEnd" />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: "var(--admin-text-light)", fontSize: 11 }} tickFormatter={(v) => `\u20b9${(v / 1000).toFixed(0)}k`} width={50} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Area type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2.5} fillOpacity={1} fill="url(#colorRevenue)" dot={false} activeDot={{ r: 5, fill: "#10b981", strokeWidth: 0 }} />
+                    <Area type="monotone" dataKey="revenue" stroke="var(--admin-success)" strokeWidth={2.5} fillOpacity={1} fill="url(#colorRevenue)" dot={false} activeDot={{ r: 5, fill: "var(--admin-success)", strokeWidth: 0 }} />
                   </AreaChart>
                 ) : (
                   <BarChart data={chartData} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#10b981" />
-                        <stop offset="100%" stopColor="#0891b2" />
+                        <stop offset="0%" stopColor="var(--admin-success)" />
+                        <stop offset="100%" stopColor="var(--admin-info)" />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 11 }} interval="preserveStartEnd" />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 11 }} tickFormatter={(v) => `\u20b9${(v / 1000).toFixed(0)}k`} width={50} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--admin-text-muted)" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "var(--admin-text-light)", fontSize: 11 }} interval="preserveStartEnd" />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: "var(--admin-text-light)", fontSize: 11 }} tickFormatter={(v) => `\u20b9${(v / 1000).toFixed(0)}k`} width={50} />
                     <Tooltip content={<CustomTooltip />} />
                     <Bar dataKey="revenue" fill="url(#barGrad)" radius={[4, 4, 0, 0]} />
                   </BarChart>
@@ -513,7 +513,7 @@ const Dashboard = () => {
             <div className="admin-chart-card best-sellers-card">
               <div className="card-header">
                 <h3>
-                  <Award size={16} style={{ marginRight: 6, verticalAlign: "middle", color: "#d97706" }} />
+                  <Award size={16} style={{ marginRight: 6, verticalAlign: "middle", color: "var(--admin-warning)" }} />
                   Best Sellers
                 </h3>
                 <span className="chart-period-tag">{periodLabel}</span>

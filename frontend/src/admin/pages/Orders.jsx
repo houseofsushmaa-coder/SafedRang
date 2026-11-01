@@ -335,7 +335,7 @@ const Orders = () => {
               </div>
 
               {selectedOrder.shippingAddress && (
-                <div style={{ marginBottom: "20px", background: "var(--admin-sidebar-bg, #f8fafc)", padding: "12px", borderRadius: "6px" }}>
+                <div style={{ marginBottom: "20px", background: "var(--admin-sidebar-bg, var(--admin-surface-2))", padding: "12px", borderRadius: "6px" }}>
                   <h4 style={{ fontSize: "0.85rem", color: "var(--admin-text-muted)", textTransform: "uppercase", marginBottom: "4px" }}>Shipping Address</h4>
                   <p style={{ fontSize: "0.85rem" }}>
                     {typeof selectedOrder.shippingAddress === "string"
@@ -347,7 +347,7 @@ const Orders = () => {
 
               <div>
                 <h4 style={{ fontSize: "0.85rem", color: "var(--admin-text-muted)", textTransform: "uppercase", marginBottom: "8px" }}>Items ({selectedOrder.items?.length || 0})</h4>
-                <div style={{ maxHeight: "200px", overflowY: "auto", border: "1px solid var(--admin-border, #e2e8f0)", borderRadius: "6px" }}>
+                <div style={{ maxHeight: "200px", overflowY: "auto", border: "1px solid var(--admin-border, var(--admin-border))", borderRadius: "6px" }}>
                   {(selectedOrder.items || []).map((item, idx) => (
                     <div
                       key={idx}
@@ -355,7 +355,7 @@ const Orders = () => {
                         display: "flex",
                         justifyContent: "space-between",
                         padding: "10px 14px",
-                        borderBottom: idx < selectedOrder.items.length - 1 ? "1px solid var(--admin-border, #e2e8f0)" : "none",
+                        borderBottom: idx < selectedOrder.items.length - 1 ? "1px solid var(--admin-border, var(--admin-border))" : "none",
                       }}
                     >
                       <div>

@@ -509,7 +509,7 @@ const Products = () => {
           className={`admin-btn ${viewTab === "instock" ? "" : "admin-btn-outline"}`}
           style={{ padding: "8px 16px", fontSize: "0.88rem", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "8px" }}
         >
-          <CheckCircle2 size={15} color="#16a34a" /> In Stock ({counts.inStock})
+          <CheckCircle2 size={15} color="var(--admin-success)" /> In Stock ({counts.inStock})
         </button>
         <button
           type="button"
@@ -517,7 +517,7 @@ const Products = () => {
           className={`admin-btn ${viewTab === "outofstock" ? "" : "admin-btn-outline"}`}
           style={{ padding: "8px 16px", fontSize: "0.88rem", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "8px" }}
         >
-          <AlertCircle size={15} color="#dc2626" /> Out of Stock ({counts.outOfStock})
+          <AlertCircle size={15} color="var(--admin-danger)" /> Out of Stock ({counts.outOfStock})
         </button>
         <button
           type="button"
@@ -526,7 +526,7 @@ const Products = () => {
           style={{ padding: "8px 16px", fontSize: "0.88rem", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "8px" }}
           title="Saved but hidden from the shop until published"
         >
-          <FileEdit size={15} color="#b7791f" /> Drafts ({counts.drafts})
+          <FileEdit size={15} color="var(--admin-warning)" /> Drafts ({counts.drafts})
         </button>
         <button
           type="button"
@@ -534,7 +534,7 @@ const Products = () => {
           className={`admin-btn ${viewTab === "archived" ? "" : "admin-btn-outline"}`}
           style={{ padding: "8px 16px", fontSize: "0.88rem", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "8px" }}
         >
-          <Archive size={15} color="#6b7280" /> Archived ({counts.archived})
+          <Archive size={15} color="var(--admin-text-muted)" /> Archived ({counts.archived})
         </button>
         <button
           type="button"
@@ -542,15 +542,15 @@ const Products = () => {
           className={`admin-btn ${viewTab === "needsreview" ? "" : "admin-btn-outline"}`}
           style={{ padding: "8px 16px", fontSize: "0.88rem", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "8px" }}
         >
-          <Flag size={15} color="#d97706" /> Needs Review ({counts.needsReview})
+          <Flag size={15} color="var(--admin-warning)" /> Needs Review ({counts.needsReview})
         </button>
       </div>
 
       {/* ── Bulk Actions Banner (appears when items are selected) ── */}
       {selectedIds.size > 0 && (
         <div style={{
-          background: "rgba(110, 30, 42, 0.08)",
-          border: "1px solid rgba(110, 30, 42, 0.2)",
+          background: "rgb(var(--admin-accent-rgb) / 0.08)",
+          border: "1px solid rgb(var(--admin-accent-rgb) / 0.2)",
           padding: "10px 18px",
           borderRadius: "8px",
           marginBottom: "16px",
@@ -561,13 +561,13 @@ const Products = () => {
           gap: "12px"
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <span style={{ fontWeight: 700, color: "#6E1E2A", fontSize: "0.9rem" }}>
+            <span style={{ fontWeight: 700, color: "var(--admin-accent-text)", fontSize: "0.9rem" }}>
               {selectedIds.size} product{selectedIds.size !== 1 ? "s" : ""} selected
             </span>
             <button
               type="button"
               className="text-link"
-              style={{ fontSize: "0.82rem", color: "#6E1E2A", textDecoration: "underline" }}
+              style={{ fontSize: "0.82rem", color: "var(--admin-accent-text)", textDecoration: "underline" }}
               onClick={() => setSelectedIds(new Set())}
             >
               Clear selection
@@ -624,18 +624,18 @@ const Products = () => {
               style={{ fontSize: "0.82rem", padding: "6px 12px" }}
               onClick={() => handleBulkStockStatus("In Stock")}
             >
-              <CheckCircle2 size={14} color="#16a34a" /> Mark In Stock
+              <CheckCircle2 size={14} color="var(--admin-success)" /> Mark In Stock
             </button>
             <button
               className="admin-btn admin-btn-outline icon-left"
               style={{ fontSize: "0.82rem", padding: "6px 12px" }}
               onClick={() => handleBulkStockStatus("Out of Stock")}
             >
-              <AlertCircle size={14} color="#dc2626" /> Mark Out of Stock
+              <AlertCircle size={14} color="var(--admin-danger)" /> Mark Out of Stock
             </button>
             <button
               className="admin-btn admin-btn-outline icon-left"
-              style={{ fontSize: "0.82rem", padding: "6px 12px", color: "#dc2626", borderColor: "#fca5a5" }}
+              style={{ fontSize: "0.82rem", padding: "6px 12px", color: "var(--admin-danger)", borderColor: "var(--admin-danger-border)" }}
               onClick={handleBulkDelete}
             >
               <Trash2 size={14} /> Delete Selected
@@ -736,7 +736,7 @@ const Products = () => {
                   const isVariable = product.productType === "variable" || (product.variations && product.variations.length > 0);
                   const varCount = product.variations?.length || 0;
                   return (
-                    <tr key={product.id} style={{ backgroundColor: isChecked ? "rgba(110, 30, 42, 0.03)" : undefined }}>
+                    <tr key={product.id} style={{ backgroundColor: isChecked ? "rgb(var(--admin-accent-rgb) / 0.03)" : undefined }}>
                       <td>
                         <input
                           type="checkbox"
@@ -768,11 +768,11 @@ const Products = () => {
                                 <span style={{
                                   fontSize: "0.62rem",
                                   fontWeight: 700,
-                                  background: "#EEF2FF",
-                                  color: "#4338CA",
+                                  background: "var(--admin-info-soft)",
+                                  color: "var(--admin-info)",
                                   padding: "2px 6px",
                                   borderRadius: "3px",
-                                  border: "1px solid #C7D2FE",
+                                  border: "1px solid var(--admin-info-border)",
                                   lineHeight: 1.2,
                                 }}>
                                   Variable ({varCount} sizes)
@@ -781,8 +781,8 @@ const Products = () => {
                                 <span style={{
                                   fontSize: "0.62rem",
                                   fontWeight: 600,
-                                  background: "#F3F4F6",
-                                  color: "#4B5563",
+                                  background: "var(--admin-surface-3)",
+                                  color: "var(--admin-text-muted)",
                                   padding: "2px 6px",
                                   borderRadius: "3px",
                                   lineHeight: 1.2,
@@ -798,8 +798,8 @@ const Products = () => {
                                     fontSize: "0.62rem",
                                     fontWeight: 700,
                                     letterSpacing: "0.08em",
-                                    backgroundColor: "#6E1E2A",
-                                    color: "#FAF5EC",
+                                    backgroundColor: "var(--admin-accent)",
+                                    color: "var(--admin-on-accent)",
                                     padding: "2px 6px",
                                     borderRadius: "3px",
                                     display: "inline-block",
@@ -817,9 +817,9 @@ const Products = () => {
                                     fontSize: "0.62rem",
                                     fontWeight: 700,
                                     letterSpacing: "0.05em",
-                                    backgroundColor: "#EFF6FF",
-                                    color: "#1D4ED8",
-                                    border: "1px solid #BFDBFE",
+                                    backgroundColor: "var(--admin-info-soft)",
+                                    color: "var(--admin-info)",
+                                    border: "1px solid var(--admin-info-border)",
                                     padding: "2px 6px",
                                     borderRadius: "3px",
                                     display: "inline-block",
@@ -850,9 +850,9 @@ const Products = () => {
                                     fontSize: "0.62rem",
                                     fontWeight: 700,
                                     letterSpacing: "0.05em",
-                                    backgroundColor: "#FEF3C7",
-                                    color: "#92400E",
-                                    border: "1px solid #FCD34D",
+                                    backgroundColor: "var(--admin-warning-soft)",
+                                    color: "var(--admin-warning)",
+                                    border: "1px solid var(--admin-warning-border)",
                                     padding: "2px 6px",
                                     borderRadius: "3px",
                                     display: "inline-flex",
@@ -861,7 +861,7 @@ const Products = () => {
                                     lineHeight: 1.2,
                                   }}
                                 >
-                                  <Flag size={10} color="#92400E" /> REVIEW
+                                  <Flag size={10} color="var(--admin-warning)" /> REVIEW
                                 </span>
                               )}
                             </div>
@@ -922,8 +922,8 @@ const Products = () => {
                               title="Save stock"
                               style={{
                                 padding: "4px 8px",
-                                background: "#6E1E2A",
-                                color: "#fff",
+                                background: "var(--admin-accent)",
+                                color: "var(--admin-on-accent)",
                                 border: "none",
                                 borderRadius: "4px",
                                 cursor: "pointer",
@@ -966,7 +966,7 @@ const Products = () => {
                               className="stock-count"
                               style={{
                                 fontWeight: 700,
-                                color: (product.stock ?? 0) <= 0 ? "#DC2626" : "inherit"
+                                color: (product.stock ?? 0) <= 0 ? "var(--admin-danger)" : "inherit"
                               }}
                             >
                               {product.stock ?? 0}
@@ -1001,7 +1001,7 @@ const Products = () => {
                               title="Restore to active catalogue"
                               onClick={() => restoreProduct(product.id)}
                             >
-                              <RotateCcw size={15} color="#16a34a" />
+                              <RotateCcw size={15} color="var(--admin-success)" />
                             </button>
                           ) : (
                             <button
@@ -1013,7 +1013,7 @@ const Products = () => {
                                 }
                               }}
                             >
-                              <Archive size={15} color="#6b7280" />
+                              <Archive size={15} color="var(--admin-text-muted)" />
                             </button>
                           )}
 
@@ -1023,7 +1023,7 @@ const Products = () => {
                             title={product.needsReview ? "Unflag Review" : "Flag for Review"}
                             onClick={() => toggleNeedsReview(product.id)}
                           >
-                            <Flag size={14} color={product.needsReview ? "#D97706" : "var(--admin-text-light)"} />
+                            <Flag size={14} color={product.needsReview ? "var(--admin-warning)" : "var(--admin-text-light)"} />
                           </button>
 
                           {/* Delete */}

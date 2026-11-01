@@ -100,7 +100,7 @@ const ProviderLogo = ({ id }) => {
           <circle cx="12" cy="12" r="10" fill="#E60023" />
           <path
             d="M12 6.5a5.5 5.5 0 00-2 10.63c.09-.76.17-1.92.04-2.76l.73-3.1s-.18-.37-.18-.92c0-.86.5-1.5 1.12-1.5.53 0 .78.4.78.87 0 .53-.34 1.33-.51 2.07-.15.61.3 1.11.9 1.11 1.08 0 1.8-1.39 1.8-3.04 0-1.26-.85-2.2-2.38-2.2a2.76 2.76 0 00-2.88 2.8c0 .51.15.87.38 1.15.1.13.12.18.08.33l-.12.48c-.04.14-.14.2-.26.13-1-.41-1.46-1.51-1.46-2.75 0-2 1.7-4.4 5.06-4.4 2.7 0 4.47 1.95 4.47 4.06 0 2.78-1.55 4.86-3.83 4.86-.77 0-1.5-.42-1.74-.89l-.5 1.92c-.17.65-.62 1.46-.94 1.96A5.5 5.5 0 1012 6.5z"
-            fill="#FFFFFF"
+            fill="var(--admin-on-accent)"
           />
         </svg>
       );
@@ -109,7 +109,7 @@ const ProviderLogo = ({ id }) => {
         <svg viewBox="0 0 24 24" fill="none">
           <rect x="3" y="3" width="18" height="18" rx="4" fill="#0078D4" />
           <circle cx="12" cy="12" r="4.5" fill="#50E6FF" />
-          <circle cx="12" cy="12" r="2" fill="#FFFFFF" />
+          <circle cx="12" cy="12" r="2" fill="var(--admin-on-accent)" />
         </svg>
       );
     case "microsoft_uet":
@@ -125,11 +125,11 @@ const ProviderLogo = ({ id }) => {
       return (
         <svg viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="10" fill="#FF4500" />
-          <circle cx="9" cy="12" r="1.3" fill="#FFFFFF" />
-          <circle cx="15" cy="12" r="1.3" fill="#FFFFFF" />
+          <circle cx="9" cy="12" r="1.3" fill="var(--admin-on-accent)" />
+          <circle cx="15" cy="12" r="1.3" fill="var(--admin-on-accent)" />
           <path
             d="M9.5 15.5c.8.6 1.7.8 2.5.8s1.7-.2 2.5-.8"
-            stroke="#FFFFFF"
+            stroke="var(--admin-on-accent)"
             strokeWidth="1.2"
             strokeLinecap="round"
           />
@@ -143,7 +143,7 @@ const ProviderLogo = ({ id }) => {
         </svg>
       );
     default:
-      return <Activity size={24} color="#ae8a54" />;
+      return <Activity size={24} color="var(--admin-primary)" />;
   }
 };
 
@@ -687,7 +687,7 @@ export default function TrackingIntegrations({ isEmbedded = false }) {
                       <Info size={20} style={{ flexShrink: 0 }} />
                       <div>
                         <strong>Notice:</strong> {item.notice}
-                        <p style={{ margin: "6px 0 0 0", fontSize: "0.82rem", color: "#374151" }}>
+                        <p style={{ margin: "6px 0 0 0", fontSize: "0.82rem", color: "var(--admin-text-muted)" }}>
                           No tracking code or fake scripts are injected. This placeholder prevents security risks while keeping your integrations roster complete.
                         </p>
                       </div>
@@ -742,7 +742,7 @@ export default function TrackingIntegrations({ isEmbedded = false }) {
                               title="Copy ID"
                               onClick={() => copyPublicId(item.public_id, `${item.id}-id`)}
                             >
-                              {copiedKey === `${item.id}-id` ? <Check size={16} color="#2e7d4f" /> : <Copy size={16} />}
+                              {copiedKey === `${item.id}-id` ? <Check size={16} color="var(--admin-success)" /> : <Copy size={16} />}
                             </button>
                           )}
                         </div>
@@ -861,7 +861,7 @@ export default function TrackingIntegrations({ isEmbedded = false }) {
                       {item.event_settings && Object.keys(item.event_settings).length > 0 && (
                         <div className="events-toggles-section">
                           <div className="events-section-title">
-                            <Sparkles size={16} color="#ae8a54" />
+                            <Sparkles size={16} color="var(--admin-primary)" />
                             <span>Supported Event Tracking</span>
                           </div>
                           <div className="events-grid">

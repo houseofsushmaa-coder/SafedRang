@@ -74,6 +74,12 @@ function productSales(orders) {
   return [...map.values()].sort((a, b) => b._sum.quantity - a._sum.quantity || b.revenue - a.revenue);
 }
 
+// Handcrafted pieces are stocked one or two at a time, so "low stock" means
+// the last piece is left. (Every product's lowStockThreshold is the column
+// default of 5, which would flag almost the whole catalogue.)
+export const LOW_STOCK_AT = 1;
+export const isLowStock = (stock) => Number(stock) > 0 && Number(stock) <= LOW_STOCK_AT;
+
 const PAYMENT_LABELS = { COD: "Cash on Delivery", CASHFREE: "Online (Cashfree)" };
 
 const safeJson = (text) => {
@@ -116,7 +122,7 @@ export const adminService = {
       // Live, published catalogue (drafts and archived pieces excluded)
       const products = (productsRes.data || []).filter((p) => !p.is_archived && upper(p.status) !== "DRAFT" && upper(p.status) !== "ARCHIVED");
       const lowStockProducts = products
-        .filter((p) => Number(p.stock) > 0 && Number(p.stock) <= Number(p.lowStockThreshold ?? 1))
+        .filter((p) => isLowStock(p.stock))
         .map((p) => ({ ...p, title: p.name }));
       const outOfStock = products.filter((p) => Number(p.stock) <= 0).length;
 
@@ -469,7 +475,7 @@ export const adminService = {
   // ─────────────────────────────────────────────
   async updateStock(productId, newStock) {
     const stockNum = Math.max(0, Number(newStock));
-    const status = stockNum > 0 ? (stockNum < 5 ? "Low Stock" : "In Stock") : "Out of Stock";
+    const status = stockNum > 0 ? (isLowStock(stockNum) ? "Low Stock" : "In Stock") : "Out of Stock";
 
     const { error } = await supabase
       .from("products")
@@ -514,27 +520,23 @@ export const adminService = {
     }));
   },
 
+  // categories was created by Prisma: id, slug and updatedAt have no database
+  // defaults, so they're supplied here.
   async saveCategory(cat) {
-    if (cat.id && !cat.id.startsWith("cat_")) {
-      const { error } = await supabase
-        .from("categories")
-        .update({
-          name: cat.name,
-          description: cat.description,
-          status: cat.status || "ACTIVE",
-        })
-        .eq("id", cat.id);
-      if (error) throw error;
-    } else {
-      const { error } = await supabase.from("categories").insert([
-        {
-          name: cat.name,
-          description: cat.description,
-          status: cat.status || "ACTIVE",
-        },
-      ]);
-      if (error) throw error;
-    }
+    const now = new Date().toISOString();
+    const slug = (cat.slug || cat.name || "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    const fields = {
+      name: String(cat.name || "").trim(),
+      slug,
+      description: cat.description || null,
+      status: cat.status || "ACTIVE",
+      updatedAt: now,
+    };
+    const isExisting = cat.id && !String(cat.id).startsWith("cat_");
+    const { error } = isExisting
+      ? await supabase.from("categories").update(fields).eq("id", cat.id)
+      : await supabase.from("categories").insert([{ id: crypto.randomUUID(), createdAt: now, ...fields }]);
+    if (error) throw error;
   },
 
   async deleteCategory(id) {
@@ -610,17 +612,41 @@ export const adminService = {
   // 5. COUPONS
   // Note: checkout does not apply coupon codes yet (see Coupons page notice).
   // ─────────────────────────────────────────────
+  // The coupons table's columns (Prisma-created) are mapped to the page's field names here.
   async getCoupons() {
-    const { data, error } = await supabase.from("coupons").select("*").order("created_at", { ascending: false });
+    const { data, error } = await supabase.from("coupons").select("*").order("createdAt", { ascending: false });
     if (error) throw error;
-    return data || [];
+    return (data || []).map((c) => ({
+      id: c.id,
+      code: c.code,
+      type: c.type,
+      value: Number(c.value),
+      minOrderAmount: c.minimumOrderAmount != null ? Number(c.minimumOrderAmount) : null,
+      maxDiscount: c.maximumDiscount != null ? Number(c.maximumDiscount) : null,
+      usageLimit: c.usageLimit,
+      usedCount: c.usedCount || 0,
+      expiresAt: c.expiryDate,
+      isActive: upper(c.status) === "ACTIVE",
+      status: c.status,
+    }));
   },
 
   async saveCoupon(coupon) {
-    const { id, ...fields } = coupon;
-    const { error } = id
-      ? await supabase.from("coupons").update(fields).eq("id", id)
-      : await supabase.from("coupons").insert([fields]);
+    const now = new Date().toISOString();
+    const row = {
+      code: coupon.code,
+      type: coupon.type,
+      value: coupon.value,
+      minimumOrderAmount: coupon.minOrderAmount ?? null,
+      maximumDiscount: coupon.maxDiscount ?? null,
+      usageLimit: coupon.usageLimit ?? null,
+      expiryDate: coupon.expiresAt || null,
+      status: coupon.isActive ? "ACTIVE" : "INACTIVE",
+      updatedAt: now,
+    };
+    const { error } = coupon.id
+      ? await supabase.from("coupons").update(row).eq("id", coupon.id)
+      : await supabase.from("coupons").insert([{ id: crypto.randomUUID(), usedCount: 0, createdAt: now, ...row }]);
     if (error) throw error;
   },
 

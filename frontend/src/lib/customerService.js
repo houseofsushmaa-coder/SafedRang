@@ -25,39 +25,56 @@ export const getCustomerOrders = async (email) => {
 
 // ─── Profile ─────────────────────────────────────────────────────────────────
 
+// The profiles table only has id, email, role and full_name. Phone and saved
+// addresses live in the customer's own auth metadata (private to them, and
+// ignored for roles), so no schema change is needed.
+const PROFILE_COLUMNS = ['full_name'];
+
 /**
- * Fetch the authenticated customer's profile row.
+ * Fetch the authenticated customer's profile, merged with their phone and
+ * saved addresses from account metadata.
  */
 export const getCustomerProfile = async (userId) => {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', userId)
-    .maybeSingle();
-
+  const [{ data, error }, { data: auth }] = await Promise.all([
+    supabase.from('profiles').select('*').eq('id', userId).maybeSingle(),
+    supabase.auth.getUser(),
+  ]);
   if (error) throw error;
-  return data;
+  const meta = auth?.user?.id === userId ? auth.user.user_metadata || {} : {};
+  return {
+    ...(data || {}),
+    phone: meta.phone || '',
+    saved_addresses: Array.isArray(meta.saved_addresses) ? meta.saved_addresses : [],
+  };
 };
 
 /**
- * Update profile fields: full_name, phone, default_address, saved_addresses.
+ * Update profile fields: full_name (table), phone and saved_addresses (metadata).
  */
 export const updateCustomerProfile = async (userId, updates) => {
-  const { data, error } = await supabase
-    .from('profiles')
-    .update({ ...updates, updated_at: new Date().toISOString() })
-    .eq('id', userId)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+  const columns = {};
+  const meta = {};
+  for (const [key, value] of Object.entries(updates)) {
+    (PROFILE_COLUMNS.includes(key) ? columns : meta)[key] = value;
+  }
+  if (Object.keys(columns).length) {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ ...columns, updated_at: new Date().toISOString() })
+      .eq('id', userId);
+    if (error) throw error;
+  }
+  if (Object.keys(meta).length) {
+    const { error } = await supabase.auth.updateUser({ data: meta });
+    if (error) throw error;
+  }
+  return getCustomerProfile(userId);
 };
 
 // ─── Addresses ───────────────────────────────────────────────────────────────
 
 /**
- * Replace the saved_addresses JSONB array on the profile.
+ * Replace the customer's saved addresses.
  * Addresses structure: [{ id, label, full_name, phone, address, city, state, pincode, is_default }]
  */
 export const saveCustomerAddresses = async (userId, addresses) => {

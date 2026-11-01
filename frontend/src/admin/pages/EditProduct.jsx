@@ -1486,7 +1486,7 @@ const EditProduct = () => {
                   type="checkbox"
                   checked={Boolean(formData.isArchived)}
                   onChange={(e) => update({ isArchived: e.target.checked })}
-                  style={{ width: "18px", height: "18px", accentColor: "#6E1E2A", marginTop: "2px", cursor: "pointer" }}
+                  style={{ width: "18px", height: "18px", accentColor: "var(--admin-accent-text)", marginTop: "2px", cursor: "pointer" }}
                 />
                 <div>
                   <label htmlFor="product-is-archived" style={{ fontSize: "0.88rem", fontWeight: 600, cursor: "pointer", display: "inline-block", margin: 0 }}>
@@ -1504,7 +1504,7 @@ const EditProduct = () => {
                   type="checkbox"
                   checked={Boolean(formData.needsReview)}
                   onChange={(e) => update({ needsReview: e.target.checked })}
-                  style={{ width: "18px", height: "18px", accentColor: "#d97706", marginTop: "2px", cursor: "pointer" }}
+                  style={{ width: "18px", height: "18px", accentColor: "var(--admin-warning)", marginTop: "2px", cursor: "pointer" }}
                 />
                 <div>
                   <label htmlFor="product-needs-review" style={{ fontSize: "0.88rem", fontWeight: 600, cursor: "pointer", display: "inline-block", margin: 0 }}>

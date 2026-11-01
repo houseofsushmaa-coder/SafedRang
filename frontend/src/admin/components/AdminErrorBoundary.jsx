@@ -51,7 +51,7 @@ export class AdminErrorBoundary extends React.Component {
             alignItems: "center",
             justifyContent: "center",
             padding: "24px",
-            backgroundColor: isSubRoute ? "transparent" : "#FAF5EC",
+            backgroundColor: isSubRoute ? "transparent" : "var(--admin-surface-2)",
             fontFamily: '"Manrope", "Inter", system-ui, -apple-system, sans-serif',
           }}
         >
@@ -59,10 +59,10 @@ export class AdminErrorBoundary extends React.Component {
             style={{
               maxWidth: "560px",
               width: "100%",
-              backgroundColor: "#FFFFFF",
+              backgroundColor: "var(--admin-surface)",
               borderRadius: "16px",
-              border: "1px solid #E8DFD0",
-              boxShadow: "0 12px 36px rgba(42, 33, 29, 0.08)",
+              border: "1px solid var(--admin-border)",
+              boxShadow: "0 12px 36px rgb(var(--admin-ink-rgb) / 0.08)",
               padding: "36px 32px",
               textAlign: "center",
             }}
@@ -72,8 +72,8 @@ export class AdminErrorBoundary extends React.Component {
                 width: "56px",
                 height: "56px",
                 borderRadius: "50%",
-                backgroundColor: "rgba(174, 138, 84, 0.12)",
-                color: "#AE8A54",
+                backgroundColor: "rgb(var(--admin-primary-rgb) / 0.12)",
+                color: "var(--admin-primary)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -88,7 +88,7 @@ export class AdminErrorBoundary extends React.Component {
                 margin: "0 0 10px 0",
                 fontSize: "1.35rem",
                 fontWeight: "700",
-                color: "#2A211D",
+                color: "var(--admin-text-main)",
                 letterSpacing: "-0.01em",
               }}
             >
@@ -99,7 +99,7 @@ export class AdminErrorBoundary extends React.Component {
               style={{
                 margin: "0 0 24px 0",
                 fontSize: "0.92rem",
-                color: "#8B7863",
+                color: "var(--admin-text-muted)",
                 lineHeight: "1.55",
               }}
             >
@@ -112,8 +112,8 @@ export class AdminErrorBoundary extends React.Component {
                 style={{
                   marginBottom: "24px",
                   textAlign: "left",
-                  backgroundColor: "#FDFBF7",
-                  border: "1px solid #F0E8DC",
+                  backgroundColor: "var(--admin-surface-2)",
+                  border: "1px solid var(--admin-border-light)",
                   borderRadius: "10px",
                   padding: "12px 16px",
                 }}
@@ -131,13 +131,13 @@ export class AdminErrorBoundary extends React.Component {
                     style={{
                       fontSize: "0.82rem",
                       fontWeight: "600",
-                      color: "#6E1E2A",
+                      color: "var(--admin-accent-text)",
                       fontFamily: "monospace",
                     }}
                   >
                     {this.state.error.message || "Runtime Error"}
                   </span>
-                  <span style={{ fontSize: "0.75rem", color: "#AE8A54" }}>
+                  <span style={{ fontSize: "0.75rem", color: "var(--admin-primary)" }}>
                     {this.state.showDetails ? "Hide stack" : "View stack"}
                   </span>
                 </div>
@@ -147,12 +147,12 @@ export class AdminErrorBoundary extends React.Component {
                     style={{
                       margin: "10px 0 0 0",
                       fontSize: "0.72rem",
-                      color: "#8B7863",
+                      color: "var(--admin-text-muted)",
                       whiteSpace: "pre-wrap",
                       wordBreak: "break-all",
                       maxHeight: "180px",
                       overflowY: "auto",
-                      borderTop: "1px dashed #E8DFD0",
+                      borderTop: "1px dashed var(--admin-border)",
                       paddingTop: "8px",
                     }}
                   >
@@ -177,8 +177,8 @@ export class AdminErrorBoundary extends React.Component {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "8px",
-                  backgroundColor: "#AE8A54",
-                  color: "#FFFFFF",
+                  backgroundColor: "var(--admin-primary)",
+                  color: "var(--admin-on-primary)",
                   border: "none",
                   padding: "10px 20px",
                   borderRadius: "8px",
@@ -199,9 +199,9 @@ export class AdminErrorBoundary extends React.Component {
                     display: "inline-flex",
                     alignItems: "center",
                     gap: "8px",
-                    backgroundColor: "#FFFFFF",
-                    color: "#2A211D",
-                    border: "1px solid #E8DFD0",
+                    backgroundColor: "var(--admin-surface)",
+                    color: "var(--admin-text-main)",
+                    border: "1px solid var(--admin-border)",
                     padding: "10px 18px",
                     borderRadius: "8px",
                     fontSize: "0.88rem",
@@ -219,9 +219,9 @@ export class AdminErrorBoundary extends React.Component {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "8px",
-                  backgroundColor: "#FFFFFF",
-                  color: "#8B7863",
-                  border: "1px solid #E8DFD0",
+                  backgroundColor: "var(--admin-surface)",
+                  color: "var(--admin-text-muted)",
+                  border: "1px solid var(--admin-border)",
                   padding: "10px 18px",
                   borderRadius: "8px",
                   fontSize: "0.88rem",

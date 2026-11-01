@@ -79,12 +79,12 @@
   padding: 8px 20px;
   transition: background 0.15s;
 }
-.best-seller-row:hover { background: #f8fafc; }
+.best-seller-row:hover { background: var(--admin-surface-2); }
 .bs-rank { font-size: 0.75rem; font-weight: 700; color: var(--admin-text-muted); width: 24px; }
 .bs-info { flex: 1; min-width: 0; }
 .bs-name { font-size: 0.85rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
-.bs-bar-wrap { height: 4px; background: #f1f5f9; border-radius: 2px; overflow: hidden; }
-.bs-bar { height: 100%; background: linear-gradient(90deg, #10b981, #0891b2); border-radius: 2px; transition: width 0.6s ease; }
+.bs-bar-wrap { height: 4px; background: var(--admin-surface-3); border-radius: 2px; overflow: hidden; }
+.bs-bar { height: 100%; background: linear-gradient(90deg, var(--admin-success), var(--admin-info)); border-radius: 2px; transition: width 0.6s ease; }
 .bs-qty { font-size: 0.78rem; font-weight: 600; color: var(--admin-text-muted); white-space: nowrap; }
 
 /* Responsive grids for Overview & Sales pages */

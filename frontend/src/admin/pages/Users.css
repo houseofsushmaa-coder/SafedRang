@@ -31,15 +31,15 @@
 }
 
 .users-toast--success {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  color: #15803d;
+  background: var(--admin-success-soft);
+  border: 1px solid var(--admin-success-border);
+  color: var(--admin-success);
 }
 
 .users-toast--error {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #dc2626;
+  background: var(--admin-danger-soft);
+  border: 1px solid var(--admin-danger-border);
+  color: var(--admin-danger);
 }
 
 .toast-close {
@@ -82,7 +82,7 @@
 
 /* ── Modal box ── */
 .modal-box {
-  background: #fff;
+  background: var(--admin-surface);
   border-radius: 16px;
   width: 100%;
   max-width: 560px;
@@ -132,7 +132,7 @@
   transition: all 0.15s;
 }
 .modal-close:hover {
-  background: #f1f5f9;
+  background: var(--admin-surface-3);
   color: var(--admin-text-main);
 }
 
@@ -177,7 +177,7 @@
   border-radius: 8px;
   font-size: 0.9rem;
   color: var(--admin-text-main);
-  background: #fff;
+  background: var(--admin-surface);
   outline: none;
   transition:
     border-color 0.2s,
@@ -188,7 +188,7 @@
 .form-group input:focus,
 .form-group select:focus {
   border-color: var(--admin-primary);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  box-shadow: 0 0 0 3px rgb(var(--admin-success-rgb) / 0.1);
 }
 
 .modal-error {
@@ -196,9 +196,9 @@
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  background: #fef2f2;
-  border-bottom: 1px solid #fecaca;
-  color: #dc2626;
+  background: var(--admin-danger-soft);
+  border-bottom: 1px solid var(--admin-danger-border);
+  color: var(--admin-danger);
   font-size: 0.875rem;
 }
 
@@ -225,20 +225,20 @@
 }
 
 .role-super {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--admin-warning-soft);
+  color: var(--admin-warning);
 }
 .role-admin {
-  background: #e0e7ff;
-  color: #3730a3;
+  background: var(--admin-info-soft);
+  color: var(--admin-info);
 }
 .role-manager {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--admin-success-soft);
+  color: var(--admin-success);
 }
 .role-customer {
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--admin-surface-3);
+  color: var(--admin-text-muted);
 }
 
 /* ── User avatar circle ── */
@@ -246,7 +246,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #10b981, #0891b2);
+  background: linear-gradient(135deg, var(--admin-success), var(--admin-info));
   color: white;
   font-weight: 700;
   font-size: 0.9rem;
