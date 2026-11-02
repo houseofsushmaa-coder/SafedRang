@@ -28,6 +28,13 @@ const TO_SHIP = ["PENDING", "CONFIRMED", "PROCESSING", "PACKED"];
 const isReadyToShip = (o) =>
   TO_SHIP.includes(o.orderStatus) && (o.paymentMethodCode === "COD" || o.paymentStatus === "PAID");
 const canLabel = (o) => !["CANCELLED", "RETURNED"].includes(o.orderStatus);
+// Why an order can't be sent to the courier (empty = it can).
+const shipBlock = (o) =>
+  ["CANCELLED", "RETURNED"].includes(o.orderStatus)
+    ? "Cancelled or returned — nothing to ship"
+    : o.paymentMethodCode !== "COD" && o.paymentStatus !== "PAID"
+    ? "Online payment not received — don't ship"
+    : "";
 
 const STATUS_OPTIONS = ["ALL", "PENDING", "PROCESSING", "PACKED", "SHIPPED", "DELIVERED", "CANCELLED", "RETURNED"];
 
@@ -60,6 +67,7 @@ const Orders = () => {
   const [newStatus, setNewStatus] = useState("");
   const [updating, setUpdating] = useState(false);
   const [labelBusy, setLabelBusy] = useState(false);
+  const [shipOrder, setShipOrder] = useState(null);
 
   const printLabels = async (list) => {
     if (!list.length) return;
@@ -312,6 +320,30 @@ const Orders = () => {
                       </td>
                       <td className="text-right">
                         <div className="action-buttons">
+                          {order.shiprocket?.shiprocket_order_id ? (
+                            <button
+                              className="action-btn"
+                              title={`In Shiprocket${order.shiprocket.awb ? " · AWB " + order.shiprocket.awb : ""} — view shipment`}
+                              style={{ color: "var(--admin-success)" }}
+                              onClick={() => setShipOrder(order)}
+                            >
+                              <Truck size={16} />
+                            </button>
+                          ) : shipBlock(order) ? (
+                            <button className="action-btn" title={shipBlock(order)} disabled style={{ opacity: 0.35 }}>
+                              <Truck size={16} />
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="admin-btn admin-btn-primary icon-left"
+                              style={{ padding: "5px 10px", fontSize: "0.75rem", minHeight: 0 }}
+                              title="Send this order to Shiprocket"
+                              onClick={() => setShipOrder(order)}
+                            >
+                              <Truck size={14} /> Ship
+                            </button>
+                          )}
                           <button
                             className="action-btn"
                             title="View Details"
@@ -461,6 +493,39 @@ const Orders = () => {
                   )}
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Ship with Shiprocket ── */}
+      {shipOrder && (
+        <div className="modal-overlay" onClick={() => setShipOrder(null)}>
+          <div className="modal-box" style={{ maxWidth: "560px" }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Ship #{shipOrder.orderNumber}</h3>
+              <button className="modal-close" onClick={() => setShipOrder(null)}>
+                <X size={20} />
+              </button>
+            </div>
+            <div style={{ padding: "16px 20px 4px" }}>
+              <p style={{ fontSize: "0.85rem", marginBottom: 14, color: "var(--admin-text-muted)" }}>
+                <strong style={{ color: "var(--admin-text-main)" }}>
+                  {shipOrder.shippingAddress?.name || `${shipOrder.customer?.firstName || ""} ${shipOrder.customer?.lastName || ""}`.trim()}
+                </strong>
+                {" · "}
+                {[shipOrder.shippingAddress?.city, shipOrder.shippingAddress?.pincode].filter(Boolean).join(" ")}
+                {" · "}
+                {(shipOrder.items || []).reduce((n, i) => n + Number(i.quantity || 1), 0)} piece(s) · {formatINR(shipOrder.total)}
+              </p>
+              <ShiprocketPanel
+                key={shipOrder.id}
+                order={shipOrder}
+                onSent={(shiprocket) => {
+                  setShipOrder((o) => ({ ...o, shiprocket }));
+                  fetchOrders();
+                }}
+              />
             </div>
           </div>
         </div>
