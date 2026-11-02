@@ -15,6 +15,7 @@ const COLUMNS = [
     links: [
       { label: "Sarees", to: "/shop?category=Sarees" },
       { label: "One-of-One", to: "/one-of-one" },
+      { label: "Jewellery", to: "/shop?category=Jewellery" },
       { label: "Chikankari", to: "/shop?craft=chikankari" },
       { label: "Zardozi", to: "/shop?craft=zardozi" },
       { label: "Bridal Sets", to: "/shop?category=bridal" },
@@ -49,6 +50,7 @@ const MOBILE_SECTIONS = [
     links: [
       { label: "Sarees", to: "/shop?category=Sarees" },
       { label: "One-of-One", to: "/one-of-one" },
+      { label: "Jewellery", to: "/shop?category=Jewellery" },
       { label: "Chikankari", to: "/shop?craft=chikankari" },
       { label: "Zardozi", to: "/shop?craft=zardozi" },
       { label: "Bridal Sets", to: "/shop?category=bridal" },

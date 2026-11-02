@@ -61,15 +61,16 @@ export default function ShopSortManager() {
   const [sortMode, setSortMode] = useState(
     shopSortSettings?.sortMode || "category_first_manual"
   );
-  const [categoriesOrder, setCategoriesOrder] = useState(
-    shopSortSettings?.categoryOrder || [
-      "Sarees",
-      "Dupattas",
-      "Kurta Sets",
-      "Blouses",
-      "Others",
-    ]
-  );
+  const [categoriesOrder, setCategoriesOrder] = useState(() => {
+    const defaults = ["Sarees", "Dupattas", "Kurta Sets", "Blouses", "Jewellery", "Others"];
+    const saved = shopSortSettings?.categoryOrder;
+    if (!saved?.length) return defaults;
+    // Add categories created after the order was saved (e.g. Jewellery), before "Others".
+    const missing = defaults.filter((c) => !saved.includes(c));
+    if (!missing.length) return saved;
+    const others = saved.indexOf("Others");
+    return others === -1 ? [...saved, ...missing] : [...saved.slice(0, others), ...missing, ...saved.slice(others)];
+  });
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState({ type: "", message: "" });
   const [showPreview, setShowPreview] = useState(false);

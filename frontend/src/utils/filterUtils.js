@@ -6,13 +6,14 @@ export const normalizeCategoryName = (rawCat) => {
   if (lower === "saree" || lower === "sarees" || lower === "sari") return "Sarees";
   if (lower === "kurta set" || lower === "kurta sets" || lower === "kurta" || lower === "kurtas") return "Kurta Sets";
   if (lower === "blouse" || lower === "blouses") return "Blouses";
-  if (lower === "bottom" || lower === "bottoms" || lower === "jewellery" || lower === "jewelry") return "Others";
+  if (lower === "jewellery" || lower === "jewelry" || lower === "jewel" || lower === "jewels") return "Jewellery";
+  if (lower === "bottom" || lower === "bottoms") return "Others";
   return c;
 };
 
 export const DEFAULT_SHOP_SORT_SETTINGS = {
   sortMode: "category_first_manual",
-  categoryOrder: ["Sarees", "Dupattas", "Kurta Sets", "Blouses", "Others"],
+  categoryOrder: ["Sarees", "Dupattas", "Kurta Sets", "Blouses", "Jewellery", "Others"],
 };
 
 export const SORT_OPTIONS = [
@@ -274,13 +275,16 @@ export function matchesAvailabilityFilter(product, activeAvailability) {
 export const sortProductsByMode = (
   list,
   mode = "category_first_manual",
-  categoryOrder = ["Sarees", "Dupattas", "Kurta Sets", "Blouses", "Others"]
+  categoryOrder = ["Sarees", "Dupattas", "Kurta Sets", "Blouses", "Jewellery", "Others"]
 ) => {
   const getRank = (cat) => {
     if (!cat) return categoryOrder.length;
     const norm = normalizeCategoryName(cat);
     const idx = categoryOrder.findIndex((c) => matchesCategory(norm, c));
-    return idx === -1 ? categoryOrder.length : idx;
+    if (idx !== -1) return idx;
+    // Categories missing from a saved order (e.g. a new one) sit just before "Others".
+    const othersIdx = categoryOrder.findIndex((c) => c === "Others");
+    return othersIdx === -1 ? categoryOrder.length : othersIdx - 0.5;
   };
 
   const comparePrio = (a, b) => {
@@ -413,6 +417,7 @@ export function sortProducts(list, sortBy, shopSortSettings) {
           "Dupattas",
           "Kurta Sets",
           "Blouses",
+          "Jewellery",
           "Others",
         ]
       );

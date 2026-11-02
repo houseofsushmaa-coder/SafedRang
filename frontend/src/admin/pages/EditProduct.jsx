@@ -80,9 +80,13 @@ const EditProduct = () => {
   }, []);
 
   // Derived flat list of category names for dropdown
-  const catOptions = categories.length > 0
-    ? [...new Set(categories.flatMap((c) => [c.name, ...(c.children || []).map((ch) => ch.name)]))]
-    : ["Sarees", "Dupattas", "Kurta Sets", "Blouses", "Others"];
+  // Core categories are always offered, plus any created in Admin → Categories.
+  const catOptions = [
+    ...new Set([
+      "Sarees", "Dupattas", "Kurta Sets", "Blouses", "Jewellery", "Others",
+      ...categories.flatMap((c) => [c.name, ...(c.children || []).map((ch) => ch.name)]),
+    ]),
+  ];
 
   // ── Badges from API ────────────────────────────────────────────────
   const [badges, setBadges] = useState([]);
