@@ -21,6 +21,7 @@ import { formatINR } from "../../config/api.js";
 import { adminService } from "../adminService";
 import Papa from "papaparse";
 import { downloadShippingLabels } from "../shippingLabel";
+import ShiprocketPanel from "../components/ShiprocketPanel";
 
 // Orders that are paid (or COD) and not yet handed to the courier.
 const TO_SHIP = ["PENDING", "CONFIRMED", "PROCESSING", "PACKED"];
@@ -146,6 +147,8 @@ const Orders = () => {
         "Payment Status": o.paymentStatus,
         "Payment Method": o.paymentMethod,
         Payment: o.paymentMethod,
+        Courier: o.shiprocket?.courier || "",
+        AWB: o.shiprocket?.awb || "",
         Items: o.items?.map((it) => `${it.title} (x${it.quantity})`).join(", ") || "",
       }));
 
@@ -297,6 +300,15 @@ const Orders = () => {
                         >
                           {order.orderStatus.replace(/_/g, " ")}
                         </span>
+                        {order.shiprocket?.shiprocket_order_id && (
+                          <div
+                            style={{ fontSize: "0.72rem", color: "var(--admin-text-muted)", marginTop: 4 }}
+                            title={order.shiprocket.status ? `Shiprocket: ${order.shiprocket.status}` : "In Shiprocket"}
+                          >
+                            <Truck size={11} style={{ verticalAlign: "-1px" }} />{" "}
+                            {order.shiprocket.awb ? `AWB ${order.shiprocket.awb}` : "In Shiprocket"}
+                          </div>
+                        )}
                       </td>
                       <td className="text-right">
                         <div className="action-buttons">
@@ -390,6 +402,19 @@ const Orders = () => {
                   <p style={{ fontSize: "0.85rem", fontWeight: 700, marginTop: "4px" }}>Total: {formatINR(selectedOrder.total)}</p>
                 </div>
               </div>
+
+              <ShiprocketPanel
+                key={selectedOrder.id}
+                order={selectedOrder}
+                onSent={(shiprocket) => {
+                  setSelectedOrder((o) => ({
+                    ...o,
+                    shiprocket,
+                    orderStatus: ["PENDING", "CONFIRMED", "PROCESSING"].includes(o.orderStatus) ? "PACKED" : o.orderStatus,
+                  }));
+                  fetchOrders();
+                }}
+              />
 
               {selectedOrder.shippingAddress && (
                 <div style={{ marginBottom: "20px", background: "var(--admin-sidebar-bg, var(--admin-surface-2))", padding: "12px", borderRadius: "6px" }}>

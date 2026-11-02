@@ -374,6 +374,7 @@ export const adminService = {
           // Fulfilment and payment are separate: an order can be SHIPPED and still PENDING payment (COD).
           orderStatus: upper(o.order_status || o.orderStatus || "PENDING"),
           paymentStatus: upper(o.payment_status || o.paymentStatus || "PENDING"),
+          shiprocket: o.shiprocket || null,
         };
       });
     } catch (err) {
@@ -717,6 +718,24 @@ export const adminService = {
     ];
     const { error } = await supabase.from("settings").upsert(rows, { onConflict: "group,key" });
     if (error) throw error;
+  },
+
+  // ─────────────────────────────────────────────
+  // SHIPROCKET (server function "courier-create"; credentials stay in Supabase secrets)
+  // ─────────────────────────────────────────────
+  async shiprocket(action, payload = {}) {
+    const { data, error } = await supabase.functions.invoke("courier-create", { body: { action, ...payload } });
+    if (error) {
+      // Non-2xx: the function's JSON message is in error.context.
+      let message = error.message;
+      try {
+        const body = await error.context?.json?.();
+        if (body?.error) message = body.error;
+      } catch {}
+      throw new Error(message);
+    }
+    if (data?.error) throw new Error(data.error);
+    return data;
   },
 
   // ─────────────────────────────────────────────
