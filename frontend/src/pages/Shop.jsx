@@ -454,6 +454,12 @@ export default function Shop() {
         description:
           "One of One sarees by Safed Rang: single pieces, each a unique combination of fabric, dye and hand embroidery from Lucknow. Once sold, the design is retired.",
       });
+    } else if (matchesCategory(listName, "Jewellery")) {
+      applyHead({
+        title: "Handcrafted Semi-Precious Stone Jewellery — Rings & Necklaces | Safed Rang",
+        description:
+          "Shop handcrafted semi-precious stone jewellery from Safed Rang, Lucknow — agate, amethyst, rose quartz, carnelian and turquoise rings, necklaces and bracelets. Free shipping on online payment.",
+      });
     } else if (listName !== "Shop" && listName !== "Archive") {
       applyHead({
         title: `Handcrafted ${listName} — Lucknowi Chikankari & Zardozi | Safed Rang`,
