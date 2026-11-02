@@ -148,7 +148,14 @@ Deno.serve(async (req) => {
     }
 
     const token = await shiprocketLogin()
-    const created = await shiprocketRequest(token, '/orders/create/adhoc', payload)
+    const reply = await shiprocketRequest(token, '/orders/create/adhoc', payload)
+    console.log('Shiprocket create reply:', JSON.stringify(reply).slice(0, 2000))
+    // Some accounts wrap the result; Shiprocket can also answer 200 with only a message.
+    const created = reply?.order_id ? reply : reply?.payload?.order_id ? reply.payload : reply?.data?.order_id ? reply.data : null
+    if (!created) {
+      const why = reply?.message || reply?.errors && JSON.stringify(reply.errors) || JSON.stringify(reply).slice(0, 300)
+      throw new ShiprocketError(`Shiprocket did not create the order: ${why}`)
+    }
 
     const shiprocket = {
       shiprocket_order_id: created.order_id ?? null,
