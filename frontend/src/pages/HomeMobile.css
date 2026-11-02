@@ -1,0 +1,274 @@
+/* ══════════════════════════════════════════════════════════════
+   HOME — phone & tablet layout (loaded after Home.css)
+   ══════════════════════════════════════════════════════════════ */
+
+/* Hero videos: one row; column count follows how many clips are playing */
+.hero-video-bg {
+  grid-template-columns: repeat(var(--hero-cols, 4), 1fr);
+}
+
+.hero-video-bg video[src*="video2"] {
+  /* Frame the sitting girl instead of the trees, whatever its position */
+  object-position: center bottom;
+}
+
+/* Tablet: the three promise boxes stay side by side */
+@media (max-width: 1024px) {
+  .promise-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .promise-card {
+    padding: 2rem 1rem;
+  }
+}
+
+@media (max-width: 680px) {
+  /* ── Hero: all clips in one row ── */
+  .hero {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    aspect-ratio: 16 / 9;
+  }
+
+  .hero-video-bg {
+    grid-template-columns: repeat(var(--hero-cols, 4), minmax(0, 1fr)) !important;
+    gap: 2px;
+    background: var(--color-dark-charcoal);
+  }
+
+  .hero-video-bg video {
+    min-width: 0;
+  }
+
+  /* ── Entry band ── */
+  .home-entry-band {
+    padding: 2rem 1.25rem 2rem;
+  }
+
+  .home-entry-title {
+    margin-bottom: 1.25rem;
+  }
+
+  .home-entry-ctas {
+    gap: 1rem;
+  }
+
+  /* ── Luxury promise: three compact boxes in one row ── */
+  .luxury-promise-v2 {
+    padding: 2.75rem 0;
+  }
+
+  .promise-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .promise-header .section-title {
+    font-size: 1.15rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+
+  .promise-header .section-subtitle {
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .promise-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .promise-card {
+    padding: 1rem 0.45rem 1.1rem;
+  }
+
+  .promise-card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .promise-card .icon-wrapper {
+    margin-bottom: 0.5rem;
+  }
+
+  .promise-card .icon-wrapper svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .promise-card h4 {
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.4rem;
+  }
+
+  .promise-card p {
+    font-size: 0.68rem;
+    line-height: 1.4;
+  }
+
+  /* ── Journey: photo left, text right ── */
+  .journey-section {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  .journey-header {
+    margin-bottom: 1.75rem;
+  }
+
+  .journey-steps {
+    gap: 1.25rem;
+  }
+
+  .j-step,
+  .j-step.right {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    text-align: left;
+  }
+
+  .j-step.right {
+    flex-direction: row-reverse;
+  }
+
+  .j-step .j-image {
+    flex: 0 0 40%;
+    max-width: 40%;
+  }
+
+  .j-image img {
+    aspect-ratio: 4 / 5;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+
+  .j-content {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+  }
+
+  .j-content .step-num {
+    font-size: 1.4rem;
+  }
+
+  .j-content h3 {
+    font-size: 0.95rem;
+    letter-spacing: 0.08em;
+    margin: 0.2rem 0 0.4rem;
+  }
+
+  .j-content p {
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+
+  /* ── Why choose us: swipe through the four cards ── */
+  .why-choose-us {
+    padding: 3rem 0;
+  }
+
+  .why-choose-header {
+    margin-bottom: 1.75rem;
+  }
+
+  .why-choose-title {
+    font-size: 1.6rem;
+  }
+
+  .why-choose-lead {
+    font-size: 0.88rem;
+    margin-bottom: 0;
+  }
+
+  .why-cards-grid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 82%;
+    grid-template-columns: none;
+    gap: 0.85rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    margin: 0 -1.25rem 2rem;
+    padding: 0 1.25rem 0.75rem;
+    scrollbar-width: none;
+  }
+
+  .why-cards-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .why-card {
+    scroll-snap-align: center;
+    padding: 1.4rem 1.2rem;
+  }
+
+  .why-card-desc {
+    font-size: 0.84rem;
+    line-height: 1.6;
+  }
+
+  .why-hallmarks-strip {
+    gap: 1.2rem 0.75rem;
+    padding: 1.25rem 1rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .why-hallmark-metric {
+    font-size: 1.4rem;
+  }
+
+  /* ── Testimonials ── */
+  .testimonials-v2 {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  /* ── Journal: swipe ── */
+  .journal-section {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  .journal-header {
+    margin-bottom: 1.25rem;
+  }
+
+  .journal-cards {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 72%;
+    grid-template-columns: none;
+    gap: 0.85rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    margin: 0 -1.25rem;
+    padding: 0 1.25rem 0.5rem;
+    scrollbar-width: none;
+  }
+
+  .journal-cards::-webkit-scrollbar {
+    display: none;
+  }
+
+  .j-card {
+    scroll-snap-align: start;
+  }
+
+  .j-info h4 {
+    font-size: 1rem;
+  }
+
+  /* Readable small labels */
+  .clothing-cat-btn {
+    font-size: 0.66rem;
+  }
+}

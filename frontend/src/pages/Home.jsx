@@ -17,6 +17,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import "./Home.css";
+import "./HomeMobile.css";
 
 /* ── Scroll-reveal hook ── */
 function useScrollReveal(options = {}) {
@@ -104,9 +105,34 @@ const REVIEWS = [
 ];
 
 const HERO_VIDEOS = ["/videos/video1.mp4", "/videos/video2.mp4", "/videos/video3.mp4", "/videos/video4.mp4"];
-// Phones get the two lightest clips (~4.5 MB) instead of all four (~38 MB).
-const MOBILE_HERO_VIDEOS = ["/videos/video1.mp4", "/videos/video3.mp4"];
+// video2 is ~29 MB (the other three ~9 MB together). On phones it starts only after the
+// page has loaded, and not at all on slow connections or with Data Saver on.
+const HEAVY_HERO_VIDEO = "/videos/video2.mp4";
 const MOBILE_QUERY = "(max-width: 680px)";
+
+const useHeavyVideoAllowed = (isMobile) => {
+  const [allowed, setAllowed] = useState(!isMobile);
+  useEffect(() => {
+    if (!isMobile) {
+      setAllowed(true);
+      return;
+    }
+    setAllowed(false);
+    const conn = navigator.connection;
+    if (conn?.saveData || /(^|-)2g|3g/.test(conn?.effectiveType || "")) return;
+    let timer;
+    const start = () => {
+      timer = setTimeout(() => setAllowed(true), 1500);
+    };
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("load", start);
+    };
+  }, [isMobile]);
+  return allowed;
+};
 
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(
@@ -123,6 +149,8 @@ const useIsMobile = () => {
 
 export default function Home() {
   const isMobile = useIsMobile();
+  const heavyVideoAllowed = useHeavyVideoAllowed(isMobile);
+  const heroVideos = HERO_VIDEOS.filter((src) => src !== HEAVY_HERO_VIDEO || heavyVideoAllowed);
   const { storefrontProducts: products } = useProducts();
 
   // Admin-flagged featured pieces, in the admin-controlled display order.
@@ -147,9 +175,9 @@ export default function Home() {
     <div className="home-page">
       {/* 1. Hero Section */}
       <section className="hero">
-        <div className="hero-video-bg">
-          {(isMobile ? MOBILE_HERO_VIDEOS : HERO_VIDEOS).map((src) => (
-            <video key={src} autoPlay loop muted playsInline src={src} />
+        <div className="hero-video-bg" style={{ "--hero-cols": heroVideos.length }}>
+          {heroVideos.map((src) => (
+            <video key={src} autoPlay loop muted playsInline preload="auto" src={src} />
           ))}
         </div>
       </section>
