@@ -54,6 +54,26 @@ export async function shiprocketRequest(token: string, path: string, payload: un
   return body
 }
 
+/**
+ * The pickup location name Shiprocket knows. Uses SHIPROCKET_PICKUP_LOCATION when it
+ * matches (case-insensitive); if the account has exactly one pickup address, uses that.
+ */
+export async function resolvePickup(token: string, configured: string): Promise<string> {
+  const res = await fetch(`${API}/settings/company/pickup`, { headers: { Authorization: `Bearer ${token}` } })
+  const body = await res.json().catch(() => ({}))
+  const list: any[] = body?.data?.shipping_address ?? []
+  const names = list.map((a) => String(a?.pickup_location ?? '')).filter(Boolean)
+  if (!names.length) {
+    throw new ShiprocketError('No pickup address found in Shiprocket. Add one in Shiprocket → Settings → Pickup Addresses.')
+  }
+  const match = names.find((n) => n.trim().toLowerCase() === configured.trim().toLowerCase())
+  if (match) return match
+  if (names.length === 1) return names[0]
+  throw new ShiprocketError(
+    `Pickup location "${configured}" doesn't exist in Shiprocket. Set the SHIPROCKET_PICKUP_LOCATION secret to one of: ${names.map((n) => `"${n}"`).join(', ')}`
+  )
+}
+
 /** Default parcel weight (kg) per piece when a product has no weight set. */
 export function defaultWeightKg(category: string | null | undefined): number {
   const c = String(category ?? '').toLowerCase()

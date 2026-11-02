@@ -13,6 +13,7 @@ import {
   shiprocketConfig,
   shiprocketLogin,
   shiprocketRequest,
+  resolvePickup,
   tenDigitPhone,
 } from '../_shared/shiprocket.ts'
 
@@ -58,8 +59,8 @@ Deno.serve(async (req) => {
     if (action === 'check') {
       const cfg = shiprocketConfig()
       if (cfg.missing.length) return json({ ok: false, pickup: cfg.pickup, error: `Missing: ${cfg.missing.join(', ')}` })
-      await shiprocketLogin()
-      return json({ ok: true, pickup: cfg.pickup })
+      const pickup = await resolvePickup(await shiprocketLogin(), cfg.pickup)
+      return json({ ok: true, pickup })
     }
 
     const orderId = String(body.orderId ?? '')
@@ -105,7 +106,8 @@ Deno.serve(async (req) => {
     const subTotal = items.reduce((s, i) => s + Number(i.price || 0) * Math.max(1, Number(i.quantity) || 1), 0)
     const shippingCharges = Number(order.shipping_charge ?? order.shippingCharge ?? 0) || 0
 
-    const { pickup } = shiprocketConfig()
+    const token = await shiprocketLogin()
+    const pickup = await resolvePickup(token, shiprocketConfig().pickup)
     const payload = {
       order_id: order.id,
       order_date: istDate(order.created_at || order.createdAt),
@@ -147,7 +149,6 @@ Deno.serve(async (req) => {
       weight,
     }
 
-    const token = await shiprocketLogin()
     const reply = await shiprocketRequest(token, '/orders/create/adhoc', payload)
     console.log('Shiprocket create reply:', JSON.stringify(reply).slice(0, 2000))
     // Some accounts wrap the result; Shiprocket can also answer 200 with only a message.
