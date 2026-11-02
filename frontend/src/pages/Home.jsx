@@ -106,7 +106,7 @@ const REVIEWS = [
 
 const HERO_VIDEOS = ["/videos/video1.mp4", "/videos/video2.mp4", "/videos/video3.mp4", "/videos/video4.mp4"];
 // video2 is ~29 MB (the other three ~9 MB together). On phones it starts only after the
-// page has loaded, and not at all on slow connections or with Data Saver on.
+// page has loaded, and not at all on 2G or with Data Saver on.
 const HEAVY_HERO_VIDEO = "/videos/video2.mp4";
 const MOBILE_QUERY = "(max-width: 680px)";
 
@@ -119,10 +119,12 @@ const useHeavyVideoAllowed = (isMobile) => {
     }
     setAllowed(false);
     const conn = navigator.connection;
-    if (conn?.saveData || /(^|-)2g|3g/.test(conn?.effectiveType || "")) return;
+    // Only Data Saver and 2G skip it; many 4G phones report "3g", so those just wait longer.
+    if (conn?.saveData || /2g/.test(conn?.effectiveType || "")) return;
+    const delay = conn?.effectiveType === "3g" ? 3500 : 1500;
     let timer;
     const start = () => {
-      timer = setTimeout(() => setAllowed(true), 1500);
+      timer = setTimeout(() => setAllowed(true), delay);
     };
     if (document.readyState === "complete") start();
     else window.addEventListener("load", start, { once: true });
