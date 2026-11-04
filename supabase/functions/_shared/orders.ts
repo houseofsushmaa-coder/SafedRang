@@ -249,12 +249,16 @@ export async function decrementStock(db: SupabaseClient, items: PricedLine[]) {
  * Idempotent: stock is decremented only by the call that performs the transition.
  */
 export async function confirmPaidOrder(db: SupabaseClient, orderId: string, paidAmount: number) {
-  const { data: order } = await db.from('orders').select('id, total, items, payment_status').eq('id', orderId).maybeSingle()
+  // select('*') so this works before and after the multi-currency columns exist.
+  const { data: order } = await db.from('orders').select('*').eq('id', orderId).maybeSingle()
   if (!order) return { status: 'NOT_FOUND' as const, order: null, transitioned: false }
   if (order.payment_status === 'PAID') return { status: 'PAID' as const, order, transitioned: false }
 
-  if (Math.abs(Number(order.total) - Number(paidAmount)) > 0.01) {
-    console.error(`Amount mismatch on ${orderId}: expected ${order.total}, paid ${paidAmount}`)
+  // Orders charged in another currency are checked against that currency's amount.
+  const chargedInOther = order.charge_currency && order.charge_currency !== 'INR' && Number(order.charge_amount) > 0
+  const expected = chargedInOther ? Number(order.charge_amount) : Number(order.total)
+  if (Math.abs(expected - Number(paidAmount)) > 0.01) {
+    console.error(`Amount mismatch on ${orderId}: expected ${expected} ${chargedInOther ? order.charge_currency : 'INR'}, paid ${paidAmount}`)
     await db.from('orders').update({ payment_status: 'AMOUNT_MISMATCH', paymentStatus: 'AMOUNT_MISMATCH', updated_at: new Date().toISOString() }).eq('id', orderId)
     return { status: 'AMOUNT_MISMATCH' as const, order, transitioned: false }
   }

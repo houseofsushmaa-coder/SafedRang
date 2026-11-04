@@ -122,6 +122,46 @@
   cursor: pointer;
 }
 
+/* Currency picker (order summary + payment window) */
+.co-currency-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-warm-taupe);
+  cursor: pointer;
+}
+
+.co-currency-select select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 5px 26px 5px 12px;
+  border: 1px solid var(--color-soft-blush, #e8dfd0);
+  border-radius: 20px;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%232a211d' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 10px center;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--color-dark-charcoal);
+  cursor: pointer;
+}
+
+.co-currency-select select:focus-visible {
+  outline: 2px solid var(--color-antique-gold);
+  outline-offset: 2px;
+}
+
+.summary-currency-note {
+  margin: -6px 0 14px;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--color-warm-taupe);
+}
+
 /* The in-bag Remove button is louder for sold-out pieces */
 .summary-qty-controls .summary-remove-btn.is-urgent {
   border-color: var(--color-deep-wine);

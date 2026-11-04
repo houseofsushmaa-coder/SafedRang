@@ -50,12 +50,32 @@ const loadCheckedPincode = () => {
 const cartToAnalyticsItems = (lines) =>
   lines.map((l) => toAnalyticsItem(l, { price: l.unitPrice, quantity: l.quantity, variant: l.selectedSize }));
 
+// Currency the shopper sees and pays in online. COD is always paid in rupees.
+function CurrencySelect({ value, onChange, codes, id }) {
+  return (
+    <label className="co-currency-select" htmlFor={id}>
+      <span>Pay in</span>
+      <select id={id} value={value} onChange={(e) => onChange(e.target.value)}>
+        {codes.map((code) => (
+          <option key={code} value={code}>
+            {code}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+const formatRupees = (n) => `₹${Math.round(Number(n) || 0).toLocaleString("en-IN")}`;
+
 export default function Checkout() {
   const {
     cartLines, cartSubtotal, cartCount, hasUnavailableItems,
     clearCart, updateQuantity, removeFromCart, fixUnavailableItems,
   } = useCart();
-  const { formatPrice, changeCurrency, currency } = useCurrency();
+  const { formatPrice, changeCurrency, currency, supportedCodes } = useCurrency();
+  const currencyCodes = ["INR", ...supportedCodes.filter((c) => c !== "INR")];
+  const nonInr = currency !== "INR";
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -299,6 +319,12 @@ export default function Checkout() {
       if (!payment_session_id)
         throw new Error("We couldn't start the payment. Please try again.");
 
+      // The server couldn't charge in the chosen currency, so Cashfree will show rupees.
+      if (currency !== "INR" && edgeData.charge_currency === "INR") {
+        setError(`Payment in ${currency} isn't available right now, so you'll be charged ${formatRupees(edgeData.amount)} (INR). Taking you to payment…`);
+        await new Promise((r) => setTimeout(r, 3500));
+      }
+
       const cashfree = await load({
         mode: CF_ENV === "PRODUCTION" ? "production" : "sandbox",
       });
@@ -523,7 +549,13 @@ export default function Checkout() {
                   )}
                 </div>
                 <p className="currency-notice">
-                  Prices shown in <strong>{selectedCountry.currency}</strong>. Orders processed in INR.
+                  {nonInr ? (
+                    <>
+                      Prices shown and charged online in <strong>{currency}</strong>. You can change the currency in your order summary.
+                    </>
+                  ) : (
+                    <>Prices shown and charged in <strong>INR</strong>. You can pay in another currency from your order summary.</>
+                  )}
                 </p>
               </div>
 
@@ -709,8 +741,13 @@ export default function Checkout() {
             {/* Currency / Country tag */}
             <div className="summary-currency-tag">
               <span>{selectedCountry.flag} {selectedCountry.name}</span>
-              <span className="summary-currency-badge">{currency}</span>
+              <CurrencySelect id="co-currency-summary" value={currency} onChange={changeCurrency} codes={currencyCodes} />
             </div>
+            {nonInr && (
+              <p className="summary-currency-note">
+                Online payment is charged in {currency} at today's exchange rate (≈ {formatRupees(cartSubtotal)}). Your bank may add its own fee.
+              </p>
+            )}
 
             <h2>Your Bag ({cartCount})</h2>
             <div className="summary-items">
@@ -776,7 +813,7 @@ export default function Checkout() {
               </div>
               {codAvailable && (
                 <div className="summary-row cod-note-row">
-                  <span className="cod-note">Cash on Delivery adds a {formatPrice(codFee)} handling fee</span>
+                  <span className="cod-note">Cash on Delivery adds a {formatRupees(codFee)} handling fee (paid in ₹)</span>
                 </div>
               )}
               <div className="summary-row total-row">
@@ -833,6 +870,9 @@ export default function Checkout() {
                   Subtotal {formatPrice(cartSubtotal)} ·{" "}
                   {selectedCountry.flag} {selectedCountry.name}
                 </p>
+                <div style={{ marginTop: 8 }}>
+                  <CurrencySelect id="co-currency-modal" value={currency} onChange={changeCurrency} codes={currencyCodes} />
+                </div>
               </div>
               <button className="modal-close" onClick={() => setStep("form")} aria-label="Close" disabled={loading}>
                 <X size={20} />
@@ -853,7 +893,7 @@ export default function Checkout() {
                 <div className="payment-card-body">
                   <div className="payment-card-title">Pay Online</div>
                   <div className="payment-card-desc">
-                    UPI · Cards · Netbanking via Cashfree
+                    {nonInr ? `International cards via Cashfree · charged in ${currency}` : "UPI · Cards · Netbanking via Cashfree"}
                   </div>
                   <div className="payment-card-badges">
                     <span className="badge badge-green">Free Shipping</span>
@@ -863,7 +903,7 @@ export default function Checkout() {
                 <div className="payment-card-amount">
                   <div className="amount-label">You Pay</div>
                   <div className="amount-value">{formatPrice(cartSubtotal)}</div>
-                  <div className="amount-shipping">Shipping Free</div>
+                  <div className="amount-shipping">{nonInr ? `≈ ${formatRupees(cartSubtotal)} · Free shipping` : "Shipping Free"}</div>
                 </div>
                 <div className="payment-card-check"><CheckCircle2 size={22} /></div>
               </label>
@@ -883,13 +923,13 @@ export default function Checkout() {
                     <div className="payment-card-title">Cash on Delivery</div>
                     <div className="payment-card-desc">Pay at your doorstep when delivered</div>
                     <div className="payment-card-badges">
-                      <span className="badge badge-amber">+{formatPrice(codFee)} Handling Fee</span>
+                      <span className="badge badge-amber">+{formatRupees(codFee)} Handling Fee</span>
                     </div>
                   </div>
                   <div className="payment-card-amount">
                     <div className="amount-label">You Pay</div>
-                    <div className="amount-value">{formatPrice(cartSubtotal + codFee)}</div>
-                    <div className="amount-shipping">Incl. {formatPrice(codFee)} COD fee</div>
+                    <div className="amount-value">{formatRupees(cartSubtotal + codFee)}</div>
+                    <div className="amount-shipping">Paid in cash (₹) · incl. {formatRupees(codFee)} fee</div>
                   </div>
                   <div className="payment-card-check"><CheckCircle2 size={22} /></div>
                 </label>

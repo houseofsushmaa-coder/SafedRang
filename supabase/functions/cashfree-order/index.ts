@@ -3,6 +3,7 @@ import {
   adminClient, cashfreeBase, cashfreeHeaders, corsHeaders, errorResponse, json,
   priceCart, provisionCustomer, requestUserId, validateCustomer,
 } from "../_shared/orders.ts"
+import { convertFromInr, normaliseCurrency } from "../_shared/currency.ts"
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -21,26 +22,65 @@ serve(async (req) => {
     const siteUrl = req.headers.get('origin') || Deno.env.get('SITE_URL') || 'https://safedrang.com'
     const phoneDigits = customer.phone.replace(/\D/g, '')
 
-    const response = await fetch(`${cashfreeBase()}/orders`, {
-      method: 'POST',
-      headers: cashfreeHeaders(),
-      body: JSON.stringify({
-        order_id: orderId,
-        order_amount: subtotal,
-        order_currency: 'INR',
-        customer_details: {
-          customer_id: `cust_${phoneDigits || Date.now()}`,
-          customer_name: customer.name,
-          customer_email: customer.email,
-          customer_phone: phoneDigits.length > 10 && phoneDigits.startsWith('91') ? phoneDigits.slice(-10) : phoneDigits,
-        },
-        order_meta: {
-          return_url: `${siteUrl}/payment/verify?order_id=${orderId}`,
-          notify_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/cashfree-webhook`,
-        },
-      }),
-    })
-    const data = await response.json()
+    // ── Which currency to charge in ──
+    // The shopper's choice, converted from INR on the server with a live rate.
+    // Falls back to INR if the rate is unavailable, the database can't record it,
+    // or Cashfree doesn't accept that currency for this account.
+    let currency = normaliseCurrency(currencySelected)
+    let charge = { amount: subtotal, rate: 1 }
+    let fallbackReason = ''
+    if (currency !== 'INR') {
+      const { error: colError } = await db.from('orders').select('charge_currency').limit(1)
+      if (colError) {
+        fallbackReason = 'multi-currency columns missing (run supabase/multi_currency_setup.sql)'
+      } else {
+        try {
+          const converted = await convertFromInr(subtotal, currency)
+          if (converted) charge = converted
+          else fallbackReason = `no exchange rate for ${currency}`
+        } catch (err) {
+          fallbackReason = `exchange rate unavailable: ${(err as Error).message}`
+        }
+      }
+      if (fallbackReason) {
+        console.warn(`Charging ${orderId} in INR instead of ${currency}: ${fallbackReason}`)
+        currency = 'INR'
+        charge = { amount: subtotal, rate: 1 }
+      }
+    }
+
+    const createCashfreeOrder = (orderCurrency: string, amount: number) =>
+      fetch(`${cashfreeBase()}/orders`, {
+        method: 'POST',
+        headers: cashfreeHeaders(),
+        body: JSON.stringify({
+          order_id: orderId,
+          order_amount: amount,
+          order_currency: orderCurrency,
+          customer_details: {
+            customer_id: `cust_${phoneDigits || Date.now()}`,
+            customer_name: customer.name,
+            customer_email: customer.email,
+            customer_phone: phoneDigits.length > 10 && phoneDigits.startsWith('91') ? phoneDigits.slice(-10) : phoneDigits,
+          },
+          order_meta: {
+            return_url: `${siteUrl}/payment/verify?order_id=${orderId}`,
+            notify_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/cashfree-webhook`,
+          },
+        }),
+      })
+
+    let response = await createCashfreeOrder(currency, charge.amount)
+    let data = await response.json()
+    if (!response.ok && currency !== 'INR') {
+      // e.g. the currency isn't enabled on this Cashfree account — charge in INR instead.
+      console.warn(`Cashfree refused ${currency} for ${orderId}:`, JSON.stringify(data).slice(0, 300))
+      fallbackReason = `Cashfree did not accept ${currency}`
+      currency = 'INR'
+      charge = { amount: subtotal, rate: 1 }
+      response = await createCashfreeOrder('INR', subtotal)
+      data = await response.json()
+    }
     if (!response.ok) {
       console.error('Cashfree order creation failed:', data)
       return json({ error: 'Our payment partner could not start the payment. Please try again in a moment.' }, 502)
@@ -72,7 +112,9 @@ serve(async (req) => {
       shippingAddress: address,
       billingAddress: address,
       items,
-      currency_selected: currencySelected || 'INR',
+      currency_selected: normaliseCurrency(currencySelected),
+      // What Cashfree is actually charging (verified against when the payment comes back).
+      ...(currency !== 'INR' ? { charge_currency: currency, charge_amount: charge.amount, fx_rate: charge.rate } : {}),
       user_id: userId,
       created_at: now,
       updated_at: now,
@@ -87,6 +129,9 @@ serve(async (req) => {
       payment_session_id: data.payment_session_id,
       order_id: orderId,
       amount: subtotal,
+      charge_currency: currency,
+      charge_amount: charge.amount,
+      currency_fallback: fallbackReason ? true : undefined,
       items,
     })
   } catch (error) {
