@@ -15,6 +15,7 @@ import { trackEvent, toAnalyticsItem } from "../lib/tracking";
 import { productPath } from "../lib/seo";
 import { PINCODE_STORAGE_KEY } from "../components/PincodeCheck";
 import "./Checkout.css";
+import "./CheckoutBagIssues.css";
 
 const CF_ENV = import.meta.env.VITE_CASHFREE_ENV || "SANDBOX";
 const DEFAULT_COD_FEE_INR = 39;       // Fallback only — Admin → Settings → Shipping is the source of truth
@@ -52,7 +53,7 @@ const cartToAnalyticsItems = (lines) =>
 export default function Checkout() {
   const {
     cartLines, cartSubtotal, cartCount, hasUnavailableItems,
-    clearCart, updateQuantity, removeFromCart,
+    clearCart, updateQuantity, removeFromCart, fixUnavailableItems,
   } = useCart();
   const { formatPrice, changeCurrency, currency } = useCurrency();
   const { user } = useAuth();
@@ -155,6 +156,11 @@ export default function Checkout() {
   const [step, setStep] = useState("form");
   // Mobile: the bag summary sits above the form, collapsed to one line.
   const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
+  const problemLines = cartLines.filter((l) => l.issue);
+  // On phones the bag is folded away; open it when something in it needs attention.
+  useEffect(() => {
+    if (problemLines.length) setMobileSummaryOpen(true);
+  }, [problemLines.length]);
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -397,6 +403,56 @@ export default function Checkout() {
         </div>
       </div>
 
+      {/* Sold-out / low-stock pieces: explained up top, removable in one tap */}
+      {problemLines.length > 0 && (
+        <div className="bag-issues" role="alert">
+          <div className="bag-issues-head">
+            <AlertCircle size={18} />
+            <div>
+              <strong>
+                {problemLines.length === 1 ? "A piece in your bag" : `${problemLines.length} pieces in your bag`}{" "}
+                {problemLines.every((l) => l.issue === "sold_out")
+                  ? (problemLines.length === 1 ? "is sold out" : "are sold out")
+                  : problemLines.every((l) => l.issue === "low_stock")
+                  ? (problemLines.length === 1 ? "isn't available in that quantity" : "aren't available in that quantity")
+                  : "need your attention"}
+              </strong>
+              <span>Remove {problemLines.length === 1 ? "it" : "them"} to continue with the rest of your order.</span>
+            </div>
+          </div>
+          <ul className="bag-issues-list">
+            {problemLines.map((l) => {
+              const lineId = l.cartItemId || l.id;
+              return (
+                <li key={lineId}>
+                  <img src={l.images?.[0] || l.image || "/logo.png"} alt="" onError={(e) => { e.currentTarget.src = "/logo.png"; }} />
+                  <div className="bag-issues-info">
+                    <span className="bag-issues-title">{l.title?.replace(/"/g, "")}{l.selectedSize ? ` · Size ${l.selectedSize}` : ""}</span>
+                    <span className="bag-issues-why">
+                      {l.issue === "sold_out" ? "Sold out" : `Only ${l.available} left — you have ${l.quantity}`}
+                    </span>
+                  </div>
+                  {l.issue === "low_stock" ? (
+                    <button type="button" className="bag-issues-btn" onClick={() => updateQuantity(lineId, l.available)}>
+                      Keep {l.available}
+                    </button>
+                  ) : (
+                    <button type="button" className="bag-issues-btn" onClick={() => removeFromCart(lineId)} aria-label={`Remove ${l.title} from bag`}>
+                      <Trash2 size={14} /> Remove
+                    </button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          {problemLines.length > 1 && (
+            <button type="button" className="bag-issues-all" onClick={fixUnavailableItems}>
+              Remove all unavailable pieces
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="checkout-grid">
         {/* ── Left: Form ── */}
         <div className="checkout-form-col">
@@ -621,7 +677,7 @@ export default function Checkout() {
             {hasUnavailableItems && (
               <div className="modal-error" role="alert" style={{ marginBottom: 16 }}>
                 <AlertCircle size={16} />
-                <span>Some pieces in your bag are no longer available in the quantity selected. Please update your bag to continue.</span>
+                <span>Some pieces in your bag are no longer available. Remove them (see the top of this page) to continue.</span>
               </div>
             )}
 
@@ -676,9 +732,9 @@ export default function Checkout() {
                         <p className="size-tag">Size: {item.selectedSize}</p>
                       )}
                       {item.fabric && <p>{item.fabric}</p>}
-                      {!item.purchasable && (
+                      {item.issue && (
                         <p className="summary-item-warning">
-                          {item.available > 0 ? `Only ${item.available} available` : "No longer available"}
+                          {item.issue === "sold_out" ? "Sold out — please remove" : `Only ${item.available} left`}
                         </p>
                       )}
                       <div className="summary-qty-controls">
@@ -694,7 +750,7 @@ export default function Checkout() {
                           onClick={() => updateQuantity(lineId, item.quantity + 1)}>
                           <Plus size={12} />
                         </button>
-                        <button type="button" className="summary-remove-btn"
+                        <button type="button" className={`summary-remove-btn ${item.issue === "sold_out" ? "is-urgent" : ""}`}
                           aria-label={`Remove ${item.title} from bag`}
                           onClick={() => removeFromCart(lineId)}>
                           <Trash2 size={13} /> Remove

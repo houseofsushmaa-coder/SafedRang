@@ -5,6 +5,7 @@
 // Status only ever moves forward. Return-to-origin (RTO) events are recorded but do not
 // change the order: mark it "Returned" in the admin so the stock goes back.
 import { adminClient, json } from '../_shared/orders.ts'
+import { inBackground, notifyOrderEvent, STATUS_EVENT } from '../_shared/notify.ts'
 
 const upper = (v: unknown) => String(v ?? '').toUpperCase().trim()
 
@@ -101,6 +102,9 @@ Deno.serve(async (req) => {
 
     const { error } = await db.from('orders').update(updates).eq('id', order.id)
     if (error) console.error('courier-webhook: update failed', error)
+    // Tell the customer (shipped / out for delivery / delivered) — once per status.
+    const moved = updates.order_status as string | undefined
+    if (!error && moved && STATUS_EVENT[moved]) await inBackground(notifyOrderEvent(db, order.id, STATUS_EVENT[moved]))
     return json({ ok: true })
   } catch (err) {
     console.error('courier-webhook error', err)

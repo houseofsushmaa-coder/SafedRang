@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import "./AdminPages.css";
 import { formatINR } from "../../config/api.js";
-import { adminService } from "../adminService";
+import { adminService, ORDER_STATUS_EMAIL } from "../adminService";
 import Papa from "papaparse";
 import { downloadShippingLabels } from "../shippingLabel";
 import ShiprocketPanel from "../components/ShiprocketPanel";
@@ -66,6 +66,7 @@ const Orders = () => {
   const [editingOrder, setEditingOrder] = useState(null);
   const [newStatus, setNewStatus] = useState("");
   const [updating, setUpdating] = useState(false);
+  const [notifyCustomer, setNotifyCustomer] = useState(true);
   const [labelBusy, setLabelBusy] = useState(false);
   const [shipOrder, setShipOrder] = useState(null);
 
@@ -132,9 +133,14 @@ const Orders = () => {
 
     setUpdating(true);
     try {
-      await adminService.updateOrderStatus(editingOrder.id, newStatus);
+      const { email } = await adminService.updateOrderStatus(editingOrder.id, newStatus, { notify: notifyCustomer });
       setEditingOrder(null);
       fetchOrders();
+      const outcome = email?.customer;
+      if (outcome === "sent") toast.success("Status saved — customer emailed.");
+      else if (outcome === "already_sent") toast.success("Status saved (customer was already emailed about this).");
+      else if (outcome?.startsWith?.("error")) toast.error(`Status saved, but the email failed: ${outcome.replace(/^error: /, "")}`);
+      else toast.success("Status saved.");
     } catch (err) {
       toast.error("Could not update the order: " + err.message);
     } finally {
@@ -365,6 +371,7 @@ const Orders = () => {
                             onClick={() => {
                               setEditingOrder(order);
                               setNewStatus(order.orderStatus);
+                              setNotifyCustomer(true);
                             }}
                           >
                             <Edit size={16} />
@@ -560,6 +567,12 @@ const Orders = () => {
                     <option key={value} value={value}>{label}</option>
                   ))}
                 </select>
+                {ORDER_STATUS_EMAIL[newStatus] && newStatus !== editingOrder.orderStatus && (
+                  <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12, fontSize: "0.85rem", cursor: "pointer" }}>
+                    <input type="checkbox" checked={notifyCustomer} onChange={(e) => setNotifyCustomer(e.target.checked)} />
+                    Email the customer about this update
+                  </label>
+                )}
                 <p className="field-hint" style={{ marginTop: 8, fontSize: "0.78rem", color: "var(--admin-text-muted)" }}>
                   {editingOrder.paymentMethodCode === "COD"
                     ? "Marking a Cash on Delivery order as Delivered records the cash as paid. "

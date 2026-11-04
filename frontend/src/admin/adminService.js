@@ -93,6 +93,47 @@ const safeJson = (text) => {
 // ─────────────────────────────────────────────
 // 1. DASHBOARD & ANALYTICS
 // ─────────────────────────────────────────────
+// Fulfilment status → customer email it triggers (see supabase/functions/_shared/notify.ts).
+export const ORDER_STATUS_EMAIL = {
+  SHIPPED: "shipped",
+  OUT_FOR_DELIVERY: "out_for_delivery",
+  DELIVERED: "delivered",
+  CANCELLED: "cancelled",
+  RETURNED: "returned",
+};
+
+// Order email settings (read by the server: supabase/functions/_shared/notify.ts).
+export const EMAIL_EVENTS = [
+  ["order_placed", "Order placed", "Order confirmation with items, total and address"],
+  ["shipped", "Shipped", "Courier name, tracking number and tracking link"],
+  ["out_for_delivery", "Out for delivery", "Arriving today (COD amount reminder)"],
+  ["delivered", "Delivered", "Thank-you note with care tips"],
+  ["cancelled", "Cancelled", "Cancellation, with refund note for paid orders"],
+  ["returned", "Returned", "Return received"],
+];
+const EMAIL_DEFAULT_TOGGLES = {
+  order_placed: { customer: true, admin: true },
+  shipped: { customer: true, admin: false },
+  out_for_delivery: { customer: true, admin: false },
+  delivered: { customer: true, admin: false },
+  cancelled: { customer: true, admin: true },
+  returned: { customer: true, admin: true },
+};
+const isEmailAddress = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v || "").trim());
+export function normaliseEmailConfig(raw) {
+  const c = (typeof raw === "string" ? safeJson(raw) : raw) || {};
+  const list = Array.isArray(c.adminEmails) ? c.adminEmails : String(c.adminEmails || "").split(/[\s,;]+/);
+  return {
+    adminEmails: [...new Set(list.map((e) => String(e).trim().toLowerCase()).filter(isEmailAddress))],
+    fromName: String(c.fromName ?? "Safed Rang").trim(),
+    fromEmail: String(c.fromEmail ?? "").trim(),
+    replyTo: String(c.replyTo ?? "").trim(),
+    events: Object.fromEntries(
+      Object.entries(EMAIL_DEFAULT_TOGGLES).map(([k, d]) => [k, { ...d, ...(c.events?.[k] || {}) }])
+    ),
+  };
+}
+
 export const adminService = {
   /**
    * Dashboard overview for a period, compared with the period before it.
@@ -388,7 +429,7 @@ export const adminService = {
    *  - a COD order marked DELIVERED is now PAID (cash collected)
    *  - cancelling returns the items to stock (once)
    */
-  async updateOrderStatus(orderId, newStatus) {
+  async updateOrderStatus(orderId, newStatus, { notify = true } = {}) {
     const status = upper(newStatus);
     const allowed = ["PENDING", "CONFIRMED", "PROCESSING", "PACKED", "SHIPPED", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED", "RETURNED"];
     if (!allowed.includes(status)) throw new Error(`Unknown order status: ${newStatus}`);
@@ -411,6 +452,32 @@ export const adminService = {
     if (["CANCELLED", "RETURNED"].includes(status) && !wasCancelled && stockWasTaken) {
       await this.restockItems(itemsOf(order));
     }
+
+    // Customer email for the new status (shipped, delivered, cancelled…), sent by the server.
+    let email = null;
+    const event = ORDER_STATUS_EMAIL[status];
+    if (notify && event && upper(order.order_status) !== status) {
+      try {
+        email = (await this.orderEmail("send", { orderId, event })).result;
+      } catch (err) {
+        email = { customer: `error: ${err.message}` };
+      }
+    }
+    return { data, email };
+  },
+
+  /** Calls the "order-email" server function (admin only). */
+  async orderEmail(action, payload = {}) {
+    const { data, error } = await supabase.functions.invoke("order-email", { body: { action, ...payload } });
+    if (error) {
+      let message = error.message;
+      try {
+        const body = await error.context?.json?.();
+        if (body?.error) message = body.error;
+      } catch {}
+      throw new Error(message);
+    }
+    if (data?.error) throw new Error(data.error);
     return data;
   },
 
@@ -704,10 +771,11 @@ export const adminService = {
         enabled: raw["shipping.cod_enabled"]?.enabled ?? raw["shipping.cod_enabled"] !== false,
         fee: Number.isFinite(fee) ? fee : 39,
       },
+      email: normaliseEmailConfig(raw["email.config"]),
     };
   },
 
-  async saveSettings({ store, cod }) {
+  async saveSettings({ store, cod, email }) {
     const rows = [
       { group: "general", key: "site_name", value: { text: String(store.name || "").trim() } },
       { group: "general", key: "store_email", value: { text: String(store.email || "").trim() } },
@@ -716,6 +784,7 @@ export const adminService = {
       { group: "shipping", key: "cod_enabled", value: { enabled: Boolean(cod.enabled) } },
       { group: "shipping", key: "cod_charge", value: { amount: Math.max(0, Number(cod.fee) || 0) } },
     ];
+    if (email) rows.push({ group: "email", key: "config", value: normaliseEmailConfig(email) });
     const { error } = await supabase.from("settings").upsert(rows, { onConflict: "group,key" });
     if (error) throw error;
   },

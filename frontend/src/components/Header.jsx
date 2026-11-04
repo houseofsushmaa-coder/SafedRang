@@ -322,6 +322,11 @@ export default function Header() {
                             <div className="cart-item-price">
                               {formatPrice(item.unitPrice)} × {item.quantity}
                             </div>
+                            {item.issue && (
+                              <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "var(--color-deep-wine)", marginTop: 2 }}>
+                                {item.issue === "sold_out" ? "Sold out — tap × to remove" : `Only ${item.available} left`}
+                              </div>
+                            )}
                           </div>
                           <button
                             type="button"

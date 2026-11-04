@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts"
 import { adminClient, confirmPaidOrder, json, sendAccountLink } from "../_shared/orders.ts"
+import { inBackground, notifyOrderEvent } from "../_shared/notify.ts"
 
 // Cashfree signs webhooks as base64(HMAC-SHA256(timestamp + rawBody, clientSecret)).
 async function isValidSignature(rawBody: string, timestamp: string, signature: string) {
@@ -40,6 +41,7 @@ serve(async (req) => {
       if (result.transitioned) {
         const { data: row } = await db.from('orders').select('customer_email').eq('id', orderId).maybeSingle()
         if (row?.customer_email) await sendAccountLink(db, row.customer_email, orderId)
+        await inBackground(notifyOrderEvent(db, orderId, 'order_placed'))
       }
     }
 

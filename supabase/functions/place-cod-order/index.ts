@@ -3,6 +3,7 @@ import {
   adminClient, corsHeaders, decrementStock, errorResponse, json,
   getCodRules, priceCart, provisionCustomer, requestUserId, sendAccountLink, UserError, validateCustomer,
 } from "../_shared/orders.ts"
+import { inBackground, notifyOrderEvent } from "../_shared/notify.ts"
 
 // Cash-on-delivery orders are created here (not from the browser) so price,
 // stock and the COD fee come from the server.
@@ -72,6 +73,7 @@ serve(async (req) => {
     // A COD order is a firm commitment, so reserve the stock now.
     await decrementStock(db, items)
     await sendAccountLink(db, customer.email, orderId)
+    await inBackground(notifyOrderEvent(db, orderId, 'order_placed'))
 
     return json({ order_id: orderId, total, items, isNewUser })
   } catch (error) {

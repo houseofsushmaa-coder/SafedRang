@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Save, CheckCircle2 } from "lucide-react";
+import { Save, CheckCircle2, Mail, Send } from "lucide-react";
 import toast from "react-hot-toast";
-import { adminService } from "../adminService";
+import { adminService, EMAIL_EVENTS } from "../adminService";
 import { Notice, Section } from "../components/AdminUI";
 import "./AdminPages.css";
 import "./Settings.css";
@@ -13,6 +13,17 @@ export default function Settings() {
   const [initial, setInitial] = useState(null);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [emailStatus, setEmailStatus] = useState(null);
+  const [adminEmailsText, setAdminEmailsText] = useState("");
+  const [testTo, setTestTo] = useState("");
+  const [testing, setTesting] = useState(false);
+
+  useEffect(() => {
+    adminService
+      .orderEmail("status")
+      .then(setEmailStatus)
+      .catch((err) => setEmailStatus({ ready: false, error: err.message }));
+  }, []);
 
   useEffect(() => {
     adminService
@@ -20,18 +31,50 @@ export default function Settings() {
       .then((s) => {
         setForm(s);
         setInitial(JSON.stringify(s));
+        setAdminEmailsText(s.email.adminEmails.join(", "));
       })
       .catch((err) => setError(err.message || "Could not load settings."));
   }, []);
 
   const dirty = form && JSON.stringify(form) !== initial;
   const set = (group, key, value) => setForm((prev) => ({ ...prev, [group]: { ...prev[group], [key]: value } }));
+  const setEmailToggle = (event, who, value) =>
+    setForm((prev) => ({
+      ...prev,
+      email: { ...prev.email, events: { ...prev.email.events, [event]: { ...prev.email.events[event], [who]: value } } },
+    }));
+  const onAdminEmails = (text) => {
+    setAdminEmailsText(text);
+    const list = text.split(/[\s,;]+/).map((e) => e.trim().toLowerCase()).filter(Boolean);
+    set("email", "adminEmails", [...new Set(list)]);
+  };
+  const badAdminEmails = (form?.email?.adminEmails || []).filter((e) => !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e));
+
+  const sendTest = async () => {
+    if (dirty) {
+      toast.error("Save your changes first, then send the test.");
+      return;
+    }
+    setTesting(true);
+    try {
+      const res = await adminService.orderEmail("test", { to: testTo.trim() || undefined });
+      toast.success(`Test emails sent to ${res.to} — check the inbox (and spam folder).`);
+    } catch (err) {
+      toast.error(`Test failed: ${err.message}`);
+    } finally {
+      setTesting(false);
+    }
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
     const fee = Number(form.cod.fee);
     if (!Number.isFinite(fee) || fee < 0) {
       toast.error("COD fee must be 0 or more.");
+      return;
+    }
+    if (badAdminEmails.length) {
+      toast.error(`Check the admin email address: ${badAdminEmails.join(", ")}`);
       return;
     }
     setSaving(true);
@@ -122,6 +165,112 @@ export default function Settings() {
                 />
                 <small style={{ color: "var(--admin-text-muted)" }}>Printed as the "From / Return to" address on parcel labels.</small>
               </label>
+            </div>
+          </Section>
+
+          <Section title="Emails" subtitle="Order emails sent automatically to your customers and to you">
+            <div className={`email-provider ${emailStatus?.ready ? "is-ok" : "is-off"}`}>
+              <Mail size={16} />
+              {emailStatus == null
+                ? "Checking the email connection…"
+                : emailStatus.ready
+                ? `Connected — sending through ${emailStatus.provider === "resend" ? "Resend" : "your mailbox (SMTP)"}.`
+                : "Not connected yet — emails will not send until RESEND_API_KEY is added in Supabase → Edge Functions → Secrets."}
+            </div>
+
+            <div className="settings-grid">
+              <label className="settings-field-stack">
+                <span>Admin email(s) — where new-order alerts go</span>
+                <input
+                  className="admin-input"
+                  value={adminEmailsText}
+                  onChange={(e) => onAdminEmails(e.target.value)}
+                  placeholder="you@safedrang.com, partner@gmail.com"
+                />
+                <small style={{ color: badAdminEmails.length ? "var(--admin-danger)" : "var(--admin-text-muted)" }}>
+                  {badAdminEmails.length
+                    ? `Not a valid address: ${badAdminEmails.join(", ")}`
+                    : "Separate several addresses with commas. Leave empty to use the contact email above."}
+                </small>
+              </label>
+              <label className="settings-field-stack">
+                <span>Sender name</span>
+                <input className="admin-input" value={form.email.fromName} onChange={(e) => set("email", "fromName", e.target.value)} placeholder="Safed Rang" />
+              </label>
+              <label className="settings-field-stack">
+                <span>Sender address</span>
+                <input
+                  type="email"
+                  className="admin-input"
+                  value={form.email.fromEmail}
+                  onChange={(e) => set("email", "fromEmail", e.target.value)}
+                  placeholder="orders@safedrang.com"
+                />
+                <small style={{ color: "var(--admin-text-muted)" }}>Must be on a domain verified with your email provider (safedrang.com).</small>
+              </label>
+              <label className="settings-field-stack">
+                <span>Customer replies go to</span>
+                <input
+                  type="email"
+                  className="admin-input"
+                  value={form.email.replyTo}
+                  onChange={(e) => set("email", "replyTo", e.target.value)}
+                  placeholder={form.store.email || "support@safedrang.com"}
+                />
+              </label>
+            </div>
+
+            <div className="table-responsive" style={{ marginTop: 18 }}>
+              <table className="aui-table email-events">
+                <thead>
+                  <tr>
+                    <th>Email</th>
+                    <th className="num">Customer</th>
+                    <th className="num">Admin</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {EMAIL_EVENTS.map(([key, label, hint]) => (
+                    <tr key={key}>
+                      <td>
+                        <strong>{label}</strong>
+                        <div style={{ fontSize: "0.76rem", color: "var(--admin-text-muted)" }}>{hint}</div>
+                      </td>
+                      <td className="num">
+                        <input
+                          type="checkbox"
+                          className="settings-switch"
+                          aria-label={`${label} email to customer`}
+                          checked={Boolean(form.email.events[key]?.customer)}
+                          onChange={(e) => setEmailToggle(key, "customer", e.target.checked)}
+                        />
+                      </td>
+                      <td className="num">
+                        <input
+                          type="checkbox"
+                          className="settings-switch"
+                          aria-label={`${label} email to admin`}
+                          checked={Boolean(form.email.events[key]?.admin)}
+                          onChange={(e) => setEmailToggle(key, "admin", e.target.checked)}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="email-test-row">
+              <input
+                type="email"
+                className="admin-input"
+                value={testTo}
+                onChange={(e) => setTestTo(e.target.value)}
+                placeholder="Send test to (default: your login email)"
+              />
+              <button type="button" className="admin-btn admin-btn-outline icon-left" onClick={sendTest} disabled={testing || !emailStatus?.ready}>
+                <Send size={15} /> {testing ? "Sending…" : "Send test email"}
+              </button>
             </div>
           </Section>
 

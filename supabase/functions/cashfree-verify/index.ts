@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.177.0/http/server.ts"
 import {
   adminClient, cashfreeBase, cashfreeHeaders, confirmPaidOrder, corsHeaders, errorResponse, json, sendAccountLink, UserError,
 } from "../_shared/orders.ts"
+import { inBackground, notifyOrderEvent } from "../_shared/notify.ts"
 
 // Called by the storefront after Cashfree redirects back. The payment status is
 // always read from Cashfree's API — never from the redirect URL.
@@ -31,6 +32,8 @@ serve(async (req) => {
       if (result.status === 'PAID' && result.order) {
         const { data: row } = await db.from('orders').select('customer_email, user_id').eq('id', order_id).maybeSingle()
         if (result.transitioned && row?.customer_email) await sendAccountLink(db, row.customer_email, order_id)
+        // Sent once per order (email_log), so the webhook and this call can't double-send.
+        if (result.transitioned) await inBackground(notifyOrderEvent(db, order_id, 'order_placed'))
         return json({
           order_status: 'PAID',
           order_amount: Number(result.order.total),

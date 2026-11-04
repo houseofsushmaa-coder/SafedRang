@@ -77,17 +77,21 @@ export const CartProvider = ({ children }) => {
             unitPrice: item.unitPrice ?? (item.salePrice || item.price || 0),
             available: productsLoading ? item.quantity : 0,
             purchasable: productsLoading,
+            // "sold_out" = can't be bought at all; "low_stock" = fewer left than in the bag.
+            issue: productsLoading ? null : "sold_out",
           };
         }
         const { unitPrice, available, purchasable } = resolveLine(live, item.selectedSize);
+        const issue = !purchasable || available <= 0 ? "sold_out" : available < item.quantity ? "low_stock" : null;
         return {
           ...item,
           title: live.title || item.title,
           image: live.image || item.image,
           images: live.images?.length ? live.images : item.images,
           unitPrice,
-          available,
-          purchasable: purchasable && available >= item.quantity,
+          available: issue === "sold_out" ? 0 : available,
+          purchasable: !issue,
+          issue,
         };
       }),
     [cart, productById, productsLoading]
@@ -95,6 +99,17 @@ export const CartProvider = ({ children }) => {
 
   const cartSubtotal = cartLines.reduce((acc, l) => acc + l.unitPrice * l.quantity, 0);
   const hasUnavailableItems = cartLines.some((l) => !l.purchasable);
+
+  // One click to clear everything that can't be bought, and trim quantities that are too high.
+  const fixUnavailableItems = () => {
+    const soldOutIds = new Set(cartLines.filter((l) => l.issue === "sold_out").map((l) => l.cartItemId || l.id));
+    const lowStock = new Map(cartLines.filter((l) => l.issue === "low_stock").map((l) => [l.cartItemId || l.id, l.available]));
+    setCart((prev) =>
+      prev
+        .filter((item) => !soldOutIds.has(item.cartItemId || item.id))
+        .map((item) => (lowStock.has(item.cartItemId || item.id) ? { ...item, quantity: lowStock.get(item.cartItemId || item.id) } : item))
+    );
+  };
 
   // --- Cart Actions ---
   // Returns { ok, reason } so callers can explain why nothing was added.
@@ -181,6 +196,7 @@ export const CartProvider = ({ children }) => {
         cartLines,
         cartSubtotal,
         hasUnavailableItems,
+        fixUnavailableItems,
         addToCart,
         removeFromCart,
         updateQuantity,
