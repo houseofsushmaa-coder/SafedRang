@@ -7,8 +7,11 @@
  */
 
 import { supabase } from "./supabase";
+import { logVisitEvent } from "./visitLog";
 
 export const TRACKING_STORAGE_KEY = "safedrang_tracking_integrations";
+// Safed Rang's Microsoft Clarity project (session recordings & heatmaps).
+export const DEFAULT_CLARITY_PROJECT = "zexyn83d1m";
 
 // Supported integration definitions with default state
 export const DEFAULT_INTEGRATIONS = {
@@ -241,6 +244,16 @@ export async function loadTrackingIntegrations() {
   }
 
   cachedIntegrations = loaded || { ...DEFAULT_INTEGRATIONS };
+
+  // Microsoft Clarity is on by default with the store's project. Saving an ID (or
+  // switching it off) in Admin → Tracking & Pixels takes precedence.
+  const clarityCfg = cachedIntegrations.clarity;
+  if (clarityCfg && !clarityCfg.public_id?.trim() && clarityCfg.verification_status !== "disabled_by_admin") {
+    cachedIntegrations = {
+      ...cachedIntegrations,
+      clarity: { ...clarityCfg, enabled: true, public_id: DEFAULT_CLARITY_PROJECT },
+    };
+  }
   return cachedIntegrations;
 }
 
@@ -579,6 +592,9 @@ export function trackEvent(eventName, payload = {}) {
     window.__srEvents.push({ event: eventName, ...data });
     console.debug("[Tracking]", eventName, data);
   }
+
+  // First-party visitor analytics (works even with no ad pixels configured).
+  logVisitEvent(eventName, data);
 
   const cfg = cachedIntegrations;
   if (!cfg) return;

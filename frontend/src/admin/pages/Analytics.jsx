@@ -1,37 +1,31 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { IndianRupee, ShoppingBag, Repeat, Users, CreditCard, TrendingUp, RefreshCw } from "lucide-react";
 import { adminService } from "../adminService";
-import { loadTrackingIntegrations } from "../../lib/tracking";
 import {
-  BarList, EmptyState, KpiCard, Notice, PeriodSelect, Section, formatINR, periodLabel, useThemeColors,
+  BarList, EmptyState, KpiCard, PeriodSelect, Section, formatINR, periodLabel, useThemeColors,
 } from "../components/AdminUI";
+import VisitorAnalytics from "../components/VisitorAnalytics";
 import "./AdminPages.css";
 
-// Overview analytics from real orders. Visitor traffic, sources and funnel
-// steps need an analytics tool (GA4), so they're linked rather than estimated.
+// Overview: sales from real orders, plus first-party visitor analytics
+// (visits, sources, funnel, each visitor's journey) from public.site_events.
 export default function Analytics() {
   const [period, setPeriod] = useState("last30");
   const [data, setData] = useState(null);
   const [chart, setChart] = useState([]);
-  const [ga4, setGa4] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
   const colors = useThemeColors();
 
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      const [overview, series, tracking] = await Promise.all([
-        adminService.getAnalytics(period),
-        adminService.getSalesChart(period),
-        loadTrackingIntegrations().catch(() => null),
-      ]);
+      const [overview, series] = await Promise.all([adminService.getAnalytics(period), adminService.getSalesChart(period)]);
       setData(overview);
       setChart(series);
-      setGa4(tracking?.ga4?.enabled && tracking.ga4.public_id ? tracking.ga4.public_id : null);
     } catch (err) {
       setError(err.message || "Could not load analytics.");
     } finally {
@@ -51,11 +45,18 @@ export default function Analytics() {
       <div className="page-header">
         <div>
           <h2>Overview</h2>
-          <p className="page-subtitle">Sales and customer figures from your orders · {label}</p>
+          <p className="page-subtitle">Sales from your orders and how visitors use the site · {label}</p>
         </div>
         <div className="header-actions">
           <PeriodSelect value={period} onChange={setPeriod} />
-          <button className="admin-btn admin-btn-outline icon-left" onClick={load} disabled={loading}>
+          <button
+            className="admin-btn admin-btn-outline icon-left"
+            onClick={() => {
+              load();
+              setRefreshKey((n) => n + 1);
+            }}
+            disabled={loading}
+          >
             <RefreshCw size={15} /> Refresh
           </button>
         </div>
@@ -90,6 +91,10 @@ export default function Analytics() {
             <KpiCard label="Customer accounts" value={data.customers.total} hint={`${data.customers.new} new in this period`} icon={<Users size={16} />} />
           </div>
 
+          <h3 className="va-heading">Visitors &amp; behaviour</h3>
+          <VisitorAnalytics period={period} label={label} refreshKey={refreshKey} />
+
+          <h3 className="va-heading">Sales</h3>
           <Section title="Revenue" subtitle={`Paid orders per day · ${label}`}>
             {hasSales ? (
               <div style={{ width: "100%", height: 280 }}>
@@ -139,24 +144,6 @@ export default function Analytics() {
             </Section>
           </div>
 
-          <Section title="Visitors, traffic sources & funnel">
-            {ga4 ? (
-              <Notice>
-                Google Analytics 4 is connected ({ga4}). Visitor numbers, traffic sources and the shopping funnel
-                (product views → add to cart → checkout → purchase) are reported there.{" "}
-                <a className="aui-link" href="https://analytics.google.com/analytics/web/" target="_blank" rel="noopener noreferrer">
-                  Open Google Analytics
-                </a>
-              </Notice>
-            ) : (
-              <Notice tone="warning">
-                Visitor and traffic data isn't being collected yet, so it isn't shown here (nothing is estimated). Add your
-                Google Analytics 4 Measurement ID in{" "}
-                <Link className="aui-link" to="/admin/settings/tracking">Tracking &amp; Pixels</Link> — the store already sends
-                product views, add-to-cart, checkout and purchase events.
-              </Notice>
-            )}
-          </Section>
         </>
       )}
 

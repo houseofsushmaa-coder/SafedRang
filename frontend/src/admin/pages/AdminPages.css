@@ -445,3 +445,65 @@
   padding: 40px; text-align: center;
   color: var(--admin-text-muted); font-size: 1rem;
 }
+
+
+/* Orders: bulk selection + unread */
+.orders-check-col {
+  width: 36px;
+  padding-right: 0 !important;
+}
+
+.orders-check-col input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.orders-bulk-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--admin-border);
+  background: var(--admin-primary-soft);
+  font-size: 0.85rem;
+  color: var(--admin-text-main);
+}
+
+.orders-bulk-bar strong {
+  margin-right: 6px;
+}
+
+.orders-bulk-bar .admin-btn {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+.orders-bulk-clear {
+  margin-left: auto;
+  border: none;
+  background: none;
+  color: var(--admin-text-muted);
+  font-size: 0.8rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.admin-table tr.order-unread td {
+  font-weight: 600;
+}
+
+.admin-table tr.order-selected td {
+  background: var(--admin-surface-2);
+}
+
+.order-unread-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--admin-accent);
+  vertical-align: 1px;
+}

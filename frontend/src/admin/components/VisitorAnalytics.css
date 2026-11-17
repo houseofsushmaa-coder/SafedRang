@@ -1,0 +1,183 @@
+/* Visitor analytics (Admin → Overview) — uses the admin theme tokens */
+.va {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Funnel */
+.va-funnel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.va-funnel-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  color: var(--admin-text-main);
+}
+
+.va-funnel-track {
+  height: 10px;
+  margin: 6px 0 4px;
+  border-radius: 999px;
+  background: var(--admin-surface-3);
+  overflow: hidden;
+}
+
+.va-funnel-track span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--admin-accent);
+}
+
+.va-funnel-meta {
+  font-size: 0.75rem;
+  color: var(--admin-text-muted);
+}
+
+/* Filters + search */
+.va-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.va-chip {
+  padding: 5px 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 999px;
+  background: var(--admin-surface);
+  color: var(--admin-text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.va-chip.is-active {
+  background: var(--admin-strong);
+  border-color: var(--admin-strong);
+  color: var(--admin-on-strong);
+}
+
+.va-search {
+  width: 220px;
+  max-width: 100%;
+  padding: 7px 12px;
+  font-size: 0.82rem;
+}
+
+/* Table */
+.va-table td {
+  vertical-align: top;
+  font-size: 0.84rem;
+}
+
+.va-row {
+  cursor: pointer;
+}
+
+.va-row:hover td,
+.va-row.is-open td {
+  background: var(--admin-surface-2);
+}
+
+.va-sub {
+  font-size: 0.72rem;
+  color: var(--admin-text-muted);
+  margin-top: 2px;
+}
+
+.va-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.va-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--admin-surface-3);
+  color: var(--admin-text-muted);
+}
+
+.va-tag.is-added {
+  background: var(--admin-warning-soft);
+  color: var(--admin-warning);
+}
+
+.va-tag.is-checkout {
+  background: var(--admin-danger-soft);
+  color: var(--admin-danger);
+}
+
+.va-tag.is-ordered {
+  background: var(--admin-success-soft);
+  color: var(--admin-success);
+}
+
+/* Journey (expanded row) */
+.va-journey-row td {
+  background: var(--admin-surface-2);
+}
+
+.va-journey {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0 0 12px;
+  border-left: 2px solid var(--admin-border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.va-journey li {
+  display: grid;
+  grid-template-columns: 74px 140px minmax(0, 1fr);
+  gap: 10px;
+  font-size: 0.8rem;
+}
+
+.va-journey-time {
+  color: var(--admin-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.va-journey-event {
+  font-weight: 600;
+  color: var(--admin-text-main);
+}
+
+.va-journey-detail {
+  color: var(--admin-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+@media (max-width: 640px) {
+  .va-journey li {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .va-journey-detail {
+    grid-column: 2;
+  }
+}
+
+.va-heading {
+  margin: 8px 0 -4px;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: var(--admin-text-main);
+}

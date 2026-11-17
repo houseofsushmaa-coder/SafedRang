@@ -27,6 +27,10 @@ import ShiprocketPanel from "../components/ShiprocketPanel";
 const TO_SHIP = ["PENDING", "CONFIRMED", "PROCESSING", "PACKED"];
 const isReadyToShip = (o) =>
   TO_SHIP.includes(o.orderStatus) && (o.paymentMethodCode === "COD" || o.paymentStatus === "PAID");
+const isUnread = (o) =>
+  o.adminSeenAt === null &&
+  !["CANCELLED", "RETURNED"].includes(o.orderStatus) &&
+  (o.paymentMethodCode === "COD" || o.paymentStatus === "PAID");
 const canLabel = (o) => !["CANCELLED", "RETURNED"].includes(o.orderStatus);
 // Why an order can't be sent to the courier (empty = it can).
 const shipBlock = (o) =>
@@ -69,6 +73,36 @@ const Orders = () => {
   const [notifyCustomer, setNotifyCustomer] = useState(true);
   const [labelBusy, setLabelBusy] = useState(false);
   const [shipOrder, setShipOrder] = useState(null);
+  const [selected, setSelected] = useState(() => new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+
+  const toggleSelected = (id) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+
+  const markSeen = async (ids, seen, { quiet = false } = {}) => {
+    if (!ids.length) return;
+    setBulkBusy(true);
+    try {
+      await adminService.markOrdersSeen(ids, seen);
+      const at = seen ? new Date().toISOString() : null;
+      setOrders((prev) => prev.map((o) => (ids.includes(o.id) ? { ...o, adminSeenAt: at } : o)));
+      if (!quiet) toast.success(`${ids.length} order${ids.length === 1 ? "" : "s"} marked as ${seen ? "read" : "unread"}.`);
+    } catch (err) {
+      if (!quiet) toast.error(err.message);
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  // Opening an order marks it as read.
+  const openOrder = (order) => {
+    setSelectedOrder(order);
+    if (isUnread(order)) markSeen([order.id], true, { quiet: true });
+  };
 
   const printLabels = async (list) => {
     if (!list.length) return;
@@ -150,7 +184,8 @@ const Orders = () => {
 
   const handleExport = () => {
     try {
-      const csvData = filteredOrders.map((o) => ({
+      const source = selected.size ? filteredOrders.filter((o) => selected.has(o.id)) : filteredOrders;
+      const csvData = source.map((o) => ({
         "Order ID": o.id,
         Date: new Date(o.createdAt).toLocaleString("en-IN"),
         Customer: `${o.customer?.firstName || ""} ${o.customer?.lastName || ""}`.trim(),
@@ -197,6 +232,16 @@ const Orders = () => {
   });
 
   const readyToShip = filteredOrders.filter(isReadyToShip);
+  const unreadCount = orders.filter(isUnread).length;
+  const selectedOrders = filteredOrders.filter((o) => selected.has(o.id));
+  const allVisibleSelected = filteredOrders.length > 0 && filteredOrders.every((o) => selected.has(o.id));
+  const toggleAllVisible = () =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (allVisibleSelected) filteredOrders.forEach((o) => next.delete(o.id));
+      else filteredOrders.forEach((o) => next.add(o.id));
+      return next;
+    });
 
   return (
     <div className="admin-page">
@@ -206,6 +251,16 @@ const Orders = () => {
           <p className="page-subtitle">Manage, view, and update customer order fulfillments.</p>
         </div>
         <div className="header-actions">
+          {unreadCount > 0 && (
+            <button
+              className="admin-btn admin-btn-outline icon-left"
+              disabled={bulkBusy}
+              onClick={() => markSeen(orders.filter(isUnread).map((o) => o.id), true)}
+              title="Clear the new-orders badge"
+            >
+              <CheckCircle size={16} /> Mark all as read ({unreadCount})
+            </button>
+          )}
           <button
             onClick={() => printLabels(readyToShip)}
             className="admin-btn admin-btn-outline icon-left"
@@ -225,6 +280,30 @@ const Orders = () => {
       </div>
 
       <div className="admin-table-card">
+        {selected.size > 0 && (
+          <div className="orders-bulk-bar">
+            <strong>{selected.size} selected</strong>
+            <button className="admin-btn admin-btn-outline" disabled={bulkBusy} onClick={() => markSeen([...selected], true)}>
+              Mark as read
+            </button>
+            <button className="admin-btn admin-btn-outline" disabled={bulkBusy} onClick={() => markSeen([...selected], false)}>
+              Mark as unread
+            </button>
+            <button
+              className="admin-btn admin-btn-outline icon-left"
+              disabled={labelBusy || !selectedOrders.some(canLabel)}
+              onClick={() => printLabels(selectedOrders.filter(canLabel))}
+            >
+              <Printer size={15} /> Labels
+            </button>
+            <button className="admin-btn admin-btn-outline icon-left" onClick={handleExport}>
+              <Download size={15} /> Export
+            </button>
+            <button className="orders-bulk-clear" onClick={() => setSelected(new Set())}>
+              Clear selection
+            </button>
+          </div>
+        )}
         <div className="table-toolbar">
           <div className="toolbar-search">
             <Search size={18} className="search-icon" />
@@ -257,6 +336,14 @@ const Orders = () => {
             <table className="admin-table">
               <thead>
                 <tr>
+                  <th className="orders-check-col">
+                    <input
+                      type="checkbox"
+                      aria-label="Select all orders shown"
+                      checked={allVisibleSelected}
+                      onChange={toggleAllVisible}
+                    />
+                  </th>
                   <th>Order ID</th>
                   <th>Date</th>
                   <th>Customer</th>
@@ -280,8 +367,17 @@ const Orders = () => {
                     : "—";
 
                   return (
-                    <tr key={order.id}>
+                    <tr key={order.id} className={`${isUnread(order) ? "order-unread" : ""} ${selected.has(order.id) ? "order-selected" : ""}`}>
+                      <td className="orders-check-col">
+                        <input
+                          type="checkbox"
+                          aria-label={`Select order ${order.orderNumber}`}
+                          checked={selected.has(order.id)}
+                          onChange={() => toggleSelected(order.id)}
+                        />
+                      </td>
                       <td className="font-medium text-link">
+                        {isUnread(order) && <span className="order-unread-dot" title="New — not read yet" />}
                         {order.orderNumber}
                       </td>
                       <td>{date}</td>
@@ -353,7 +449,7 @@ const Orders = () => {
                           <button
                             className="action-btn"
                             title="View Details"
-                            onClick={() => setSelectedOrder(order)}
+                            onClick={() => openOrder(order)}
                           >
                             <Eye size={16} />
                           </button>

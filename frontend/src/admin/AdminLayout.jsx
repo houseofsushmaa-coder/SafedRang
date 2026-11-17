@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
+import { ADMIN_DEVICE_KEY } from "../lib/visitLog";
 import AdminErrorBoundary from "./components/AdminErrorBoundary";
 import "./AdminLayout.css";
 import "./adminTheme.css";
@@ -106,21 +107,47 @@ const AdminLayout = () => {
     } catch {}
   }, [theme]);
 
-  // Orders waiting to be processed (refreshed on navigation).
+  // This browser belongs to the store team: keep its visits out of visitor analytics.
+  useEffect(() => {
+    try {
+      localStorage.setItem(ADMIN_DEVICE_KEY, "1");
+    } catch {}
+  }, []);
+
+  // Badge = new real orders (COD or paid) nobody has marked as read yet.
+  // Refreshed on navigation and whenever Orders marks something read/unread.
+  const [badgeTick, setBadgeTick] = useState(0);
+  useEffect(() => {
+    const bump = () => setBadgeTick((n) => n + 1);
+    window.addEventListener("sr-orders-seen", bump);
+    return () => window.removeEventListener("sr-orders-seen", bump);
+  }, []);
   useEffect(() => {
     let active = true;
-    supabase
-      .from("orders")
-      .select("id", { count: "exact", head: true })
-      .in("order_status", ["PENDING", "PROCESSING", "CONFIRMED", "PACKED"])
-      .neq("payment_status", "FAILED")
-      .then(({ count, error }) => {
-        if (active && !error) setCounts({ openOrders: count || 0 });
-      });
+    (async () => {
+      const unread = await supabase
+        .from("orders")
+        .select("id", { count: "exact", head: true })
+        .is("admin_seen_at", null)
+        .not("order_status", "in", "(CANCELLED,RETURNED)")
+        .or("payment_method.eq.COD,payment_status.eq.PAID");
+      if (!active) return;
+      if (!unread.error) {
+        setCounts({ openOrders: unread.count || 0 });
+        return;
+      }
+      // Before supabase/analytics_and_orders_setup.sql is run: orders still to process.
+      const { count, error } = await supabase
+        .from("orders")
+        .select("id", { count: "exact", head: true })
+        .in("order_status", ["PENDING", "PROCESSING", "CONFIRMED", "PACKED"])
+        .neq("payment_status", "FAILED");
+      if (active && !error) setCounts({ openOrders: count || 0 });
+    })();
     return () => {
       active = false;
     };
-  }, [location.pathname]);
+  }, [location.pathname, badgeTick]);
 
   const handleLogout = () => {
     logout();
@@ -228,7 +255,7 @@ const AdminLayout = () => {
                           <span className="admin-nav-label">
                             {item.label}
                             {count > 0 && (
-                              <span className="nav-badge" title={`${count} order${count === 1 ? "" : "s"} to process`}>
+                              <span className="nav-badge" title={`${count} new order${count === 1 ? "" : "s"}`}>
                                 {count}
                               </span>
                             )}

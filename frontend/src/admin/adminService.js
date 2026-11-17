@@ -416,6 +416,8 @@ export const adminService = {
           orderStatus: upper(o.order_status || o.orderStatus || "PENDING"),
           paymentStatus: upper(o.payment_status || o.paymentStatus || "PENDING"),
           shiprocket: o.shiprocket || null,
+          // undefined = "mark as read" not set up yet (column missing); null = unread.
+          adminSeenAt: "admin_seen_at" in o ? o.admin_seen_at : undefined,
         };
       });
     } catch (err) {
@@ -464,6 +466,21 @@ export const adminService = {
       }
     }
     return { data, email };
+  },
+
+  /** Marks orders as read (seen = true) or unread; refreshes the sidebar badge. */
+  async markOrdersSeen(ids, seen = true) {
+    const list = [...new Set(ids)].filter(Boolean);
+    if (!list.length) return;
+    const { error } = await supabase
+      .from("orders")
+      .update({ admin_seen_at: seen ? new Date().toISOString() : null })
+      .in("id", list);
+    if (error) {
+      if (/admin_seen_at/.test(error.message)) throw new Error("Run supabase/analytics_and_orders_setup.sql first to enable read/unread.");
+      throw error;
+    }
+    window.dispatchEvent(new Event("sr-orders-seen"));
   },
 
   /** Calls the "order-email" server function (admin only). */
